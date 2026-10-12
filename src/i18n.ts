@@ -1,0 +1,87 @@
+// Textele interfetei, in romana si engleza. Mesajele motorului stau in motor/mesaje.ts.
+import type { Limba } from './motor/mesaje'
+
+export const TEXTE = {
+  titlu: { ro: 'Vizualizator de algoritmi pentru Metode numerice', en: 'Algorithm visualizer for Numerical Methods' },
+  algoritm: { ro: 'algoritm', en: 'algorithm' },
+  propriu: { ro: 'pseudocod propriu', en: 'your own pseudocode' },
+  ruleaza: { ro: 'Rulează', en: 'Run' },
+  ruleazaScurt: { ro: 'rulează (Ctrl+Enter în editor)', en: 'run (Ctrl+Enter in the editor)' },
+  intrari: { ro: 'Intrări', en: 'Inputs' },
+  cost: { ro: 'Cost', en: 'Cost' },
+  pasul: { ro: 'pasul {0} din {1}', en: 'step {0} of {1}' },
+  linia: { ro: 'linia {0}', en: 'line {0}' },
+  flopi: { ro: '{0} flopi', en: '{0} flops' },
+  laInceput: { ro: 'la început (Home)', en: 'to the start (Home)' },
+  pasInapoi: { ro: 'un pas înapoi (săgeată stânga)', en: 'one step back (left arrow)' },
+  redaPauza: { ro: 'redă sau oprește (spațiu)', en: 'play or pause (space)' },
+  pasInainte: { ro: 'un pas înainte (săgeată dreapta)', en: 'one step forward (right arrow)' },
+  laSfarsit: { ro: 'la sfârșit (End)', en: 'to the end (End)' },
+  reda: { ro: 'Redă', en: 'Play' },
+  pauza: { ro: 'Pauză', en: 'Pause' },
+  deLaInceput: { ro: 'De la început', en: 'From the start' },
+  viteza: { ro: 'viteză', en: 'speed' },
+  pasiPeSecunda: { ro: '{0} pași/s', en: '{0} steps/s' },
+  pasulCurent: { ro: 'pasul curent', en: 'current step' },
+  legendaPivot: { ro: 'pivotul, elementul la care se împarte', en: 'the pivot, the element divided by' },
+  legendaScris: { ro: 'ce se scrie la pasul curent', en: 'written at the current step' },
+  legendaCitit: { ro: 'ce se citește la pasul curent', en: 'read at the current step' },
+  legendaGata: { ro: 'calculat la pașii dinainte, nu se mai schimbă', en: 'computed at earlier steps, final' },
+  legendaMult: { ro: 'multiplicator, păstrat pentru mai târziu', en: 'multiplier, kept for later' },
+  urmatoareaScriere: { ro: 'următoarea scriere (Shift+săgeată dreapta)', en: 'next write (Shift+right arrow)' },
+  scriereaAnterioara: { ro: 'scrierea anterioară (Shift+săgeată stânga)', en: 'previous write (Shift+left arrow)' },
+  notiuni: { ro: 'Noțiuni de bază', en: 'Fundamentals' },
+  notiuniAjutor: {
+    ro: 'Ce trebuie să știi ca să urmărești algoritmii, pe scurt: notațiile cursului, operațiile elementare, ideea fiecărei metode și cum citești pseudocodul.',
+    en: 'What you need in order to follow the algorithms, in short: the course notation, the elementary operations, the idea behind each method and how to read the pseudocode.',
+  },
+  notiuniNecesare: { ro: 'Noțiuni necesare:', en: 'Prerequisites:' },
+  matriceMare: { ro: 'peste {0} de celule animațiile sunt oprite; pașii se văd în continuare', en: 'above {0} cells the animations are off; the steps still show' },
+  temaIntunecata: { ro: 'Întunecat', en: 'Dark' },
+  temaLuminoasa: { ro: 'Luminos', en: 'Light' },
+  schimbaTema: { ro: 'schimbă tema', en: 'switch theme' },
+  schimbaLimba: { ro: 'switch to English', en: 'treci pe română' },
+  adaugaMatrice: { ro: '+ matrice', en: '+ matrix' },
+  adaugaVector: { ro: '+ vector', en: '+ vector' },
+  adaugaScalar: { ro: '+ scalar', en: '+ scalar' },
+  sterge: { ro: 'șterge', en: 'remove' },
+  aleator: { ro: 'aleator', en: 'random' },
+  aleatorAjutor: { ro: 'valori întregi aleatoare, cu aceleași dimensiuni', en: 'random integer values, same size' },
+  nume: { ro: 'nume', en: 'name' },
+  matrice: { ro: 'matrice', en: 'matrix' },
+  vector: { ro: 'vector', en: 'vector' },
+  scalar: { ro: 'scalar', en: 'scalar' },
+  valoriAjutor: { ro: 'o linie pe rând, numerele despărțite prin spații', en: 'one row per line, numbers separated by spaces' },
+  propriuAjutor: {
+    ro: 'Scrie pseudocodul în notația cursului și definește intrările de mai jos; n și m se iau din dimensiunile lor. Orice program se animează.',
+    en: 'Write the pseudocode in the course notation and define the inputs below; n and m come from their sizes. Any program gets animated.',
+  },
+  faraIntrari: { ro: 'nicio intrare: adaugă o matrice, un vector sau un scalar', en: 'no inputs: add a matrix, a vector or a scalar' },
+  propriuSablon: {
+    ro: '% Scrie aici pseudocodul, în notația cursului.\n% Exemplu: suma elementelor de pe diagonala lui A\ns ← 0\npentru i = 1 : n\n    s ← s + a_ii',
+    en: '% Write your pseudocode here.\n% Example: the sum of the diagonal of A\ns ← 0\nfor i = 1 : n\n    s ← s + a_ii',
+  },
+  verificare: { ro: 'Verificare', en: 'Check' },
+  verificareAjutor: {
+    ro: 'Identitățile pe care le promite algoritmul, recalculate independent de urmă; eroarea e raportată la mărimea datelor.',
+    en: 'The identities the algorithm promises, recomputed independently of the trace; the error is relative to the size of the data.',
+  },
+  verificareOk: { ro: 'ok', en: 'ok' },
+  verificareRau: { ro: 'prea mare', en: 'too large' },
+  verificareLaSfarsit: { ro: 'apare la ultimul pas al urmei', en: 'shown at the last step of the trace' },
+  verificareOprit: { ro: 'algoritmul s-a oprit înainte de sfârșit, nu e nimic de verificat', en: 'the algorithm stopped before the end, there is nothing to check' },
+  codPython: { ro: 'Cod Python', en: 'Python code' },
+  codPythonAjutor: {
+    ro: 'Traducerea literală a pseudocodului, cu indici de la 1; rulează cu python/mn/runtime.py alături.',
+    en: 'The literal translation of the pseudocode, with indices from 1; runs with python/mn/runtime.py next to it.',
+  },
+  copiaza: { ro: 'copiază', en: 'copy' },
+  copiat: { ro: 'copiat', en: 'copied' },
+  descarca: { ro: 'descarcă', en: 'download' },
+} satisfies Record<string, Record<Limba, string>>
+
+export type CheieText = keyof typeof TEXTE
+
+export function text(limba: Limba, cheie: CheieText, ...args: (string | number)[]): string {
+  return TEXTE[cheie][limba].replace(/\{(\d+)\}/g, (_, k: string) => String(args[Number(k)] ?? ''))
+}
