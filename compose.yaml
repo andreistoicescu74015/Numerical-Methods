@@ -1,0 +1,14 @@
+# docker compose up   ->  http://localhost:5173
+# Se monteaza doar sursele, ca node_modules sa ramana cel din imagine; dupa un pachet nou,
+# docker compose up --build.
+services:
+  app:
+    build: .
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./src:/app/src
+      - ./index.html:/app/index.html
+      - ./vite.config.ts:/app/vite.config.ts
+    environment:
+      VITE_POLL: "1"
