@@ -1,0 +1,100 @@
+// Mesajele motorului (erori de sintaxa, erori la rulare, texte din urma), in romana si engleza.
+// Limba se alege o data, inainte de parsare si rulare; {0}, {1}... sunt argumentele.
+
+export type Limba = 'ro' | 'en'
+
+let limba: Limba = 'ro'
+
+export function setLimba(l: Limba): void {
+  limba = l
+}
+
+export function getLimba(): Limba {
+  return limba
+}
+
+const CATALOG = {
+  sirNeinchis: { ro: 'text între ghilimele neînchis', en: 'unterminated quoted text' },
+  caracterNeasteptat: { ro: 'caracter neașteptat „{0}” la coloana {1}', en: 'unexpected character "{0}" at column {1}' },
+  laColoana: { ro: '{0}, la coloana {1}', en: '{0}, at column {1}' },
+  indentareNeasteptata: { ro: 'indentare neașteptată', en: 'unexpected indentation' },
+  altfelFaraDaca: { ro: '„altfel” fără „dacă” pe linia de deasupra', en: '"else" without "if" on the line above' },
+  textNeasteptat: { ro: 'text neașteptat', en: 'unexpected text' },
+  seAsteptaText: { ro: 'se aștepta un text între ghilimele', en: 'expected quoted text' },
+  seAsteptaAtribuire: { ro: 'se aștepta „←” sau „=”', en: 'expected "←" or "="' },
+  etichetaNume: {
+    ro: 'înaintea lui „=” trebuie să stea un nume, ca în „a_ik ← μ_ik = a_ik / a_kk”',
+    en: 'a name must come before "=", as in "a_ik ← μ_ik = a_ik / a_kk"',
+  },
+  textDupaBucla: { ro: 'text neașteptat după antetul buclei', en: 'unexpected text after the loop header' },
+  corpLipsaPentru: { ro: 'corpul buclei lipsește: indentează liniile de sub „pentru”', en: 'the loop body is missing: indent the lines under "for"' },
+  seAsteptaAtunci: { ro: 'se aștepta „atunci”', en: 'expected "then"' },
+  lipsaDupaAtunci: { ro: 'după „atunci” lipsește instrucțiunea', en: 'a statement must follow "then"' },
+  lipsaDupaAltfel: { ro: 'după „altfel” lipsește instrucțiunea', en: 'a statement must follow "else"' },
+  seAsteptaTimp: { ro: 'se aștepta „cât timp”', en: 'expected "while"' },
+  textDupaConditie: { ro: 'text neașteptat după condiție', en: 'unexpected text after the condition' },
+  corpLipsaCatTimp: { ro: 'corpul buclei lipsește: indentează liniile de sub „cât timp”', en: 'the loop body is missing: indent the lines under "while"' },
+  seAsteptaPeste: { ro: 'se aștepta „peste”, ca în „L, U peste A”', en: 'expected "over", as in "L, U over A"' },
+  seAstepta: { ro: 'se aștepta „{0}”', en: 'expected "{0}"' },
+  seAsteptaNume: { ro: 'se aștepta un nume', en: 'expected a name' },
+  seAsteptaTinta: { ro: 'se aștepta o variabilă sau un element de tablou', en: 'expected a variable or an array element' },
+  tintaInvalida: { ro: 'ținta atribuirii trebuie să fie o variabilă sau un element de tablou', en: 'the assignment target must be a variable or an array element' },
+  normaUnArgument: { ro: 'norma are un singur argument', en: 'norm takes a single argument' },
+  indiceLipsa: { ro: 'indice lipsă după „_”', en: 'missing index after "_"' },
+  seAsteptaExpresie: { ro: 'se aștepta o expresie', en: 'expected an expression' },
+  liniiDiferite: { ro: 'liniile matricei au lungimi diferite', en: 'the matrix rows have different lengths' },
+
+  pesteMaxPasi: { ro: 'peste {0} de pași; buclă fără sfârșit?', en: 'more than {0} steps; endless loop?' },
+  linia: { ro: 'linia {0}: {1}', en: 'line {0}: {1}' },
+  stop: { ro: 'stop', en: 'stop' },
+  gata: { ro: 'algoritmul s-a terminat', en: 'the algorithm has finished' },
+  dimNegativa: { ro: 'dimensiune negativă pentru {0}', en: 'negative size for {0}' },
+  schimbElemente: { ro: 'interschimbarea se face între două elemente de tablou', en: 'a swap needs two array elements' },
+  pasZero: { ro: 'pasul buclei nu poate fi 0', en: 'the loop step cannot be 0' },
+  nicioIteratie: { ro: 'nicio iterație: intervalul e gol', en: 'no iteration: the range is empty' },
+  conditieComparatie: { ro: 'condiția trebuie să fie o comparație', en: 'the condition must be a comparison' },
+  adevarat: { ro: 'adevărat', en: 'true' },
+  fals: { ro: 'fals', en: 'false' },
+  seAsteptaElement: { ro: 'se aștepta un element de tablou', en: 'expected an array element' },
+  vectorUnIndice: { ro: '{0}: {1} este vector și are un singur indice', en: '{0}: {1} is a vector and takes one index' },
+  indiceVector: { ro: '{0}: indicele {1} iese din vectorul {2} (1..{3})', en: '{0}: index {1} is outside vector {2} (1..{3})' },
+  matriceDoiIndici: { ro: '{0}: {1} este matrice și are doi indici', en: '{0}: {1} is a matrix and takes two indices' },
+  pozitieMatrice: { ro: '{0}: poziția ({1}, {2}) iese din matricea {3} ({4} x {5})', en: '{0}: position ({1}, {2}) is outside matrix {3} ({4} x {5})' },
+  atribuireBloc: { ro: 'atribuirea pe un bloc nu este suportată încă', en: 'assigning to a block is not supported yet' },
+  nuEsteTablouFie: { ro: '{0} nu este un vector sau o matrice; declară-l cu „fie”', en: '{0} is not a vector or a matrix; declare it with "let"' },
+  doarNumar: { ro: 'în {0} se poate scrie doar un număr', en: 'only a number can be stored in {0}' },
+  indiceNumar: { ro: 'indicele trebuie să fie un număr', en: 'the index must be a number' },
+  indiceIntreg: { ro: 'indicele {0} nu este întreg', en: 'index {0} is not an integer' },
+  seAsteptaNumar: { ro: '{0}: se aștepta un număr, nu un {1}', en: '{0}: expected a number, not a {1}' },
+  nedefinita: { ro: 'variabila {0} nu este definită', en: 'variable {0} is not defined' },
+  nedefinit: { ro: '{0} nu este definit', en: '{0} is not defined' },
+  modulul: { ro: 'modulul', en: 'the absolute value' },
+  termenulSumei: { ro: 'termenul sumei', en: 'the sum term' },
+  comparatia: { ro: 'comparația', en: 'the comparison' },
+  intervalGol: { ro: '{0} pe un interval gol', en: '{0} over an empty range' },
+  nuEsteTablou: { ro: '{0} nu este un vector sau o matrice', en: '{0} is not a vector or a matrix' },
+  feliaIese: { ro: 'felia iese din {0}', en: 'the slice is outside {0}' },
+  blocIese: { ro: 'blocul iese din {0}', en: 'the block is outside {0}' },
+  radicalNegativ: { ro: 'radical din număr negativ: {0}', en: 'square root of a negative number: {0}' },
+  functieNecunoscuta: { ro: 'funcție necunoscută: {0}', en: 'unknown function: {0}' },
+  impartireZero: { ro: 'împărțire la zero', en: 'division by zero' },
+  rezultatInfinit: { ro: 'rezultat infinit sau nedefinit', en: 'infinite or undefined result' },
+  matvecDim: { ro: 'produs matrice-vector cu dimensiuni nepotrivite ({0} x {1} și {2})', en: 'matrix-vector product with mismatched sizes ({0} x {1} and {2})' },
+  dotDim: { ro: 'produs scalar între vectori de lungimi diferite', en: 'dot product of vectors with different lengths' },
+  vecmatDim: { ro: 'produs vector-matrice cu dimensiuni nepotrivite', en: 'vector-matrix product with mismatched sizes' },
+  opNesuportata: { ro: 'operație nesuportată: {0} {1} {2}', en: 'unsupported operation: {0} {1} {2}' },
+
+  nuEsteNumar: { ro: '{0}: „{1}” nu este număr', en: '{0}: "{1}" is not a number' },
+  unSingurNumar: { ro: '{0}: se aștepta un singur număr', en: '{0}: expected a single number' },
+  vectorGol: { ro: '{0}: vectorul este gol', en: '{0}: the vector is empty' },
+  matriceGoala: { ro: '{0}: matricea este goală', en: '{0}: the matrix is empty' },
+  liniiLungimi: { ro: '{0}: liniile au lungimi diferite', en: '{0}: the rows have different lengths' },
+  numeInvalid: { ro: 'numele „{0}” nu este valid: litere și cifre, prima literă', en: 'the name "{0}" is not valid: letters and digits, starting with a letter' },
+  numeDublat: { ro: 'numele {0} apare de două ori', en: 'the name {0} appears twice' },
+} satisfies Record<string, { ro: string; en: string }>
+
+export type Cheie = keyof typeof CATALOG
+
+export function mesaj(cheie: Cheie, ...args: (string | number)[]): string {
+  return CATALOG[cheie][limba].replace(/\{(\d+)\}/g, (_, k: string) => String(args[Number(k)] ?? ''))
+}

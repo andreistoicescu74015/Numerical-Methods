@@ -1,0 +1,100 @@
+// Ce variabile foloseste fiecare linie a programului, in ordinea aparitiei. Vederea arata
+// valorile lor langa linia curenta, ca a_ij din cod sa se lege de celula (2, 3) din grila.
+import type { Expr, Instr, Program } from './ast'
+
+function dinExpr(e: Expr, rez: string[], legate: Set<string>): void {
+  const pune = (n: string) => {
+    if (!legate.has(n) && !rez.includes(n)) rez.push(n)
+  }
+  switch (e.tip) {
+    case 'num':
+      return
+    case 'var':
+      pune(e.nume)
+      return
+    case 'elem':
+      e.idx.forEach((x) => dinExpr(x, rez, legate))
+      return
+    case 'felie':
+      for (const x of e.idx) {
+        if (x === null) continue
+        if (x.tip === 'interval') {
+          dinExpr(x.de, rez, legate)
+          dinExpr(x.la, rez, legate)
+        } else dinExpr(x, rez, legate)
+      }
+      return
+    case 'bin':
+    case 'cmp':
+      dinExpr(e.a, rez, legate)
+      dinExpr(e.b, rez, legate)
+      return
+    case 'neg':
+    case 'abs':
+    case 'norma':
+    case 'transp':
+      dinExpr(e.a, rez, legate)
+      return
+    case 'apel':
+      e.args.forEach((x) => dinExpr(x, rez, legate))
+      return
+    case 'suma':
+    case 'extrem': {
+      dinExpr(e.de, rez, legate)
+      dinExpr(e.la, rez, legate)
+      const l = new Set(legate)
+      l.add(e.var)
+      dinExpr(e.corp, rez, l)
+      return
+    }
+  }
+}
+
+function dinInstr(s: Instr, rez: Map<number, string[]>): void {
+  const lista = rez.get(s.linie) ?? []
+  const legate = new Set<string>()
+  switch (s.tip) {
+    case 'atrib':
+      if (s.tinta.tip !== 'var') dinExpr(s.tinta, lista, legate)
+      if (s.eticheta && s.eticheta.tip !== 'var') dinExpr(s.eticheta, lista, legate)
+      dinExpr(s.expr, lista, legate)
+      if (s.bucla) {
+        if (!lista.includes(s.bucla.var)) lista.unshift(s.bucla.var)
+        dinExpr(s.bucla.de, lista, legate)
+        dinExpr(s.bucla.la, lista, legate)
+      }
+      break
+    case 'schimb':
+      dinExpr(s.a, lista, legate)
+      dinExpr(s.b, lista, legate)
+      break
+    case 'pentru':
+      if (!lista.includes(s.var)) lista.push(s.var)
+      dinExpr(s.de, lista, legate)
+      dinExpr(s.la, lista, legate)
+      if (s.pas) dinExpr(s.pas, lista, legate)
+      s.corp.forEach((x) => dinInstr(x, rez))
+      break
+    case 'daca':
+      dinExpr(s.cond, lista, legate)
+      s.atunci.forEach((x) => dinInstr(x, rez))
+      s.altfel?.forEach((x) => dinInstr(x, rez))
+      break
+    case 'cattimp':
+      dinExpr(s.cond, lista, legate)
+      s.corp.forEach((x) => dinInstr(x, rez))
+      break
+    case 'fie':
+      s.decl.forEach((d) => d.dims.forEach((x) => dinExpr(x, lista, legate)))
+      break
+    default:
+      break
+  }
+  if (lista.length) rez.set(s.linie, lista)
+}
+
+export function variabilePeLinie(program: Program): Map<number, string[]> {
+  const rez = new Map<number, string[]>()
+  program.instr.forEach((s) => dinInstr(s, rez))
+  return rez
+}
