@@ -91,7 +91,7 @@ describe('erorile de sintaxă spun linia și cauza', () => {
   })
 
   it('altfel fără dacă', () => {
-    expect(() => parseaza('altfel\n    x ← 1')).toThrow(/„altfel” fără „dacă”/)
+    expect(() => parseaza('altfel\n    x ← 1')).toThrow(/"altfel" fără "dacă"/)
   })
 
   it('caracter necunoscut, cu linia', () => {

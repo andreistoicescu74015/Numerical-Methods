@@ -129,50 +129,120 @@ def sgn(v):
     return 1.0 if v >= 0 else -1.0
 
 
-def tort(A, m, n):
+def qr(A, m, n):
+    """Algoritmul QR din curs. Intoarce A, cu R in triunghiul superior si partea de sub diagonala
+    a vectorilor Householder scalati in locul zerourilor, si beta (beta[k] = u_kk)."""
     A = A.copy()
-    p = min(m - 1, n)
-    U = np.zeros((m + 1, p + 1))
-    beta = np.zeros(p + 1)
-    for k in r(1, p):
-        sigma = sgn(A[k, k]) * math.sqrt(sum(A[i, k] ** 2 for i in r(k, m)))
-        if sigma == 0:
-            beta[k] = 0
-        else:
-            U[k, k] = A[k, k] + sigma
-            for i in r(k + 1, m):
-                U[i, k] = A[i, k]
-            beta[k] = sigma * U[k, k]
-            A[k, k] = -sigma
-            for i in r(k + 1, m):
-                A[i, k] = 0
+    s = min(m - 1, n)
+    beta = np.zeros(s + 1)
+    for k in r(1, s):
+        sigma = math.sqrt(sum(A[i, k] ** 2 for i in r(k, m)))
+        if sigma != 0:
+            sigma = sgn(A[k, k]) * sigma
+            for i in r(k, m):
+                A[i, k] = A[i, k] / sigma
+            beta[k] = 1 + A[k, k]
+            # u_kk sta si in A pana la sfarsitul pasului
+            A[k, k] = beta[k]
             for j in r(k + 1, n):
-                tau = sum(U[i, k] * A[i, j] for i in r(k, m)) / beta[k]
+                nu = sum(A[i, k] * A[i, j] for i in r(k, m)) / beta[k]
                 for i in r(k, m):
-                    A[i, j] = A[i, j] - tau * U[i, k]
-    return A, U, beta
+                    A[i, j] = A[i, j] - nu * A[i, k]
+            A[k, k] = -sigma
+    return A, beta
 
 
-def cmmp(A, b, m, n):
-    """Solutia in sensul celor mai mici patrate; intoarce x, b transformat (d = Q^T b) si reziduul."""
-    R, U, beta = tort(A, m, n)
+def sqr(A, b, m, n):
+    """Algoritmul SQR din curs, pornit de la iesirea lui QR: solutia in sensul celor mai mici
+    patrate. Intoarce x, A si beta de la QR, b transformat (d = Q^T b) si norma reziduului."""
+    A, beta = qr(A, m, n)
     b = b.copy()
     for k in r(1, n):
-        tau = sum(U[i, k] * b[i] for i in r(k, m)) / beta[k]
+        t = A[k, k]
+        A[k, k] = beta[k]
+        nu = sum(A[i, k] * b[i] for i in r(k, m)) / beta[k]
         for i in r(k, m):
-            b[i] = b[i] - tau * U[i, k]
+            b[i] = b[i] - nu * A[i, k]
+        A[k, k] = t
     x = np.zeros(n + 1)
-    for i in r(n, 1, -1):
-        x[i] = b[i]
-        for j in r(i + 1, n):
-            x[i] = x[i] - R[i, j] * x[j]
-        x[i] = x[i] / R[i, i]
+    for k in r(n, 1, -1):
+        x[k] = (b[k] - sum(A[k, j] * x[j] for j in r(k + 1, n))) / A[k, k]
     rez = math.sqrt(sum(b[i] ** 2 for i in r(n + 1, m)))
-    return x, R, U, beta, b, rez
+    return x, A, beta, b, rez
 
 
 def norma(v):
     return math.sqrt(sum(x * x for x in v))
+
+
+def reziduu_relativ(A, x, b, m, n):
+    """e = ||Ax - b|| / ||b||, cu produsul pe linii, ca in interpretor."""
+    rez = [sum(A[i, j] * x[j] for j in r(1, n)) - b[i] for i in r(1, m)]
+    return norma(rez) / norma(b[1:])
+
+
+def jacobi(A, b, x, n, tol, maxiter):
+    """Intoarce (x, k) sau (None, k) daca nu a convers in maxiter iteratii."""
+    x = x.copy()
+    y = np.zeros(n + 1)
+    e = reziduu_relativ(A, x, b, n, n)
+    k = 0
+    while e > tol:
+        if k >= maxiter:
+            return None, k
+        for i in r(1, n):
+            y[i] = (b[i] - sum(A[i, j] * x[j] for j in r(1, i - 1)) - sum(A[i, j] * x[j] for j in r(i + 1, n))) / A[i, i]
+        x = y.copy()
+        e = reziduu_relativ(A, x, b, n, n)
+        k = k + 1
+    return x, k
+
+
+def gauss_seidel(A, b, x, n, tol, maxiter):
+    """Ca Jacobi, cu x actualizat pe loc. Intoarce (x, k) sau (None, k)."""
+    x = x.copy()
+    e = reziduu_relativ(A, x, b, n, n)
+    k = 0
+    while e > tol:
+        if k >= maxiter:
+            return None, k
+        for i in r(1, n):
+            x[i] = (b[i] - sum(A[i, j] * x[j] for j in r(1, i - 1)) - sum(A[i, j] * x[j] for j in r(i + 1, n))) / A[i, i]
+        e = reziduu_relativ(A, x, b, n, n)
+        k = k + 1
+    return x, k
+
+
+def kaczmarz(A, b, x, m, n, tol, maxiter):
+    """Proiectii ciclice pe hiperplanele ecuatiilor. Intoarce (x, k) sau (None, k)."""
+    x = x.copy()
+    e = reziduu_relativ(A, x, b, m, n)
+    k = 0
+    while e > tol:
+        if k >= maxiter:
+            return None, k
+        for i in r(1, m):
+            alfa = (sum(A[i, j] * x[j] for j in r(1, n)) - b[i]) / norma(A[i, 1:]) ** 2
+            for j in r(1, n):
+                x[j] = x[j] - alfa * A[i, j]
+        e = reziduu_relativ(A, x, b, m, n)
+        k = k + 1
+    return x, k
+
+
+def rfg(x, k, m):
+    """Reflectorul de indice k pentru x, in forma scalata din slide-uri. Intoarce (x, beta)."""
+    x = x.copy()
+    beta = 0.0
+    if k < m:
+        sigma = math.sqrt(sum(x[i] ** 2 for i in r(k, m)))
+        if sigma != 0:
+            sigma = sgn(x[k]) * sigma
+            for i in r(k, m):
+                x[i] = x[i] / sigma
+            beta = 1 + x[k]
+            x[k] = -sigma
+    return x, beta
 
 
 def mp(A, y, tol, maxiter):

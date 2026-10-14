@@ -67,18 +67,29 @@ def cazuri(n):
     yield "CHOL", "numpy.linalg.cholesky", eroare(Lch, L_np), n**3 // 3, t, t_np
 
     R_np, t_np = cronometru(lambda: np.linalg.qr(Ar)[1])
-    R, t = cronometru(lambda: np.triu(alg.tort(alg.pad(Ar), m, n)[0][1:, 1:])[:n])
-    yield "TORT", "numpy.linalg.qr, |R|", eroare(np.abs(R), np.abs(R_np)), 2 * (m * n * n - n**3 // 3), t, t_np
+    R, t = cronometru(lambda: np.triu(alg.qr(alg.pad(Ar), m, n)[0][1:, 1:])[:n])
+    yield "QR", "numpy.linalg.qr, |R|", eroare(np.abs(R), np.abs(R_np)), 2 * (m * n * n - n**3 // 3), t, t_np
 
     x_np, t_np = cronometru(lambda: np.linalg.lstsq(Ar, bm, rcond=None)[0])
-    x, t = cronometru(lambda: alg.cmmp(alg.pad(Ar), alg.pad(bm), m, n)[0][1:])
-    yield "CMMP", "numpy.linalg.lstsq", eroare(x, x_np), 2 * (m * n * n - n**3 // 3) + 2 * m * n + n * n, t, t_np
+    x, t = cronometru(lambda: alg.sqr(alg.pad(Ar), alg.pad(bm), m, n)[0][1:])
+    yield "SQR", "numpy.linalg.lstsq", eroare(x, x_np), 2 * (m * n * n - n**3 // 3) + 2 * m * n + n * n, t, t_np
 
     w, t_np = cronometru(lambda: np.linalg.eigvalsh(Sy))
     (ym, it), t = cronometru(lambda: alg.mp(Sy, y0, 1e-10, 10000))
     lam = float(ym @ Sy @ ym) if ym is not None else float("nan")
     dominanta = w[np.argmax(np.abs(w))]
     yield f"MP ({it} iter.)", "numpy.linalg.eigvalsh, λ dominantă", abs(lam - dominanta), it * 2 * n * n, t, t_np
+
+    # metodele iterative, pe o matrice strict diagonal dominanta; x porneste de la zero
+    Ad = rng.standard_normal((n, n)) + 2 * n * np.eye(n)
+    bd = rng.standard_normal(n)
+    zero = alg.pad(np.zeros(n))
+    x_np, t_np = cronometru(lambda: np.linalg.solve(Ad, bd))
+    for nume, metoda in (("Jacobi", alg.jacobi), ("Gauss-Seidel", alg.gauss_seidel)):
+        (x, it), t = cronometru(lambda: metoda(alg.pad(Ad), alg.pad(bd), zero, n, 1e-10, 1000))
+        yield f"{nume} ({it} iter.)", "numpy.linalg.solve", eroare(x[1:], x_np), (4 * it + 2) * n * n, t, t_np
+    (x, it), t = cronometru(lambda: alg.kaczmarz(alg.pad(Ad), alg.pad(bd), zero, n, n, 1e-10, 5000))
+    yield f"Kaczmarz ({it} treceri)", "numpy.linalg.solve", eroare(x[1:], x_np), (8 * it + 2) * n * n, t, t_np
 
 
 def main(argv):

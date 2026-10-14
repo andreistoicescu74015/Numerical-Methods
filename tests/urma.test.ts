@@ -62,12 +62,13 @@ describe('felul pașilor și rolurile', () => {
     expect(schimb.scrieri[1].vechi).toBe(schimb.scrieri[0].nou)
   })
 
-  it('MP: formula numerică arată operanzii vectoriali', () => {
+  it('MP: formula numerică scrie vectorii coloană și matricea întreagă', () => {
     const alg = algoritm('MP')!
     const rez = urma(parseaza(alg.sursa), intrariExemplu(alg))
-    expect(rez.pasi[0].formula).toBe('y \\leftarrow y / \\left\\|y\\right\\| = (1,\\, 0) / \\left\\|(1,\\, 0)\\right\\| = (1,\\, 0)')
+    const y = '\\begin{bmatrix} 1 \\\\ 0 \\end{bmatrix}'
+    expect(rez.pasi[0].formula).toBe(`y \\leftarrow y / \\left\\|y\\right\\| = ${y} / \\left\\|${y}\\right\\| = ${y}`)
     const matvec = rez.pasi.find((p) => p.linie === 4)!
-    expect(matvec.formula).toBe('z \\leftarrow A\\,y = A \\cdot (1,\\, 0) = (2,\\, 1)')
+    expect(matvec.formula).toBe(`z \\leftarrow A\\,y = \\begin{bmatrix} 2 & 1 \\\\ 1 & 2 \\end{bmatrix} \\cdot ${y} = \\begin{bmatrix} 2 \\\\ 1 \\end{bmatrix}`)
   })
 })
 

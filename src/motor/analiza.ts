@@ -1,6 +1,8 @@
 // Ce variabile foloseste fiecare linie a programului, in ordinea aparitiei. Vederea arata
 // valorile lor langa linia curenta, ca a_ij din cod sa se lege de celula (2, 3) din grila.
 import type { Expr, Instr, Program } from './ast'
+import type { FelOperatie, Pas } from './interpretor'
+import { latexScris, numeLatex } from './latex'
 
 function dinExpr(e: Expr, rez: string[], legate: Set<string>): void {
   const pune = (n: string) => {
@@ -97,4 +99,51 @@ export function variabilePeLinie(program: Program): Map<number, string[]> {
   const rez = new Map<number, string[]>()
   program.instr.forEach((s) => dinInstr(s, rez))
   return rez
+}
+
+export interface LinieOperatii {
+  linie: number
+  // instructiunile liniei, asa cum sunt scrise
+  tex: string
+  feluri: FelOperatie[]
+}
+
+function texInstr(s: Instr, rez: Map<number, string[]>): void {
+  const pune = (tex: string) => rez.set(s.linie, [...(rez.get(s.linie) ?? []), tex])
+  switch (s.tip) {
+    case 'atrib': {
+      const bucla = s.bucla ? `,\\; ${numeLatex(s.bucla.var)} = ${latexScris(s.bucla.de)} : ${latexScris(s.bucla.la)}` : ''
+      pune(`${latexScris(s.tinta)} \\leftarrow ${latexScris(s.expr)}${bucla}`)
+      break
+    }
+    case 'pentru':
+      s.corp.forEach((x) => texInstr(x, rez))
+      break
+    case 'daca':
+      pune(latexScris(s.cond))
+      s.atunci.forEach((x) => texInstr(x, rez))
+      s.altfel?.forEach((x) => texInstr(x, rez))
+      break
+    case 'cattimp':
+      pune(latexScris(s.cond))
+      s.corp.forEach((x) => texInstr(x, rez))
+      break
+    default:
+      break
+  }
+}
+
+// Liniile pe care urma a intalnit operatii intre tablouri (A x, x^T y, ‖x‖...), cu felurile lor.
+// Din ele se face lista "Operații pe matrice" pentru un program oarecare.
+export function operatiiPeLinii(program: Program, pasi: Pas[]): LinieOperatii[] {
+  const feluri = new Map<number, FelOperatie[]>()
+  for (const p of pasi) {
+    if (!p.operatii) continue
+    const lista = feluri.get(p.linie) ?? []
+    for (const o of p.operatii) if (!lista.includes(o.fel)) lista.push(o.fel)
+    feluri.set(p.linie, lista)
+  }
+  const tex = new Map<number, string[]>()
+  program.instr.forEach((s) => texInstr(s, tex))
+  return [...feluri.keys()].sort((a, b) => a - b).map((linie) => ({ linie, tex: (tex.get(linie) ?? []).join(';\\quad '), feluri: feluri.get(linie)! }))
 }

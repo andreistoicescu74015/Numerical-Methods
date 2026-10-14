@@ -12,6 +12,7 @@ const GRECESTI: Record<string, string> = {
   θ: '\\theta',
   λ: '\\lambda',
   μ: '\\mu',
+  ν: '\\nu',
   ρ: '\\rho',
   σ: '\\sigma',
   τ: '\\tau',
@@ -26,6 +27,8 @@ export interface InfoLatex {
   simbolice: Set<string>
   // cu culori, elementele citite apar albastre si pivotul rosu, ca in grila
   culori: boolean
+  // elementul e o celula de tablou, nu un scalar cu indice in nume (i_k); doar celulele se coloreaza
+  eCelula?: (e: Extract<Expr, { tip: 'elem' }>) => boolean
 }
 
 // Clasele CSS ale rolurilor; culoarea lor vine din tema (luminoasa sau intunecata).
@@ -50,12 +53,24 @@ export function fmt(x: number): string {
   return s
 }
 
+// peste atatea elemente un tablou nu se mai scrie desfasurat in formula, ramane numele lui
+export const MAX_DESFASURAT = 36
+
+// Vectorii se scriu coloana si matricele intregi, ca operatia dintre ele sa se vada: un produs
+// matrice-vector arata ca in curs, nu ca un nume urmat de un sir de numere.
 export function valoareLatex(v: Valoare | undefined, nume = '?'): string {
   if (!v) return numeLatex(nume)
   if (v.tip === 'scalar') return fmt(v.v)
-  if (v.tip === 'matrice') return numeLatex(nume)
-  return `(${v.d.map(fmt).join(',\\, ')})`
+  if (v.d.length > MAX_DESFASURAT) return numeLatex(nume)
+  const n = v.tip === 'matrice' ? v.n : v.tip === 'rand' ? v.n : 1
+  const linii: string[] = []
+  for (let k = 0; k < v.d.length; k += n) linii.push(v.d.slice(k, k + n).map(fmt).join(' & '))
+  return `\\begin{bmatrix} ${linii.join(' \\\\ ')} \\end{bmatrix}`
 }
+
+// Expresia asa cum e scrisa in program, fara valori: indicii raman litere.
+const SCRIS: InfoLatex = { valoare: () => undefined, termeni: () => undefined, simbolice: new Set(), culori: false }
+export const latexScris = (e: Expr): string => latex(e, SCRIS, 'simbolic')
 
 function prec(e: Expr): number {
   switch (e.tip) {
@@ -73,7 +88,7 @@ function prec(e: Expr): number {
   }
 }
 
-function contine(e: Expr, nume: Set<string>): boolean {
+export function contine(e: Expr, nume: Set<string>): boolean {
   switch (e.tip) {
     case 'num':
       return false
@@ -135,12 +150,12 @@ export function latex(e: Expr, info: InfoLatex, mod: Mod): string {
         if (v) return valoareLatex(v, e.sursa)
       }
       const s = `${numeLatex(e.nume)}_{${indici(e.idx, info)}}`
-      return info.culori ? colorat(s, ROL.citit) : s
+      return info.culori && (info.eCelula?.(e) ?? true) ? colorat(s, ROL.citit) : s
     }
     case 'felie': {
       if (mod === 'numeric') {
         const v = info.valoare(e)
-        if (v) return valoareLatex(v, e.nume)
+        if (v && (v.tip === 'scalar' || v.d.length <= MAX_DESFASURAT)) return valoareLatex(v, e.nume)
       }
       const parti = e.idx.map((x) => (x === null ? ':' : x.tip === 'interval' ? `${indice(x.de, info)}\\!:\\!${indice(x.la, info)}` : indice(x, info)))
       return `${numeLatex(e.nume)}(${parti.join(',\\,')})`

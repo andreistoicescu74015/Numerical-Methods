@@ -1,4 +1,4 @@
-"""Scrie tests/fixtures/algoritmi.json: intrari si iesiri pentru cei opt algoritmi de examen.
+"""Scrie tests/fixtures/algoritmi.json: intrari si iesiri pentru algoritmii din biblioteca.
 
 Iesirile vin din mn/algoritmi.py, traducerea literala a pseudocodului. Interpretorul
 TypeScript ruleaza acelasi pseudocod pe aceleasi intrari si trebuie sa dea aceleasi numere.
@@ -79,36 +79,44 @@ nedef[2, 2] = -1.0
 assert alg.chol(alg.pad(nedef), n) is None
 cazuri.append({"algoritm": "CHOL", "descriere": "nu e pozitiv definita: se opreste", "intrari": {"A": lista(nedef)}, "iesiri": {"final": "stop"}})
 
-R, Uh, beta = alg.tort(alg.pad(Ar), m, n)
-cazuri.append(
-    {
-        "algoritm": "TORT",
-        "descriere": "A 6x4",
-        "intrari": {"A": lista(Ar)},
-        "iesiri": {"A": lista(R[1:, 1:]), "U": lista(Uh[1:, 1:]), "β": lista(beta[1:])},
-    }
-)
+R, beta = alg.qr(alg.pad(Ar), m, n)
+# R, fara partea de sub diagonala, este cel de la NumPy pana la semnul liniilor
+assert np.allclose(np.abs(np.triu(R[1:, 1:])[:n]), np.abs(np.linalg.qr(Ar)[1]))
+cazuri.append({"algoritm": "QR", "descriere": "A 6x4", "intrari": {"A": lista(Ar)}, "iesiri": {"A": lista(R[1:, 1:]), "β": lista(beta[1:])}})
 
 At = np.array([[2.0, 3.0], [-1.0, 1.0], [2.0, -1.0]])
-Rt, Ut, bt = alg.tort(alg.pad(At), 3, 2)
-cazuri.append(
-    {
-        "algoritm": "TORT",
-        "descriere": "exemplul din curs, 3x2",
-        "intrari": {"A": lista(At)},
-        "iesiri": {"A": lista(Rt[1:, 1:]), "U": lista(Ut[1:, 1:]), "β": lista(bt[1:])},
-    }
-)
+Rt, bt = alg.qr(alg.pad(At), 3, 2)
+# valorile de pe slide: u_1 = (5/3, -1/3, 2/3), beta_1 = 5/3, R cu diagonala (-3, -sqrt(10))
+assert np.allclose(bt[1:], [5 / 3, 1 + 1.8 / np.sqrt(10)])
+assert np.allclose(Rt[1:, 1:], [[-3, -1], [-1 / 3, -np.sqrt(10)], [2 / 3, -2.6 / np.sqrt(10)]])
+cazuri.append({"algoritm": "QR", "descriere": "exemplul din curs, 3x2", "intrari": {"A": lista(At)}, "iesiri": {"A": lista(Rt[1:, 1:]), "β": lista(bt[1:])}})
+
+# generator separat, ca valorile cazurilor de dupa sa ramana cele dinainte
+Al = rotunjit(np.random.default_rng(11).standard_normal((3, 5)))
+Rl, bl = alg.qr(alg.pad(Al), 3, 5)
+cazuri.append({"algoritm": "QR", "descriere": "matrice lata, 3x5", "intrari": {"A": lista(Al)}, "iesiri": {"A": lista(Rl[1:, 1:]), "β": lista(bl[1:])}})
 
 bm = rotunjit(rng.standard_normal(m))
-xc, Rc, Uc, bc, dc, rc = alg.cmmp(alg.pad(Ar), alg.pad(bm), m, n)
+xc, Rc, bc, dc, rc = alg.sqr(alg.pad(Ar), alg.pad(bm), m, n)
 assert np.allclose(xc[1:], np.linalg.lstsq(Ar, bm, rcond=None)[0])
 cazuri.append(
     {
-        "algoritm": "CMMP",
+        "algoritm": "SQR",
         "descriere": "A 6x4, b 6",
         "intrari": {"A": lista(Ar), "b": lista(bm)},
-        "iesiri": {"A": lista(Rc[1:, 1:]), "U": lista(Uc[1:, 1:]), "β": lista(bc[1:]), "b": lista(dc[1:]), "x": lista(xc[1:]), "r": rc},
+        "iesiri": {"A": lista(Rc[1:, 1:]), "β": lista(bc[1:]), "b": lista(dc[1:]), "x": lista(xc[1:]), "r": rc},
+    }
+)
+
+xs3, Rs3, bs3, ds3, rs3 = alg.sqr(alg.pad(At), alg.pad(np.array([1.0, 2.0, 3.0])), 3, 2)
+# exemplul din curs: x = (2/3, 0), reziduul minim sqrt(10)
+assert np.allclose(xs3[1:], [2 / 3, 0]) and np.isclose(rs3, np.sqrt(10))
+cazuri.append(
+    {
+        "algoritm": "SQR",
+        "descriere": "exemplul din curs, 3x2",
+        "intrari": {"A": lista(At), "b": [1.0, 2.0, 3.0]},
+        "iesiri": {"A": lista(Rs3[1:, 1:]), "β": lista(bs3[1:]), "b": lista(ds3[1:]), "x": lista(xs3[1:]), "r": rs3},
     }
 )
 
@@ -125,6 +133,31 @@ cazuri.append(
         "iesiri": {"y": lista(ym), "i": it},
     }
 )
+
+# Cazurile de mai jos trag numere dupa toate cele de sus, ca fixture-urile vechi sa ramana aceleasi.
+Ad = rotunjit(rng.standard_normal((n, n)) + 2 * n * np.eye(n))
+bd = rotunjit(rng.standard_normal(n))
+x0 = np.zeros(n)
+exact = np.linalg.solve(Ad, bd)
+
+xj, kj = alg.jacobi(alg.pad(Ad), alg.pad(bd), alg.pad(x0), n, 1e-6, 200)
+assert xj is not None and np.linalg.norm(xj[1:] - exact) < 1e-5
+cazuri.append({"algoritm": "JACOBI", "descriere": f"diagonal dominanta 4x4, {kj} iteratii", "intrari": {"A": lista(Ad), "b": lista(bd), "x": lista(x0), "tol": 1e-6, "maxiter": 200}, "iesiri": {"x": lista(xj[1:]), "k": kj}})
+
+xg, kg = alg.gauss_seidel(alg.pad(Ad), alg.pad(bd), alg.pad(x0), n, 1e-6, 200)
+assert xg is not None and np.linalg.norm(xg[1:] - exact) < 1e-5 and kg <= kj
+cazuri.append({"algoritm": "GS", "descriere": f"diagonal dominanta 4x4, {kg} iteratii", "intrari": {"A": lista(Ad), "b": lista(bd), "x": lista(x0), "tol": 1e-6, "maxiter": 200}, "iesiri": {"x": lista(xg[1:]), "k": kg}})
+
+Ak = rotunjit(rng.standard_normal((m, n)) + 2 * np.eye(m, n))
+bk = Ak @ np.array([1.0, -2.0, 0.5, 3.0])
+xk, kk = alg.kaczmarz(alg.pad(Ak), alg.pad(bk), alg.pad(x0), m, n, 1e-4, 300)
+assert xk is not None and kk < 150 and np.linalg.norm(xk[1:] - np.array([1.0, -2.0, 0.5, 3.0])) < 1e-2
+cazuri.append({"algoritm": "KACZMARZ", "descriere": f"compatibil 6x4, {kk} treceri", "intrari": {"A": lista(Ak), "b": lista(bk), "x": lista(x0), "tol": 1e-4, "maxiter": 300}, "iesiri": {"x": lista(xk[1:]), "k": kk}})
+
+xr = rotunjit(rng.standard_normal(5))
+xh, bh = alg.rfg(alg.pad(xr), 2, 5)
+assert bh != 0
+cazuri.append({"algoritm": "RFG", "descriere": "vector de 5, indice 2", "intrari": {"x": lista(xr), "k": 2}, "iesiri": {"x": lista(xh[1:]), "β": bh}})
 
 iesire = pathlib.Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "algoritmi.json"
 iesire.parent.mkdir(parents=True, exist_ok=True)

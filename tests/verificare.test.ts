@@ -47,9 +47,22 @@ describe('verificările numerice', () => {
     const alg = BIBLIOTECA.find((a) => a.id === 'MP')!
     const rez = urma(parseaza(alg.sursa), intrariExemplu(alg))
     const v = verifica('MP', intrariExemplu(alg), rez.stare, rez.scalari)
-    expect(v[0].fel).toBe('valoare')
-    expect(v[0].valoare).toBeCloseTo(3, 4)
-    expect(v[1].prag).toBe(1e-6)
+    const rand = (inceput: string) => v.find((x) => x.text.ro.startsWith(inceput))!
+    expect(rand('λ = yᵀAy').fel).toBe('valoare')
+    expect(rand('λ = yᵀAy').valoare).toBeCloseTo(3, 4)
+    expect(rand('e = ').prag).toBe(1e-6)
+    expect(rand('|λ| față de').valoare).toBeLessThan(rand('|λ| față de').prag!)
+  })
+
+  it('MP pe un vector de pornire fără componentă pe vectorul propriu dominant: λ nu este cea dominantă, iar verificarea o spune', () => {
+    const alg = BIBLIOTECA.find((a) => a.id === 'MP')!
+    const intrari = { A: [[-2, 3], [0, -5]], y: [1, 0], tol: 1e-6, maxiter: 50 }
+    const rez = urma(parseaza(alg.sursa), intrari)
+    const v = verifica('MP', intrari, rez.stare, rez.scalari)
+    const comparatie = v.find((x) => x.text.ro.startsWith('|λ| față de'))!
+    // λ = -2, iar valoarea dominanta este -5
+    expect(comparatie.valoare).toBeCloseTo(0.6, 6)
+    expect(comparatie.valoare).toBeGreaterThan(comparatie.prag!)
   })
 
   it('un program editat care nu mai produce formele așteptate nu aruncă', () => {

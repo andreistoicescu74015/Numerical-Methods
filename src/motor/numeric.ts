@@ -67,6 +67,36 @@ export function superior(A: Matrice, cuDiagonala: boolean, unitate = false): Mat
   return U
 }
 
+// Solutia lui Ax = b prin eliminare gaussiana cu pivotare partiala; null daca A e singulara.
+export function rezolva(A: Matrice, b: Vector): Vector | null {
+  const n = A.n
+  if (A.m !== n || b.n !== n) return null
+  const T = { ...A, d: [...A.d] }
+  const x = vectorNou(n)
+  x.d = [...b.d]
+  for (let k = 1; k <= n; k++) {
+    let p = k
+    for (let i = k + 1; i <= n; i++) if (Math.abs(citeste(T, i, k)) > Math.abs(citeste(T, p, k))) p = i
+    if (citeste(T, p, k) === 0) return null
+    for (let j = 1; j <= n; j++) {
+      const t = citeste(T, k, j)
+      scrie(T, citeste(T, p, j), k, j)
+      scrie(T, t, p, j)
+    }
+    ;[x.d[k - 1], x.d[p - 1]] = [x.d[p - 1], x.d[k - 1]]
+    for (let i = k + 1; i <= n; i++) {
+      const mu = citeste(T, i, k) / citeste(T, k, k)
+      for (let j = k; j <= n; j++) scrie(T, citeste(T, i, j) - mu * citeste(T, k, j), i, j)
+      x.d[i - 1] -= mu * x.d[k - 1]
+    }
+  }
+  for (let i = n; i >= 1; i--) {
+    for (let j = i + 1; j <= n; j++) x.d[i - 1] -= citeste(T, i, j) * x.d[j - 1]
+    x.d[i - 1] /= citeste(T, i, i)
+  }
+  return x
+}
+
 export function coloana(A: Matrice, j: number): Vector {
   const v = vectorNou(A.m)
   for (let i = 1; i <= A.m; i++) v.d[i - 1] = citeste(A, i, j)
