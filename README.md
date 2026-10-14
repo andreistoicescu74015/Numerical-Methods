@@ -1,15 +1,27 @@
 # Algorithm visualizer for Numerical Methods
 
 A web application in which you write pseudocode in the notation of the Numerical Methods
-course, your own or from a library of algorithms (matrix products, substitutions, Gaussian
-elimination with and without pivoting, LU, Cholesky, orthogonal triangularization, least
-squares, the power method), and watch step by step what it does on matrices and vectors: the
-current line of code is highlighted, the cells read, written, the pivot and the finished ones are
-coloured, the step formula shows the substituted values, and a counter keeps the flops. At the
-end, the identities the algorithm promises (LU = A, LLᵀ = A, QR = A, Ax = b) are recomputed and
-shown as residuals, and the pseudocode can be exported as a Python program. The interface is in
-Romanian or English (the EN/RO button) and has a light and a dark theme. The research and the
-architecture decision are in `docs/cercetare.md` (in Romanian).
+course, your own or from a library of algorithms, and watch step by step what it does on
+matrices and vectors. The current line of code is highlighted, the cells read, written, the
+pivot and the finished ones are marked, the step formula shows the substituted values with the
+matrices written out, and a counter keeps the flops. Each computation first appears with a `?`
+in place of its result, so that you can work it out, type it and check it before it is shown.
+
+The library has 20 algorithms: matrix products, the two substitutions, Gaussian elimination
+with and without pivoting (G, GPP, S_GPP, and S_G for the course example where the lack of
+pivoting gives a false solution), LU (Crout), Cholesky, the variants of G, GPP and UTRIS for
+banded matrices, the iterative solvers of the course (Jacobi, Gauss-Seidel, Kaczmarz), the
+Householder reflector for a vector, orthogonal triangularization (algorithm QR), least squares
+(algorithm SQR) and the power method. The theory comes only from the course folder of this year:
+the slides and the book of the course (Dumitrescu, Popeea, Jora). For each algorithm the
+application says which course and slide (or which section of the book) it comes from and what
+differs from the source. It also shows what the
+lines of the pseudocode do at the level of matrices, practical notes, the cost formula evaluated
+for the current inputs next to the counted flops, and at the end the identities the algorithm
+promises (LU = A, LLᵀ = A, QR = A, Ax = b) recomputed as residuals. The pseudocode can be exported as a
+NumPy program in the style of the course labs. The interface is in Romanian or English (the
+EN/RO button) and has a light and a dark theme. The research and the architecture decision are
+in `docs/cercetare.md` (in Romanian).
 
 Stack: Vite, React, TypeScript. The application runs locally, natively or in Docker, on
 `http://localhost:5173`. `npm run build` additionally produces a single file `dist/index.html`
@@ -22,7 +34,7 @@ Requires Node 24 (or 22.12 and newer).
 ```
 npm install
 npm run dev        # http://localhost:5173, reloads on save
-npm test           # engine and interface tests (vitest)
+npm test           # engine, linear algebra, cost, colour and interface tests (vitest)
 npm run build      # type-checks and writes dist/index.html
 ```
 
@@ -44,45 +56,186 @@ the one from the image.
   changed at any time; "Run" (or Ctrl+Enter in the editor) restarts the trace. The current line
   shows the values of its variables at its end (`k = 1, i = 2`), so that `a_ik` in the code ties
   to the cell in the grid.
-- Under the description, the "Prerequisites" tags open the "Fundamentals" panel at the
-  requested explanation: the course notation, the elementary operations, the idea behind each
-  method, how to read the pseudocode and what the colours mean.
-- Inputs have a name, a type (matrix, vector or scalar) and values, one row per line; "random"
-  fills them with integers keeping the sizes. `n` and `m` come from their sizes. A decimal comma
-  (`0,5`) is accepted when the numbers are separated by spaces.
+- Under the description, "In the course" names the course and the slide of the algorithm and
+  opens to show what differs from the slide; "In practice" holds the notes for real use (when it
+  fails, what the convergence conditions are, which NumPy or SciPy function does the same), and
+  the "Prerequisites" tags open the "Fundamentals" panel at the requested explanation.
+- Inputs have a name, a type (matrix, vector or scalar) and values, one row per line. `m` and
+  `n` are the sizes of the first matrix; with no matrix, `n` is the length of the first vector.
+  A decimal comma (`0,5`) is accepted when the numbers are separated by spaces.
+- Each input of a library algorithm has a nature, written next to it (upper triangular,
+  symmetric positive definite, a right-hand side for which the system has a solution). "random"
+  keeps the sizes, generates small integers with that nature and runs at once: a triangular
+  matrix with a nonzero diagonal, A = LLᵀ with an integer L for Cholesky, a strictly diagonally
+  dominant matrix for Jacobi and Gauss-Seidel so that they converge, b = Ax for Kaczmarz, a
+  tolerance from a short list. A value typed by hand that lacks the nature gets a warning under
+  its field saying what is wrong and what the algorithm will do. "initial example" restores the
+  inputs the algorithm starts with.
+- Editing the pseudocode or an input does not run anything; a notice above the grids says they
+  still show the previous run, until "Run".
+- A library algorithm does not run on inputs of the wrong shape (a non-square matrix where a
+  square one is needed, a vector whose length does not match the matrix): the warning under the
+  input says what is wrong, and "Run" repeats it instead of solving another problem. A run that
+  ends with an error or a `stop` says so from its first step, with a button to its last step.
+- "Keep for another algorithm", next to "Inputs", keeps the values and the precision when the
+  next algorithm has inputs with the same names and types (S_G and S_GPP, Jacobi and
+  Gauss-Seidel), so the two can be compared on the same data.
+- In English the library pseudocode is shown with the English keywords the parser accepts
+  (`for`, `if`, `while`, `over`, `let`), with the same lines as in Romanian.
+- "Arithmetic" under the inputs rounds every input and the result of every operation to t
+  significant digits, like a computing machine with low precision. S_G starts with 3 digits on
+  the course example with the pivot 10⁻⁴, where elimination without pivoting gives x₁ = 0 instead
+  of 1; S_GPP on the same data and precision gives the correct solution. With t digits the
+  "Check" panel accepts residuals up to 10^(2 - t).
+- For the banded algorithms (Gb, GPPb, UTRISb) the zeros outside the band are hatched: the
+  algorithm never reads or writes them. The description adds how many flops the algorithm for
+  full matrices (G, GPP, UTRIS) counts on the same inputs.
 - Controls: step forward and back, "next write" (skips loop headers), playback with adjustable
   speed in which loop headers pass faster than writes, a scrub bar over the trace. The arrow
   keys, Shift+arrows, Home, End and space do the same when the editor does not have focus.
-- Colours: red for the pivot, orange for what is written, blue for what is read, green for what
-  is final, purple for multipliers. On a swap the two values move towards each other. Above 150
-  cells the animations stop and the steps remain.
+- "Hide the result behind ?" is on by default: a step that computes something shows its formula
+  ending in `= ?` and its target cells as `?`; one step forward (or "Show the result") reveals
+  it. Copies and constants have nothing to hide. The checkbox turns this off.
+- Exercise mode: while a result is hidden, "your answer" takes the value (`0.5`, `0,5` or `1/2`;
+  several values separated by spaces, in the order of the cells; `true`/`false` for a
+  condition). "Check" accepts answers within 0.5%, shows the result and keeps the count of
+  correct answers for the current run.
+- The step formula writes vectors as columns and matrices in full, so `r ← A x - b` shows the
+  three arrays and the operations between them. Under it, each operation between arrays is
+  named, with the shapes of its operands, its flops and its elementwise definition.
+- "Matrix operations" lists what the program does between matrices and vectors. For a library
+  algorithm these are its stages in matrix form (`A ← M_k A`, `U x = b`); for your own program
+  they are the lines that operate on whole arrays. The entry of the current step is marked. The
+  same panel has the list of operations you can write.
+- "Convergence" appears for programs with a `while` loop: the quantity tested by the loop
+  condition at every iteration, against its threshold, with a table of the same values. For the
+  iterative solvers it also compares the flops spent with the cost of the direct method.
+- "Geometric view" appears for two unknowns: for Jacobi, Gauss-Seidel and Kaczmarz the equations
+  are lines and the approximations are points moving towards their intersection (Gauss-Seidel
+  moves one coordinate at a time, Kaczmarz projects perpendicularly onto one line per step); for
+  the power method with a 2 x 2 matrix, y turns on the unit circle towards the dominant
+  eigenvector; for RFG with a vector of length 2, x is mirrored onto the first axis.
+- Cells: red with a double outline for the pivot, orange with a thick outline for what is
+  written, blue with a dashed outline for what is read, green with a marked corner for what is
+  final, purple with the letter μ for multipliers. The outlines carry the role without colour;
+  the fills stay distinct under simulated protanopia and deuteranopia. On a swap the two values
+  move towards each other. Above 150 cells the animations stop and the steps remain; with
+  "reduce motion" set in the system, cells change colour without moving.
 - The "Check" panel appears when the algorithm finishes: residuals below 1e-9 (relative to the
-  size of the data) are marked ok. The "Python code" panel generates the literal translation of
-  the current program, to copy or download; it runs with `python/mn/runtime.py` next to it.
+  size of the data) are marked ok. For the iterative solvers it shows the residual against the
+  tolerance and, next to it, the error against the Gaussian elimination solution, also after a
+  stop by `maxiter`. For the power method it also compares |λ| with the largest eigenvalue in
+  absolute value found from another starting vector, so a starting vector without a component
+  along the dominant eigenvector (also flagged under the input) shows up in red.
+- Flops are counted as in the course: square roots, arithmetic on indices and counters
+  (`k ← k + 1`, `s ← min(m-1, n)`) and the subtraction of an empty sum are not flops.
+- The "Python code" panel generates the current program as a self-contained NumPy file, to copy
+  or download: the function, then a call on the current inputs that prints the results and, for
+  a library algorithm, compares them with the standard NumPy function (`np.linalg.solve`,
+  `np.linalg.cholesky`, `np.linalg.qr`, `np.linalg.lstsq`, `np.linalg.eigvals`) and prints the
+  largest difference.
+- When a run stops on an error, the last step shows the computation that could not be done with
+  its values (`a_21 / a_11 = 1 / 0`).
 - URL parameters: `?algoritm=GPP` or `?algoritm=propriu`, `?pas=12`, `?notiune=pivot`,
-  `?limba=en`, `?tema=dark`.
+  `?limba=en`, `?tema=dark`, `?cifre=3`. The address keeps the algorithm, the language, the theme
+  and the precision as they change, so a reload keeps them.
 - In "your own pseudocode" mode the text and the inputs stay in localStorage between sessions.
+
+## The generated Python
+
+The export follows the labs of the course: `import numpy as np`, indices from 0, `for ... in
+range(...)` loops over elements, `return` with the results.
+
+```python
+import numpy as np
+
+
+def G(A):
+    # copii de lucru in virgula mobila: intrarile raman neschimbate
+    A = np.array(A, dtype=float)
+    n = A.shape[0]
+    # mu peste A: se citesc si se scriu in A
+    for k in range(n - 1):
+        for i in range(k + 1, n):
+            A[i, k] = A[i, k] / A[k, k]
+        for j in range(k + 1, n):
+            for i in range(k + 1, n):
+                A[i, j] = A[i, j] - A[i, k] * A[k, j]
+    return A
+
+
+if __name__ == "__main__":
+    # exemplul din vizualizator
+    A = np.array([[1, 2, 1], [2, 1, 2], [1, 1, 2]])
+    A = G(A)
+    print("A =", A, sep="\n")
+```
+
+The file ends with the call on the inputs currently in the visualizer, so running it prints what
+the last step of the trace shows. The pseudocode counts from 1 and NumPy from 0. Loop variables hold positions (the pseudocode
+value minus 1), and so do the scalars and arrays that only ever receive positions (`i_k` from
+`argmax`, `p` in GPP), so a returned `p` holds positions counted from 0; the header comment of
+the generated file names them. Every other name keeps its pseudocode value, and an element
+indexed by such a name is written `x[k - 1]`. `n` is the number of rows when the algorithm asks
+for a square matrix (`A.shape[0]`, as in the labs) and the number of columns otherwise, as in
+the interpreter. Sums become accumulation loops (`suma = 0`, then `suma = suma + ...`), `argmax` over a column
+becomes `np.argmax` on a slice, `A y` and `z^T y` become `A @ y` and `z @ y`, Greek names are
+spelled out (`sigma`, `beta`), and `stop` raises `RuntimeError`. Inputs are copied as float
+arrays, so the caller's data is left unchanged and an integer matrix does not truncate the
+divisions. `sgn(0)` is 1, as in the course; `np.sign(0)` is 0 and would skip a reflector.
 
 ## Layout of the repository
 
 - `src/motor/`: the lexer, the parser, the interpreter (the execution trace: per-step
   differences and a full frame every 100 steps, rebuilt with `stareLa`), the formula renderer,
-  the algorithm library, the numerical checks, the Python emitter, the per-line variables and the
+  the algorithm library, the numerical checks, the Python emitter, the per-line analysis and the
   message catalogue (Romanian and English).
-- `src/componente/`, `src/App.tsx`: the editor, the grids, the formula, the controls, the inputs,
-  the check, the Python panel and the fundamentals. `src/preferinte.tsx` holds the language and
-  the theme; `src/i18n.ts` holds the interface texts; `src/notiuni.ts` holds the fundamentals.
+- `src/componente/`, `src/App.tsx`: the editor, the grids, the formula, the controls, the
+  inputs, the matrix operations, the convergence chart, the check, the Python panel and the
+  fundamentals. `src/preferinte.tsx` holds the language and the theme, `src/i18n.ts` the
+  interface texts, `src/notiuni.ts` the fundamentals, `src/operatii.ts` the names and definitions
+  of the operations between arrays, `src/paleta.ts` the cell colours, `src/natura.ts` the natures
+  of the inputs (the random generators and the checks on typed values), `src/exercitiu.ts` the
+  expected answer of a step and the reading of a typed answer.
 - `python/mn/algoritmi.py`: the same algorithms translated literally into Python, with indices
-  from 1; `python/mn/runtime.py`: the functions the generated code needs.
-  `python/genereaza_fixturi.py` writes `tests/fixtures/algoritmi.json`, and `npm test` checks
-  that the interpreter and the generated Python give the same numbers
-  (`python/verifica_export.py`). `python/compara.py` writes the comparison table against the
-  NumPy functions (error, flops, time) for the report. Regenerate the fixtures with
-  `npm run fixturi`; all of these need Python 3 with NumPy.
-- `tests/`: tests for the parser, the interpreter, the formulas, the checks, the Python export
-  and the mounted application (jsdom).
+  from 1, used as the numerical oracle. `python/genereaza_fixturi.py` writes
+  `tests/fixtures/algoritmi.json` (regenerate with `npm run fixturi`), and
+  `python/verifica_export.py` runs the generated NumPy code against the interpreter and the
+  oracle. `python/compara.py` writes the comparison table against the NumPy functions (error,
+  flops, time) for the report. All of these need Python 3 with NumPy.
+- `tests/`: see below.
 
 Identifiers in the code are Romanian, after the course and the notation of the slides.
+
+## Tests
+
+`npm test` runs, besides the parser, trace, formula and interface tests:
+
+- `tests/algebra.test.ts`: every library algorithm is run through the interpreter on random
+  matrices with a fixed seed, in several sizes, and the result has to satisfy the identities of
+  linear algebra it promises: `LU = A`, `LLᵀ = A`, `QR = A` and `QᵀQ = I`, `Ax = b`,
+  `Aᵀ(b - Ax) = 0`, `Ay = λy`, determinants equal to the product of the pivots, plus limit cases
+  with exact answers (the identity matrix, a diagonal matrix, orthogonal rows). The identities
+  are computed with helpers written separately from the engine (`tests/ajutor.ts`).
+- `tests/cost.test.ts`: the cost formula of each algorithm against the counted flops. The exact
+  formulas must match; the leading-term formulas must be within 12% at n = 24 and closer than at
+  n = 12; the order measured by doubling n must be the one in the formula.
+- `tests/motor.test.ts`, `tests/verificare.test.ts`: the interpreter against the Python oracle
+  on the fixtures, and the end-of-run checks.
+- `tests/python.test.ts`: the generated NumPy code must give the same numbers as the
+  interpreter and the oracle, for the library (on its examples and on random inputs with the
+  required nature) and for hand-written programs. Each generated file is run twice: the function
+  called with the inputs, and the whole file as a script with its example (needs Python with
+  NumPy; skipped otherwise).
+- `tests/algebra.test.ts` also checks that Gb, GPPb and UTRISb give exactly the results of G, GPP
+  and UTRIS on banded matrices, with fewer flops, and that with 3 significant digits the course
+  example gives x = (0, 1) without pivoting and x = (1, 1) with it.
+- `tests/exercitiu.test.ts`: the reading of typed answers and the expected answer of a step.
+- `tests/natura.test.ts`: for every library algorithm, at several sizes, the values produced by
+  "random" have the nature the algorithm asks for, the run finishes within the step limit of the
+  application and its identities check; values that lack the nature are reported.
+- `tests/culori.test.ts`: WCAG contrast of the texts and separation of the cell roles under
+  simulated colour blindness, read from `src/index.css` and `src/paleta.ts`.
 
 ## Accepted pseudocode
 
@@ -107,6 +260,9 @@ Statements:
 - `x ← expression` or `x = expression`. The form `a_ik ← μ_ik = expression` names the new
   value; the name in the middle appears in the displayed formula but is not evaluated.
 - `u_ik ← a_ik, i = k+1 : m` performs the assignment for every `i` in the range.
+- `A(i, k:n) ← A(i, k:n) - c A(k, k:n)` assigns to a block: a row `A(i, :)`, a column
+  `A(:, j)`, part of one, or a submatrix `A(1:2, 1:2)`. A number fills the block; a vector or a
+  matrix must have its shape.
 - `a_kj ↔ a_{i_k, j}` swaps two elements.
 - `pentru i = 1 : n`, `pentru i = n : -1 : 1` (the second number is the step), with an indented
   body.
@@ -120,12 +276,14 @@ Statements:
 - Several statements on one line are separated by `;`. Comments start with `%`.
 
 Expressions: `+ - * /`, multiplication by juxtaposition (`a_ij x_j`), `^2`, `√x` or `sqrt(x)`,
-`|x|`, `‖v‖` or `norm(v)`, `sgn`, `min`, `max`, `linii(A)`/`rows(A)`, `coloane(A)`/`cols(A)`,
-`lungime(x)`/`len(x)`, `Σ_{j=1}^{k-1} l_ij l_kj`, `argmax_{i=k:n} |a_ik|`, `z^T y` (dot
-product), `A y` (matrix times vector), blocks `A(k:m, k)`. Elements are written `a_ij`, `x_i`,
-`a_{i,j-1}` or `A(i,j)`; a lowercase name (`a`, `l`, `u`) looks up the matrix with the uppercase
-letter. Comparisons: `<`, `>`, `≤` or `<=`, `≥` or `>=`, `=`, `≠` or `!=`. ASCII alternatives:
-`<-` for `←`, `<->` for `↔`.
+`|x|`, `sgn`, `min`, `max`, `linii(A)`/`rows(A)`, `coloane(A)`/`cols(A)`, `lungime(x)`/`len(x)`,
+`Σ_{j=1}^{k-1} l_ij l_kj`, `argmax_{i=k:n} |a_ik|`. Between arrays: `A x` (matrix times vector),
+`A B` (matrix times matrix), `x^T y` (dot product), `x y^T` (outer product), `x^T A`, `A^T`,
+`c x`, `x / c`, `x + y`, `x - y`, `‖v‖` or `norm(v)` (the 2-norm of a vector, the Frobenius norm
+of a matrix). A vector is a column; `A(i, :)` is a row, so `A(i, :) x` is a dot product.
+Elements are written `a_ij`, `x_i`, `a_{i,j-1}` or `A(i,j)`; a lowercase name (`a`, `l`, `u`)
+looks up the matrix with the uppercase letter. Comparisons: `<`, `>`, `≤` or `<=`, `≥` or `>=`,
+`=`, `≠` or `!=`. ASCII alternatives: `<-` for `←`, `<->` for `↔`.
 
 An indexed element of a variable that is not an array, such as `i_k`, is a scalar with that
 name.

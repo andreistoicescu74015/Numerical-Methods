@@ -4,7 +4,13 @@ Scris pe 12 octombrie 2026. Sursele pentru cerințe, algoritmi și notație sunt
 `D:\GitHub\CV\docs\UPB\Anul 2\Sem I\Metode numerice`: `Cursuri/Cursuri.pdf` (499 de slide-uri,
 cursurile I-VI), `Laboratoare/Laborator 1` (notebook) și `Laborator 2.pdf`, și anexa
 `Anexe/algoritmi-algebra-liniara.tex`. Faptele despre biblioteci vin din paginile oficiale citate
-în secțiunea 8 și au fost verificate pe 12 octombrie 2026.
+în secțiunea 14 și au fost verificate pe 12 octombrie 2026. Secțiunile 8-11 sunt din 13 octombrie
+2026 și folosesc în plus laboratoarele și subiectele din anii trecuți, din
+`D:\GitHub\CV\docs\UPB\Anul 2\Anii trecuți\Semestrul_1\MN_Metode_numerice`. Secțiunea 12, tot din
+13 octombrie 2026, verifică biblioteca și noțiunile doar față de materialele din anul curent și
+înlocuiește ce venea din anii trecuți. Din 14 octombrie 2026 (secțiunea 13) teoria din aplicație
+vine numai din folderul `Cursuri`: slide-urile și cartea cursului, fără anexă și fără laboratoare
+sau articole din afara lui. Laboratoarele rămân doar modelul de stil pentru codul Python.
 
 ## 1. Ce cere cursul
 
@@ -15,7 +21,8 @@ factorizare LU, factorizare Cholesky, factorizare QR, CMMP, o aplicație CMMP, f
 puterii (inverse), o aplicație cu valori proprii (stabilitate, PCA, recunoaștere de fețe), DVS
 pentru matrice de rang 1 și o aplicație DVS (compresie de imagini).
 
-Cursurile IV și V repetă cerința sub titlul "Tema colocviu", cu șase puncte de evaluare:
+Cursul IV o repetă pe slide-ul "Teme colocviu - cerința" (pagina 256 a PDF-ului), iar cursul VI
+pe slide-ul "Tema - colocviu" (pagina 468), cu șase puncte de evaluare:
 
 1. descrierea în detaliu a aplicației alese;
 2. formularea matematică și legătura cu o problemă din curs (sistem liniar, valori și vectori
@@ -35,11 +42,14 @@ textul slide-ului; secțiunea 4 spune cum se acoperă și ce rămâne de întreb
 ## 2. Algoritmii și notația din materiale
 
 Cursul are șase părți: introducere, algoritmi elementari, sisteme liniare, CMMP, valori și
-vectori proprii, DVS. Pseudocod apare în slide-uri pentru LTRIS, UTRIS și TRV (cursul II); G, GPP,
-GPC, Crout, S_GPP, S_GPC, INV_GPP, DET_GPP, G pentru sisteme simetrice și CHOL (cursul III); QR
-Householder, GQR și SQR (cursul IV); MP, MPI, HQr, QR iterativ cu deplasare explicită și implicită,
-VD2 și IT_QR2 (cursul V); DVS prin bidiagonalizare (cursul VI). Lista de examen, pe care anexa o preia de pe ultimul
-slide al cursului 1 din 2026: matvec, UTRIS, LTRIS, G, LU, Cholesky, TORT, MP.
+vectori proprii, DVS. Pseudocod apare în slide-uri pentru normele vectoriale, produsul C = AB,
+LTRIS, UTRIS, LINV și TRV (cursul II); G, GPP, GPC, Crout, S_GPP, S_GPC, INV_GPP, DET_GPP, G
+pentru sisteme simetrice și CHOL (cursul III); RFG și RF (reflectori), ROTG și ROT (rotații), QR
+Householder, GQR și SQR (cursul IV); MP, MPI, HQr, pasul QR cu deplasare explicită, VD2, IT_QR2,
+TRID2 și QR2 (cursul V); DVS prin bidiagonalizare (cursul VI). Pentru Jacobi, Gauss-Seidel și
+Kaczmarz (cursul III) slide-urile dau doar formula iterației, iar produsul matrice-vector nu are
+pseudocod în slide-uri. Lista de examen, pe care anexa o preia de pe ultimul slide al cursului 1
+din 2026: matvec, UTRIS, LTRIS, G, LU, Cholesky, TORT, MP; PDF-ul din 2022 nu are acest slide.
 
 Notația are două stiluri în același curs. Cursul II scrie fără numerotare, cu indentare, `pentru`
 și `=` ca atribuire:
@@ -241,16 +251,262 @@ Pasul 1 nu depinde de răspunsul la întrebările de mai jos.
    din `file://`; nu mai e nevoie, fiindcă cerința de cod Python s-a acoperit cu emițătorul din
    arborele sintactic.
 
-## 8. Surse
+## 8. Metodele iterative din curs
+
+Cursul III împarte metodele de rezolvare a sistemelor liniare în două (pagina 97): cele directe
+sunt "recomandate pentru sisteme de dim. medii n < 500", iar cele iterative, "bazate pe
+construirea recursivă a unui șir de vectori care converge către soluția sistemului liniar", sunt
+"recomandate pentru sisteme de dimensiuni foarte mari". Cartea adaugă, la pagina 69, că limita de
+500 depinde de calculator și că metodele iterative se folosesc și când matricea are o structură
+specială, eventual rară.
+
+Ce conțin slide-urile 163-172:
+
+- Cadrul comun (163): iterația x^(k+1) = B x^(k) + c, cu descompunerea A = M - N, B = M⁻¹N și
+  c = M⁻¹b; "convergența acestor metode este asigurată dacă raza spectrală ρ(B) < 1".
+- Jacobi (164-165): A = D - N cu D diagonala lui A; x_i^(k+1) = (b_i - Σ_{j≠i} a_ij x_j^(k)) / a_ii;
+  converge dacă ρ(D⁻¹N) < 1 sau dacă A este strict diagonal dominantă. Exemplu: A = [2 1; 5 7],
+  b = (11, 13), x⁰ = (1, 1).
+- Gauss-Seidel (166-167): A = L - U cu L triunghiul inferior al lui A; în formula pe componente,
+  pentru j < i se folosesc valorile noi. Exemplu: A = [16 3; 7 -11], b = (11, 13), x⁰ = (1, 1).
+- Kaczmarz (168): x^(k+1) = x^(k) - ((a_iᵀx^(k) - b_i) / ‖a_i‖²) a_i, cu linia i aleasă ciclic sau
+  aleator.
+- O aplicație cu 10 necunoscute (170-172) în care Gauss-Seidel ajunge la soluție în 18 iterații,
+  "datorită rarității A, G-S este mai avantajoasă decât GPP".
+
+Slide-urile nu au pseudocod pentru aceste metode, nu numesc o toleranță și nu pun o limită de
+iterații; criteriul de oprire este propoziția "continuă până la convergență, i.e. norma
+‖Ax^k - b‖ mică". În bibliotecă, bucla este scrisă după modelul algoritmului MP din cursul V
+(`cât timp e > tol`, cu `maxiter`), iar reziduul se raportează la ‖b‖, cum recomandă Templates
+(pagina 52), ca toleranța să nu depindă de unitățile datelor. Descrierile spun care parte vine
+din slide și care e scrisă aici.
+
+Trei formulări din slide-uri sunt precizate în unealtă, cu sursa:
+
+- La Gauss-Seidel slide-ul scrie "A este pozitiv definită". Cursul definește noțiunea doar pentru
+  matrice simetrice (paginile 13 și 63), iar teorema cere într-adevăr simetria (Saad, teorema 4.10
+  pentru SOR cu ω = 1; notele Cambridge, corolarul 4.13), așa că unealta scrie "simetrică și
+  pozitiv definită".
+- ρ(B) < 1 este și necesară, nu doar suficientă, pentru convergența din orice punct de pornire
+  (Saad, teorema 4.1).
+- Marginea de la Kaczmarz, cu factorul 1 - λ_min(AᵀA)/‖A‖_F², este rezultatul lui Strohmer și
+  Vershynin: valabilă în medie, pentru linii alese aleator cu probabilitate proporțională cu
+  ‖a_i‖², pe un sistem compatibil.
+
+Costul, numărat de interpretor: o trecere Jacobi sau Gauss-Seidel pe o matrice densă costă cât
+un produs matrice-vector, aproximativ 2n² flopi, iar testul pe reziduu încă 2n². Eliminarea
+gaussiană cu cele două substituții costă aproximativ 2n³/3 + 2n², deci pe o matrice densă metoda
+iterativă e mai ieftină doar dacă se oprește în mai puțin de n/6 iterații; pe exemplul Jacobi din
+curs sunt 329 de flopi față de 13. Pe o matrice rară o trecere atinge doar elementele nenule și
+costă aproximativ 2·nnz flopi, deci pragul urcă. În aplicația de pe slide-ul 172 (n = 10, mai puțin de
+jumătate din elemente nenule, 18 iterații) numărătoarea încă favorizează
+GPP: aproximativ 1500 de flopi față de 870. Panoul "Convergență" arată comparația lângă graficul
+reziduului.
+
+Un reziduu mic nu înseamnă o eroare mică: ‖x - x̂‖/‖x‖ ≤ κ(A) ‖r‖/‖b‖ (cartea, pagina 99, "testul
+«r este mic» e valid doar dacă matricea A este bine condiționată"). Panoul de verificare arată,
+pentru metodele iterative, reziduul la oprire și eroarea față de soluția eliminării gaussiene.
+
+Dintre celelalte algoritmi iterativi ai cursului, în bibliotecă este doar metoda puterii. MPI
+(slide-ul 318) rezolvă un sistem la fiecare iterație, iar iterațiile QR (slide-urile 357-391) sunt
+scrise cu apeluri la alți algoritmi; limbajul de pseudocod de aici nu are apeluri.
+
+## 9. Python în laboratoare
+
+Laboratoarele din 2026 (`Laborator 1`, `Laborator 2`) și șabloanele din 2023 scriu la fel:
+
+- `import numpy as np`; Laboratorul 1 spune explicit că "în Python indexarea începe de la 0".
+- Bucle `for i in range(...)` pe elemente, cu `A[i, k]` sau `U[i][j]`; nicio actualizare
+  vectorizată de linie în algoritmi.
+- Dimensiunea se ia din tablou (`n = U.shape[0]`, `m, n = np.shape(A)`), nu se dă ca parametru.
+- Funcțiile întorc rezultatele: `return x`, `return A, p`, `return U, A, beta`.
+- Sumele se adună într-o variabilă (`s = s + A[i, k]**2`), numele sunt fără litere grecești
+  (`sigma`, `beta`, `tau`), iar rezolvările din 2026 copiază intrarea cu `A.astype(float)`, ca o
+  matrice de întregi să nu trunchieze împărțirile.
+
+Emițătorul din `src/motor/python.ts` produce acest stil din arborele sintactic. Diferența de
+fond față de pseudocod este numărarea de la 0: variabilele de buclă și mărimile care țin poziții
+(`i_k` din `argmax`, vectorul `p` de la GPP) se mută cu 1 în jos, iar capetele buclelor se
+rescriu (`i = n : -1 : 1` devine `range(n - 1, -1, -1)`). Testul `tests/python.test.ts` rulează
+codul generat și îl compară cu interpretorul și cu oracolul, pe bibliotecă și pe programe scrise
+de mână.
+
+Un detaliu de corectitudine: șablonul de laborator pentru TORT calculează
+`sigma = np.sign(A[k,k])*np.sqrt(s)`. `np.sign(0)` este 0, deci pentru o coloană cu a_kk = 0 și
+elemente nenule dedesubt reflectorul ar fi sărit. Cartea avertizează în nota de la pagina 129 că
+funcțiile `sgn` predefinite, cu sgn(0) = 0, "pot conduce la rezultate eronate". Codul generat
+definește `sgn` cu sgn(0) = 1.
+
+## 10. Biblioteca față de slide-uri și ce a rămas neacoperit
+
+Compararea linie cu linie a pseudocodului din bibliotecă cu slide-urile:
+
+- Identice ca bucle, memorare și termen dominant al costului: C = AB (pagina 67), LTRIS și UTRIS
+  (83-85), G (113), GPP (121-122), Crout (137), S_GPP (140), CHOL (160), MP (314).
+- Până la verificarea din secțiunea 12, biblioteca avea TORT și CMMP în varianta nescalată, cu
+  vectorii Householder într-o matrice U separată (propoziția de pe slide-ul 196, șablonul de
+  laborator din 2023, algoritmul 3.2 din carte). Acum are Algoritmul QR și Algoritmul SQR de pe
+  slide-urile 211 și 224, cu vectorul împărțit la σ (u_kk = 1 + a_kk/σ = β_k) și păstrat în A.
+  Pe exemplul din curs iese ce tipărește slide-ul 212: u_1 = (5/3, -1/3, 2/3), β_1 = 5/3.
+  Algoritmul RFG este aceeași formă scalată, pe un singur vector.
+- Pe exemplul de pe slide-ul 225 soluția exactă este x = (2/3, 0), cu reziduul √10; slide-ul
+  tipărește (0.65, 0.003), pentru că lucrează cu Qᵀ scris cu două zecimale.
+- Slide-ul 314 scrie "tol > 1" la MP; cu e = 1 la pornire bucla nu s-ar executa. Laboratorul 5
+  din 2018 scrie tol < 1.
+
+Biletele din anii trecuți (`MN_examene_alti_ani`) cer aproape numai adaptări și calcule de mână.
+Biletul nr. 1, de exemplu: matricea elementară M_k pe un vector, o transformare ortogonală cu
+Qx = ‖x‖e_1, adaptarea eliminării gaussiene la o matrice cu structură și complexitatea ei, un
+produs bᵀA eficient, metoda puterii cu rata de convergență, forma Schur reală a unei matrice 3x3,
+DVS pentru o matrice de rang 1 și un sistem (diag(a) + baᵀ)x = c. Slide-ul 493 spune că la examen
+se cer cel mult două transformări Householder.
+
+Algoritmi din curs care nu sunt în bibliotecă, în ordinea în care ar merita adăugați:
+
+1. Variantele adaptate la structură (G, Crout și QR pe matrice Hessenberg, sisteme bidiagonale
+   și tridiagonale), cerute de bilete. Se pot scrie de pe acum în modul "pseudocod propriu",
+   schimbând capetele buclelor.
+2. DVS pentru o matrice de rang 1 și un pas de deflație spre forma Schur; se pot scrie cu
+   reflectori și bucle pe elemente, dar sunt lungi.
+3. Rotațiile Givens (ROTG, ROT) și GQR.
+4. GPC și S_GPC (maximul pe doi indici se scrie cu două bucle), LINV, INV_GPP, DET_GPP, LDLᵀ.
+5. MPI, care are nevoie de o rezolvare de sistem în interiorul buclei.
+6. HQr, iterațiile QR și DVS completă, construite pe apeluri între algoritmi.
+
+## 11. Culori și accesibilitate
+
+Culorile din anexă (aceleași nuanțe pastelate pentru fond și un ton închis pentru text) au fost
+măsurate cu raportul de contrast WCAG 2 și cu distanța în OKLab (înmulțită cu 100) sub
+protanopie și deuteranopie simulate după Machado, Oliveira și Fernandes (2009):
+
+- Textul din celule nu ajungea la 4.5:1 pe portocaliu (3.60) și pe roșu (4.44), iar textul
+  secundar al interfeței avea 2.66:1.
+- Fondurile rolurilor nu se deosebeau sub daltonism: albastru și mov la 0.65 sub deuteranopie,
+  roșu și verde la 2.25, față de un prag de 8.
+
+Paleta actuală păstrează nuanțele (roșu pivot, portocaliu scris, albastru citit, verde gata, mov
+multiplicator) și schimbă luminozitatea și saturația: orice două fonduri sunt la cel puțin 9.9
+(tema luminoasă) și 9.2 (tema întunecată) sub protanopie și deuteranopie, iar numărul din celulă,
+scris cu culoarea textului temei, are cel puțin 8.9:1 și 5.0:1. Culorile din formulă (țintă,
+pivot, citit) sunt la cel puțin 10 între ele. `tests/culori.test.ts` recalculează aceste praguri
+din `src/index.css` și `src/paleta.ts`.
+
+Culoarea nu este singurul semn. Fiecare rol are un contur al lui (dublu pentru pivot, gros
+pentru scris, întrerupt pentru citit, colț marcat pentru gata, litera μ pentru multiplicator),
+care rămâne vizibil și în modul de contrast ridicat al sistemului, unde fondurile dispar. În
+formulă ținta este îngroșată, pivotul încadrat și elementele citite subliniate punctat. Linia
+curentă din editor are o bară în stânga. Grila se citește ca tabel de către cititoarele de ecran,
+cu rolul în eticheta celulei, butoanele au nume, panoul pasului este anunțat când se schimbă,
+iar cu "reducere a mișcării" cerută în sistem celulele își schimbă doar culoarea.
+
+## 12. Verificarea față de materialele din anul curent
+
+Referința era folderul `Sem I/Metode numerice`: slide-urile (`Cursuri/Cursuri.pdf`), cartea
+cursului și laboratoarele 1 și 2; secțiunea 13 o restrânge la folderul `Cursuri`. Un audit
+independent, făcut fără materialele din anii trecuți, a
+căutat sursa fiecărui enunț din `src/motor/biblioteca.ts` și `src/notiuni.ts` și a comparat
+pseudocodul cu imaginea fiecărui slide. Ce s-a schimbat în urma lui:
+
+- TORT și CMMP au fost înlocuite cu Algoritmul QR (slide-ul 211) și Algoritmul SQR (slide-ul
+  224). Două lucruri diferă de slide și sunt spuse în aplicație: linia `a_kk ← u_kk = β_k`, pusă
+  ca sumele pe i = k : m să citească vectorul Householder din A, așa cum face slide-ul SQR, și
+  prima linie din bucla SQR, tipărită pe slide ca "t = a_kk = 0" și scrisă aici `t ← a_kk`.
+  Linia `r ← ‖b(n+1:m)‖` vine din slide-ul 223. Oracolul Python, fixture-urile și verificările
+  au fost refăcute pentru noua memorare.
+- Fiecare algoritm are câmpul `curs`: cursul și titlul slide-ului, apoi ce diferă aici.
+  Produsul matrice-vector nu are algoritm pe slide-uri; vine din cartea cursului (Algoritmul
+  1.5, Gaxpy). Pentru Jacobi, Gauss-Seidel și Kaczmarz slide-urile dau doar formula iterației.
+- Enunțuri scoase, pentru că nu au sursă în materiale: Jacobi "se poate face în paralel",
+  Gauss-Seidel "de regulă are nevoie de mai puține iterații", comparația de flopi dintre
+  Gauss-Seidel și GPP la n = 10 (un calcul propriu care contrazicea observația de pe slide-ul
+  172), numele rutinei LAPACK, remarca despre DVS la examen.
+- Enunțuri reformulate ca pe slide: convergența metodelor iterative "dacă ρ < 1" (slide-urile
+  163-166 dau condiții suficiente, nu o echivalență), teorema de condiționare cu perturbațiile
+  datelor (slide-ul 152) în locul formei cu reziduul, soluția din exemplul cu pivotul 10⁻⁴.
+- Enunțuri păstrate din afara slide-urilor, cu sursa numită în text: din carte, factorul de
+  creștere și "practic stabil" (pagina 103), testul reziduului (pagina 99), sgn(0) = 1 (pagina
+  129); din documentația NumPy și SciPy, ce fac funcțiile echivalente.
+
+Intrările au acum o natură (`src/natura.ts`): proprietatea pe care algoritmul o cere de la ele.
+Butonul "aleator" o respectă, iar pentru Jacobi și Gauss-Seidel generează matrice strict diagonal
+dominante, condiția suficientă de pe slide-urile 164 și 166.
+
+## 13. Doar folderul Cursuri și funcțiile din 14 octombrie
+
+Ce s-a scos ca să rămână doar slide-urile și cartea: numele TORT din titlul algoritmului QR și
+lista de examen, care veneau din anexă; trimiterea la Strohmer și Vershynin de la Kaczmarz (rămâne
+ce spune slide-ul 168: convergență liniară, cu factorul de pe slide); trimiterile la laborator din
+texte; regula lui Cramer, care nu apare în curs; ghilimelele tipografice din mesaje. Liniile de
+pseudocod care nu sunt pe slide au acum un comentariu `%` chiar în cod. Pentru metoda puterii,
+"aleator" generează A = T D T⁻¹ cu T întreagă și det T = 1: A și D sunt asemenea, deci au aceleași
+valori proprii (slide-ul 280), alese cu una dominantă; vectorul de pornire primește o componentă pe
+vectorul propriu dominant (ipoteza de pe slide-ul 310, γ₁ ≠ 0), iar un vector scris de mână fără
+această componentă este semnalat.
+
+Funcții noi, cu sursa lor:
+
+- Matrice bandă: Gb și GPPb sunt algoritmii 2.14 și 2.15 din carte (secțiunea 2.9), iar UTRISb
+  este substituția înapoi cu limita min(i + q, n) din aceeași secțiune; slide-urile 14-15
+  definesc matricele bandă, tridiagonale și Hessenberg. Teoremele 2.9 și 2.10 din carte spun cum
+  se păstrează banda: U are q diagonale deasupra la G și cel mult q + r la GPP. În grilă,
+  zerourile din afara benzii sunt hașurate, iar descrierea arată flopii lui G, GPP sau UTRIS pe
+  aceleași intrări. Formula de cost, lăsată de carte ca exercițiu, este numărată pe pseudocod.
+- Aritmetica cu t cifre: interpretorul rotunjește fiecare intrare și rezultatul fiecărei
+  operații la t cifre semnificative. S_G (rezolvarea cu G fără pivotare, descrisă pe slide-ul
+  138 fără pseudocod) pornește pe exemplul de pe slide-ul 114 cu 3 cifre și dă x₁ = 0, soluția
+  falsă de pe slide; S_GPP pe aceleași date dă x₁ = 1. Slide-ul spune "precizia 10⁻³"; calculul
+  lui de pe slide (9998/9999 rotunjit la 1) corespunde rotunjirii la 3 cifre semnificative.
+- Modul exercițiu: cât rezultatul unui pas e ascuns, studentul îl scrie și îl verifică (0.5%
+  toleranță, fracții acceptate, adevărat/fals la condiții).
+- Vederea geometrică pentru două necunoscute: ecuațiile ca drepte și drumul aproximărilor la
+  Jacobi, Gauss-Seidel și Kaczmarz, vectorul metodei puterii pe cercul unitate, reflexia lui RFG.
+- Comparația cu NumPy în fișierul Python generat: aceeași problemă rezolvată de funcția standard
+  și cea mai mare diferență, verificate pe toate cazurile testului de export.
+
+O recenzie UI/UX independentă, făcută în browser ca un student la prima folosire, a găsit între
+altele: metoda puterii putea raporta ca "ok" o valoare proprie nedominantă când vectorul de
+pornire nu avea componentă pe vectorul propriu dominant; dimensiuni incompatibile (B cu alt număr
+de linii decât coloanele lui A) rulau până la capăt pe altă problemă; săgețile pe meniul de
+algoritmi schimbau algoritmul; flopii erau numărați diferit de curs (radicali, sume goale,
+contoare), așa că LU număra 18 flopi unde G numără 13. Toate sunt corectate și acoperite de teste;
+lista e în istoricul sesiunii, nu aici.
+
+## 14. Surse
+
+## 13. Surse
 
 Materiale de curs:
 
 - `Cursuri/Cursuri.pdf`: slide-urile de examinare și temele exemplu (cursul I), "Teme colocviu"
-  (cursul IV) și "Tema colocviu" (cursul V), algoritmii G, GPP, Crout, CHOL (cursul III), QR
-  (cursul IV), MP și MPI (cursul V).
+  (cursul IV, pagina 256) și "Tema colocviu" (cursul VI, pagina 468), algoritmii G, GPP, Crout,
+  CHOL și metodele iterative (cursul III), reflectorii, QR și SQR (cursul IV), MP și MPI
+  (cursul V). Numerele de pagină din acest document sunt ale PDF-ului din 2022.
+- `Cursuri/METODE DE CALCUL NUMERIC MATRICEAL. ALGORITMI FUNDAMENTALI.pdf` (Dumitrescu, Popeea,
+  Jora): paginile 31, 69, 99, 103, 116 și 129, citate în secțiunile 8-10 și 12, și secțiunea
+  2.9 "Sisteme bandă" (algoritmii 2.14 și 2.15, teoremele 2.9 și 2.10), citată în secțiunea 13.
 - `Laboratoare/Laborator 2.pdf`: algoritmii S_INF_TR, S_SUP_TR, G în notația cărții.
-- `Laboratoare/Laborator 1/Lab1_MN.ipynb`: Python cu NumPy în Jupyter.
+- `Laboratoare/Laborator 1/Lab1_MN.ipynb`, `Laborator 2/Lab2_rezolvare.ipynb`: Python cu NumPy
+  în Jupyter.
+- `Anii trecuți/.../Laboratoare`: șabloanele din 2023 (`Lab2_321_322.py`, `lab4_321.py` pentru
+  TORT) și îndrumarele din 2018; `MN_examene_alti_ani`: biletele de examen.
 - `Anexe/algoritmi-algebra-liniara.tex`: pseudocodul celor opt algoritmi de examen și culorile.
+
+Metode iterative (consultate pe 13 octombrie 2026) și culori:
+
+- Saad, Iterative Methods for Sparse Linear Systems, ediția a 2-a, teoremele 4.1, 4.9 și 4.10:
+  https://www-users.cse.umn.edu/~saad/IterMethBook_2ndEd.pdf
+- Barrett și colaboratorii, Templates for the Solution of Linear Systems, secțiunea 4.2
+  (criterii de oprire): https://www.netlib.org/templates/templates.pdf
+- Fawzi, Cambridge Part II Numerical Analysis, cursul 16:
+  https://www.damtp.cam.ac.uk/user/hf323/M21-II-NA/Lect16.pdf
+- Strohmer și Vershynin, A randomized Kaczmarz algorithm with exponential convergence:
+  https://arxiv.org/abs/math/0702226
+- numpy.linalg.solve folosește rutina LAPACK gesv (eliminare cu pivotare parțială):
+  https://numpy.org/doc/1.26/reference/generated/numpy.linalg.solve.html
+- Machado, Oliveira, Fernandes 2009, A physiologically-based model for simulation of color
+  vision deficiency, IEEE TVCG 15(6): DOI 10.1109/TVCG.2009.113
+- WCAG 2.2, criteriile 1.4.1 (folosirea culorii), 1.4.3 (contrast minim) și 1.4.11 (contrast
+  pentru elemente netextuale): https://www.w3.org/TR/WCAG22/
 
 Biblioteci (pagini oficiale, consultate pe 12 octombrie 2026):
 
