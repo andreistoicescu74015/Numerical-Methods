@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react'
 import { EditorView, basicSetup } from 'codemirror'
-import { StreamLanguage } from '@codemirror/language'
+import { HighlightStyle, StreamLanguage, syntaxHighlighting } from '@codemirror/language'
 import { Compartment, Prec, StateEffect, StateField } from '@codemirror/state'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { Decoration, WidgetType, keymap, type DecorationSet } from '@codemirror/view'
+import { tags } from '@lezer/highlight'
 import type { Tema } from '../preferinte'
 
 // Evidentiere sintactica pentru pseudocod: cuvinte cheie (romana si engleza), functii,
@@ -73,7 +74,11 @@ const campMarcaj = StateField.define<DecorationSet>({
   provide: (f) => EditorView.decorations.from(f),
 })
 
-const temaEditor = (tema: Tema) => (tema === 'intunecat' ? oneDark : [])
+// Comentariile temei One Dark au contrast 3.9:1 pe fondul ei; culoarea de aici are peste 5:1,
+// si pe linia curenta.
+const comentariiLizibile = Prec.highest(syntaxHighlighting(HighlightStyle.define([{ tag: tags.comment, color: '#9ca6b5' }])))
+
+const temaEditor = (tema: Tema) => (tema === 'intunecat' ? [oneDark, comentariiLizibile] : [])
 
 interface Props {
   text: string

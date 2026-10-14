@@ -1,4 +1,4 @@
-import { PRAG, type Verificare as Rand } from '../motor/verificare'
+import { PRAG, pragCifre, type Verificare as Rand } from '../motor/verificare'
 import { usePreferinte } from '../preferinte'
 
 function fmtValoare(x: number): string {
@@ -11,22 +11,26 @@ interface Props {
   randuri: Rand[]
   // 'inainte': urma nu e inca la ultimul pas; 'oprit': algoritmul nu a ajuns la sfarsit
   stare: 'inainte' | 'gata' | 'oprit'
+  // cifrele semnificative ale rularii; 0 pentru dubla precizie
+  cifre: number
 }
 
-export function Verificare({ randuri, stare }: Props) {
+export function Verificare({ randuri, stare, cifre }: Props) {
   const { t, limba } = usePreferinte()
   return (
     <section className="verificare">
       <h2>{t('verificare')}</h2>
       {stare === 'inainte' && <p className="ajutor">{t('verificareLaSfarsit')}</p>}
-      {stare === 'oprit' && <p className="ajutor">{t('verificareOprit')}</p>}
-      {stare === 'gata' && (
+      {stare === 'oprit' && <p className="ajutor">{t(randuri.length > 0 ? 'verificareOpritRanduri' : 'verificareOprit')}</p>}
+      {(stare === 'gata' || (stare === 'oprit' && randuri.length > 0)) && (
         <>
           <p className="ajutor">{t('verificareAjutor')}</p>
+          {cifre > 0 && <p className="ajutor">{t('verificareCifre', cifre, fmtValoare(pragCifre(cifre)))}</p>}
           <table>
             <tbody>
               {randuri.map((r, k) => {
-                const ok = r.fel === 'valoare' || r.valoare < (r.prag ?? PRAG)
+                // bucla se opreste cand e > tol nu mai e adevarat, deci egalitatea cu pragul trece
+                const ok = r.fel === 'valoare' || r.valoare <= (r.prag ?? PRAG)
                 return (
                   <tr key={k} className={ok ? 'ok' : 'rau'}>
                     <td>{r.text[limba]}</td>

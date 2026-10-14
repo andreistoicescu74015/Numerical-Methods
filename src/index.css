@@ -4,17 +4,24 @@
   --fundal: #f6f7f9;
   --panou: #ffffff;
   --text: #1c1c1c;
-  --text-sters: #666666;
-  --text-slab: #999999;
+  --text-sters: #5c5c5c;
+  --text-slab: #6b6b6b;
+  /* contur decorativ, intre panouri si celule */
   --contur: #d4d4d4;
+  /* conturul butoanelor si al campurilor: cel putin 3:1 fata de fond */
+  --contur-control: #8c8c8c;
   --titlu: #263a5c;
   --pe-titlu: #ffffff;
-  --c-scris: #b45f00;
-  --c-pivot: #b92d28;
-  --c-citit: #1e5aa0;
-  --c-gata: #237341;
-  --f-scris: #ffe0a5;
-  --f-pivot: #fad4d0;
+  /* culorile rolurilor ca text si contur: cel putin 4.5:1 pe panou */
+  --c-scris: #ad5800;
+  --c-pivot: #94100a;
+  --c-citit: #0b43b8;
+  --c-gata: #1f7a35;
+  --c-mult: #6b2fa3;
+  --f-linie: #ffe7b8;
+  --f-eroare: #fad4d0;
+  --serie: #2a78d6;
+  --rigla: #e3e5e9;
   color-scheme: light;
 }
 
@@ -23,16 +30,20 @@
   --panou: #1f2329;
   --text: #e8e8e8;
   --text-sters: #a6adb5;
-  --text-slab: #7d858e;
+  --text-slab: #8e96a0;
   --contur: #3a4048;
+  --contur-control: #6b7480;
   --titlu: #9fb8e0;
   --pe-titlu: #0f1420;
-  --c-scris: #ffd98a;
-  --c-pivot: #ffc2bd;
-  --c-citit: #b0d0fa;
-  --c-gata: #7fd39a;
-  --f-scris: #6b4a10;
-  --f-pivot: #6b2a26;
+  --c-scris: #ffcf7a;
+  --c-pivot: #ff9d94;
+  --c-citit: #a9cdff;
+  --c-gata: #8ddb86;
+  --c-mult: #d2b3ff;
+  --f-linie: #332c1a;
+  --f-eroare: #4a2422;
+  --serie: #3987e5;
+  --rigla: #2e343c;
   color-scheme: dark;
 }
 
@@ -96,7 +107,7 @@ button {
 select,
 input,
 textarea {
-  border: 1px solid var(--contur);
+  border: 1px solid var(--contur-control);
   border-radius: 4px;
   padding: 0.3rem 0.45rem;
   background: var(--panou);
@@ -108,8 +119,13 @@ textarea {
   resize: vertical;
 }
 
+:focus-visible {
+  outline: 2px solid var(--titlu);
+  outline-offset: 2px;
+}
+
 button {
-  border: 1px solid var(--contur);
+  border: 1px solid var(--contur-control);
   border-radius: 4px;
   background: var(--panou);
   color: var(--text);
@@ -167,12 +183,15 @@ button.preferinta {
   line-height: 1.6;
 }
 
+/* linia curenta se recunoaste si dupa bara din stanga, nu doar dupa fond */
 .cm-linie-curenta {
-  background: var(--f-scris) !important;
+  background: var(--f-linie) !important;
+  box-shadow: inset 4px 0 0 var(--c-scris);
 }
 
 .cm-linie-eroare {
-  background: var(--f-pivot) !important;
+  background: var(--f-eroare) !important;
+  box-shadow: inset 4px 0 0 var(--c-pivot);
 }
 
 .eroare {
@@ -231,6 +250,35 @@ button.preferinta {
   width: 8rem;
 }
 
+/* o intrare care nu are natura ceruta de algoritm; o rulare ramasa in urma textului */
+.avertisment,
+.invechit {
+  margin: 0;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.85rem;
+  background: var(--f-linie);
+  box-shadow: inset 4px 0 0 var(--c-scris);
+  border-radius: 4px;
+}
+
+.avertisment {
+  max-width: 28rem;
+}
+
+/* o nota, nu o greseala: valoarea e buna, dar o conditie de convergenta nu e indeplinita */
+.avertisment.usor {
+  background: none;
+  box-shadow: inset 4px 0 0 var(--contur-control);
+  color: var(--text-sters);
+}
+
+.invechit {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
 .adauga {
   display: flex;
   gap: 0.4rem;
@@ -244,6 +292,8 @@ button.preferinta {
 .grile {
   display: flex;
   flex-wrap: wrap;
+  /* o matrice mai lata decat coloana se deruleaza, nu iese din pagina */
+  overflow-x: auto;
   gap: 1.5rem;
   align-items: flex-start;
   padding: 0.5rem 0;
@@ -270,6 +320,11 @@ button.preferinta {
   gap: 2px;
 }
 
+/* randurile exista doar pentru cititoarele de ecran; grila ramane plata */
+.rand {
+  display: contents;
+}
+
 .indice {
   font-size: 0.7rem;
   color: var(--text-slab);
@@ -279,16 +334,62 @@ button.preferinta {
 }
 
 .celula {
+  position: relative;
   width: var(--cel);
   height: var(--cel);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--contur);
+  border: 1px solid var(--contur-control);
   border-radius: 3px;
+  color: var(--text);
   font-variant-numeric: tabular-nums;
   font-size: 0.9rem;
   overflow: hidden;
+}
+
+/* Fiecare rol are, pe langa fond, un contur al lui: se disting si fara culori (daltonism,
+   tiparire alb-negru, modul de contrast ridicat al sistemului, care scoate fondurile). */
+.celula.rol-scris {
+  border: 3px solid var(--c-scris);
+  font-weight: 700;
+}
+
+.celula.rol-pivot {
+  border: 5px double var(--c-pivot);
+}
+
+.celula.rol-citit {
+  border: 2px dashed var(--c-citit);
+}
+
+.celula.rol-gata {
+  border-color: var(--c-gata);
+}
+
+.celula.rol-gata::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-style: solid;
+  border-width: 0 0.5rem 0.5rem 0;
+  border-color: transparent var(--c-gata) transparent transparent;
+}
+
+.celula.rol-mult {
+  border-color: var(--c-mult);
+}
+
+.celula.rol-mult::after {
+  content: 'μ';
+  position: absolute;
+  top: 1px;
+  left: 3px;
+  font-size: 0.65rem;
+  line-height: 1;
+  font-weight: 700;
+  color: var(--c-mult);
 }
 
 .pas {
@@ -313,18 +414,67 @@ button.preferinta {
 .formula {
   font-size: 1.1rem;
   overflow-x: auto;
+  /* loc pentru chenarul pivotului, care altfel ar fi taiat de derulare */
+  padding: 2px 3px;
 }
 
-.rol-scris {
+.formula-mica {
+  display: inline-block;
+  max-width: 100%;
+  overflow-x: auto;
+  vertical-align: middle;
+}
+
+/* In formula, rolurile au si un semn fara culoare: tinta ingrosata, pivotul incadrat,
+   elementele citite subliniate punctat. */
+.formula .rol-scris {
   color: var(--c-scris);
+  font-weight: 700;
 }
 
-.rol-pivot {
+.formula .rol-pivot {
   color: var(--c-pivot);
+  outline: 1.5px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 2px;
+  /* loc pentru chenar, ca sa nu atinga semnele vecine */
+  margin: 0 0.3em;
 }
 
-.rol-citit {
+.formula .rol-citit {
   color: var(--c-citit);
+  border-bottom: 1.5px dotted currentColor;
+}
+
+button.arata {
+  margin: 0.1rem 0 0.3rem;
+}
+
+.operatii-pas {
+  list-style: none;
+  margin: 0.4rem 0 0.1rem;
+  padding: 0.4rem 0 0;
+  border-top: 1px solid var(--contur);
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+}
+
+.operatii-pas li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.2rem 0.9rem;
+}
+
+.operatii-pas .nume {
+  font-weight: 600;
+  color: var(--titlu);
+}
+
+.operatii-pas .forme {
+  color: var(--text-sters);
 }
 
 .mesaj {
@@ -360,6 +510,12 @@ button.preferinta {
   gap: 0.4rem;
 }
 
+.comenzi input[type='checkbox'] {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+}
+
 .legenda {
   list-style: none;
   margin: 0;
@@ -371,20 +527,76 @@ button.preferinta {
   color: var(--text-sters);
 }
 
-.legenda span {
-  display: inline-block;
-  width: 0.9rem;
-  height: 0.9rem;
-  border: 1px solid;
-  border-radius: 2px;
-  vertical-align: -2px;
-  margin-right: 0.35rem;
+.legenda li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.legenda .celula {
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 @media (max-width: 60rem) {
   .aplicatie {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
   }
+
+  /* pe o singura coloana, grilele, pasul si comenzile vin imediat dupa cod, nu dupa intrari */
+  .stanga,
+  .dreapta {
+    display: contents;
+  }
+
+  .descriere { order: 1; }
+  .in-curs { order: 2; }
+  .practic { order: 3; }
+  .etichete { order: 4; }
+  .editor { order: 5; }
+  .eroare { order: 6; }
+  .invechit { order: 7; }
+  .matrice-mare { order: 8; }
+  .grile { order: 9; }
+  .pas { order: 10; }
+  .comenzi { order: 11; }
+  .comenzi-ajutor { order: 12; }
+  .legenda { order: 13; }
+  .titlu-intrari { order: 14; }
+  .intrari { order: 15; }
+  .precizie { order: 16; }
+  .convergenta { order: 17; }
+  .geometrie { order: 18; }
+  .operatii { order: 19; }
+  .verificare { order: 20; }
+  .python { order: 21; }
+  .notiuni { order: 22; }
+}
+
+.titlu-intrari {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.titlu-intrari label {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.titlu-intrari input[type='checkbox'] {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+}
+
+/* numerele de linie din editor, lizibile si in tema intunecata */
+.editor .cm-gutters {
+  color: var(--text-sters);
 }
 
 button.mic {
@@ -532,4 +744,420 @@ button.mic {
 .notiuni .exemplu {
   color: var(--text-sters);
   font-style: italic;
+}
+
+/* unde este algoritmul in cursul din anul curent si ce difera fata de slide */
+.in-curs {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--text-sters);
+}
+
+.in-curs span {
+  font-weight: 600;
+  color: var(--titlu);
+}
+
+.in-curs summary {
+  cursor: pointer;
+}
+
+.in-curs p {
+  margin: 0.3rem 0 0;
+}
+
+.practic summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--titlu);
+}
+
+.practic p {
+  margin: 0.3rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.operatii,
+.convergenta,
+.geometrie {
+  background: var(--panou);
+  border: 1px solid var(--contur);
+  border-radius: 4px;
+  padding: 0.4rem 0.8rem 0.6rem;
+}
+
+.operatii h2,
+.convergenta h2,
+.geometrie h2 {
+  margin: 0.2rem 0 0.3rem;
+}
+
+.operatii ol {
+  list-style: none;
+  margin: 0.4rem 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.operatii li {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  gap: 0.1rem 0.6rem;
+  align-items: center;
+  padding: 0.3rem 0.5rem;
+  border-left: 4px solid transparent;
+  border-radius: 2px;
+  font-size: 0.88rem;
+}
+
+/* etapa pasului curent: bara si fond, ca la linia curenta din editor */
+.operatii li.curenta {
+  border-left-color: var(--c-scris);
+  background: var(--f-linie);
+}
+
+.operatii li .linii {
+  grid-row: span 2;
+  font-size: 0.8rem;
+  color: var(--text-sters);
+}
+
+.operatii li .text {
+  grid-column: 2;
+  color: var(--text-sters);
+}
+
+.operatii li.curenta .linii,
+.operatii li.curenta .text {
+  color: var(--text);
+}
+
+.operatii details,
+.convergenta details {
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.operatii summary,
+.convergenta summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--titlu);
+}
+
+.operatii table,
+.convergenta table {
+  border-collapse: collapse;
+  margin: 0.3rem 0;
+}
+
+.operatii td,
+.convergenta td,
+.convergenta th {
+  padding: 0.15rem 1rem 0.15rem 0;
+  text-align: left;
+  font-weight: 400;
+}
+
+.convergenta th {
+  color: var(--text-sters);
+}
+
+.convergenta td {
+  font-variant-numeric: tabular-nums;
+}
+
+.convergenta .grafic {
+  position: relative;
+  max-width: 38rem;
+}
+
+.convergenta svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.convergenta .rigla {
+  stroke: var(--rigla);
+  stroke-width: 1;
+}
+
+.convergenta .rigla.tinta {
+  stroke: var(--text-slab);
+}
+
+.convergenta .gradatie {
+  fill: var(--text-sters);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.convergenta .eticheta {
+  fill: var(--text);
+  font-size: 12px;
+}
+
+/* pragul e o linie de referinta, nu o serie: intrerupta si in culoarea textului */
+.convergenta .prag {
+  fill: none;
+  stroke: var(--text-sters);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+
+.convergenta .serie {
+  fill: none;
+  stroke: var(--serie);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.convergenta .punct {
+  fill: var(--serie);
+  stroke: var(--panou);
+  stroke-width: 2;
+}
+
+.convergenta .lovire {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.convergenta .indiciu {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 12px));
+  display: flex;
+  flex-direction: column;
+  padding: 0.2rem 0.5rem;
+  background: var(--panou);
+  border: 1px solid var(--contur-control);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: var(--text-sters);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.convergenta .indiciu strong {
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+/* zero stiut dinainte, in afara benzii: hasurat, cu cifra stearsa */
+.celula.zero-stiut {
+  color: var(--text-slab);
+  background-image: repeating-linear-gradient(135deg, transparent 0 5px, var(--contur) 5px 6px);
+}
+
+/* precizia aritmeticii, sub intrari */
+.precizie {
+  display: flex;
+  flex-direction: row;
+  align-self: flex-start;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-sters);
+}
+
+/* modul exercitiu: raspunsul la pasul ascuns */
+.raspuns {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.raspuns label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-sters);
+}
+
+.raspuns input {
+  width: 16rem;
+  max-width: 60vw;
+}
+
+.raspuns .necitit {
+  color: var(--c-pivot);
+}
+
+.raspuns .scor {
+  color: var(--text-sters);
+}
+
+.verdict {
+  margin: 0.4rem 0 0;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.85rem;
+  border-radius: 4px;
+}
+
+.verdict.corect {
+  box-shadow: inset 4px 0 0 var(--c-gata);
+}
+
+.verdict.gresit {
+  box-shadow: inset 4px 0 0 var(--c-pivot);
+}
+
+/* vederea geometrica pentru doua necunoscute */
+.geometrie svg {
+  display: block;
+  width: 100%;
+  max-width: 30rem;
+  height: auto;
+  background: var(--panou);
+}
+
+.geometrie .axa {
+  stroke: var(--contur-control);
+  stroke-width: 1;
+}
+
+.geometrie .gradatie {
+  fill: var(--text-sters);
+  font-size: 11px;
+}
+
+.geometrie .eticheta {
+  fill: var(--text);
+  font-size: 12px;
+}
+
+.geometrie .dreapta {
+  stroke: var(--text-sters);
+  stroke-width: 1.5;
+}
+
+.geometrie .drum {
+  fill: none;
+  stroke: var(--serie);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.geometrie .punct {
+  fill: var(--serie);
+}
+
+.geometrie .punct.afara {
+  fill: var(--panou);
+  stroke: var(--serie);
+  stroke-width: 2;
+}
+
+.geometrie .punct.curent.afara {
+  fill: var(--panou);
+  stroke: var(--c-scris);
+}
+
+.geometrie .punct.curent {
+  fill: var(--c-scris);
+  stroke: var(--panou);
+  stroke-width: 2;
+}
+
+.geometrie .solutie {
+  fill: none;
+  stroke: var(--c-gata);
+  stroke-width: 2.5;
+}
+
+.geometrie .cerc {
+  fill: none;
+  stroke: var(--contur-control);
+  stroke-dasharray: 2 3;
+}
+
+.geometrie .propriu {
+  stroke: var(--c-gata);
+  stroke-width: 2;
+}
+
+.geometrie .propriu.al-doilea {
+  stroke-dasharray: 6 4;
+  stroke-width: 1.5;
+}
+
+.geometrie .oglinda {
+  stroke: var(--text-sters);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 4;
+}
+
+.geometrie .sageata {
+  stroke-width: 2;
+}
+
+.geometrie .sageata.intrare,
+.geometrie .varf.intrare {
+  stroke: var(--c-citit);
+  fill: var(--c-citit);
+}
+
+.geometrie .sageata.imagine,
+.geometrie .varf.imagine,
+.geometrie .sageata.curent {
+  stroke: var(--c-scris);
+  fill: var(--c-scris);
+}
+
+.geometrie .sageata.veche {
+  stroke: var(--serie);
+  stroke-opacity: 0.35;
+}
+
+.legenda-geometrie {
+  list-style: none;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1rem;
+  font-size: 0.8rem;
+  color: var(--text-sters);
+}
+
+.legenda-geometrie .mostra {
+  display: inline-block;
+  width: 1.4rem;
+  height: 0;
+  vertical-align: middle;
+  border-top: 2px solid var(--text-sters);
+}
+
+.legenda-geometrie .mostra.curent {
+  width: 0.7rem;
+  height: 0.7rem;
+  border: none;
+  border-radius: 50%;
+  background: var(--c-scris);
+}
+
+.legenda-geometrie .mostra.solutie {
+  width: 0.8rem;
+  height: 0.8rem;
+  border: 2px solid var(--c-gata);
+  border-radius: 50%;
+}
+
+.legenda-geometrie .mostra.propriu {
+  border-top-color: var(--c-gata);
+}
+
+.legenda-geometrie .mostra.oglinda {
+  border-top-style: dashed;
 }

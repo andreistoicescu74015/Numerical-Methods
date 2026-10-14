@@ -16,7 +16,9 @@ export function Notiuni({ tinta, cerere }: Props) {
   useEffect(() => {
     if (!tinta) return
     setDeschis(true)
-    const timer = setTimeout(() => document.getElementById(`notiune-${tinta}`)?.scrollIntoView?.({ block: 'start', behavior: 'smooth' }), 50)
+    // fara derulare animata cand sistemul cere miscare redusa
+    const lin = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+    const timer = setTimeout(() => document.getElementById(`notiune-${tinta}`)?.scrollIntoView?.({ block: 'start', behavior: lin }), 50)
     return () => clearTimeout(timer)
   }, [tinta, cerere])
 
