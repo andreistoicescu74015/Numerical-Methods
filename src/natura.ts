@@ -51,6 +51,8 @@ export type Structura =
   | 'inferior'
   | 'superior'
   | 'tridiagonala'
+  | 'bidiagonalaInf'
+  | 'bidiagonalaSup'
   | 'hessenberg'
   | 'dominanta'
   | 'ortogonala'
@@ -58,7 +60,7 @@ export type Structura =
   | 'lider'
   | 'singulara'
 
-export const STRUCTURI: Structura[] = ['oarecare', 'simetrica', 'spd', 'diagonala', 'inferior', 'superior', 'tridiagonala', 'hessenberg', 'dominanta', 'ortogonala', 'nesingulara', 'lider', 'singulara']
+export const STRUCTURI: Structura[] = ['oarecare', 'simetrica', 'spd', 'diagonala', 'inferior', 'superior', 'bidiagonalaInf', 'bidiagonalaSup', 'tridiagonala', 'hessenberg', 'dominanta', 'ortogonala', 'nesingulara', 'lider', 'singulara']
 
 export type Valoare = number | number[] | number[][]
 export type Tip = 'matrice' | 'vector' | 'scalar'
@@ -283,6 +285,15 @@ export interface Cerere {
 
 type Rnd = () => number
 
+// Un sir pseudoaleator determinist (congruential liniar): aceleasi intrari la fiecare rulare.
+export function rndDeterminist(samanta: number): Rnd {
+  let s = samanta >>> 0
+  return () => {
+    s = (Math.imul(s, 1664525) + 1013904223) >>> 0
+    return s / 2 ** 32
+  }
+}
+
 const intre = (rnd: Rnd, a: number, b: number): number => a + Math.floor(rnd() * (b - a + 1))
 const semn = (rnd: Rnd): number => (rnd() < 0.5 ? -1 : 1)
 const alege = <T>(rnd: Rnd, variante: T[]): T => variante[intre(rnd, 0, variante.length - 1)]
@@ -444,13 +455,20 @@ export function genereaza(c: Cerere, rnd: Rnd = Math.random): Valoare {
     }
     case 'diagonala':
       return matrice(m, n, (i, j) => (i === j ? semn(rnd) * intre(rnd, 1, 5) : 0))
+    case 'bidiagonalaInf':
+    case 'bidiagonalaSup': {
+      // diagonala si o singura diagonala vecina, sub ea sau deasupra ei, nenule (cartea, P 1.24)
+      const vecina = c.natura === 'bidiagonalaInf' ? 1 : -1
+      return matrice(m, n, (i, j) => (i === j ? semn(rnd) * intre(rnd, 1, 5) : i - j === vecina ? semn(rnd) * intre(rnd, 1, 3) : 0))
+    }
     case 'tridiagonala':
-      // diagonalele de langa cea principala nenule, ca matricea sa fie chiar tridiagonala
-      return matrice(m, n, (i, j) => (Math.abs(i - j) > 1 ? 0 : i === j ? semn(rnd) * intre(rnd, 1, 5) : semn(rnd) * intre(rnd, 1, 3)))
+      // diagonalele de langa cea principala nenule, ca matricea sa fie chiar tridiagonala; diagonala
+      // dominanta, ca eliminarea fara pivotare sa nu dea un pivot nul
+      return cuDiagonalaDominanta(matrice(m, n, (i, j) => (Math.abs(i - j) > 1 ? 0 : i === j ? 0 : semn(rnd) * intre(rnd, 1, 3))), rnd)
     case 'hessenberg':
       // superior Hessenberg: zerouri sub prima subdiagonala; subdiagonala si coltul din dreapta sus
-      // nenule, ca matricea sa nu fie o banda mai ingusta
-      return matrice(m, n, (i, j) => (i - j > 1 ? 0 : i - j === 1 || j - i === n - 1 ? semn(rnd) * intre(rnd, 1, 3) : oarecare()))
+      // nenule, ca matricea sa nu fie o banda mai ingusta; diagonala dominanta, ca la tridiagonala
+      return cuDiagonalaDominanta(matrice(m, n, (i, j) => (i - j > 1 || i === j ? 0 : i - j === 1 || j - i === n - 1 ? semn(rnd) * intre(rnd, 1, 3) : oarecare())), rnd)
     case 'ortogonala':
       return ortogonala(n, rnd)
     case 'singulara':
@@ -461,10 +479,16 @@ export function genereaza(c: Cerere, rnd: Rnd = Math.random): Valoare {
 }
 
 // tipurile din meniu care cer o matrice patrata, pe langa naturile din PATRATE
-const PATRATE_ALEATOR: Aleator[] = ['dominanta', 'asemenea', 'simetrica', 'diagonala', 'tridiagonala', 'hessenberg', 'ortogonala', 'singulara']
+const PATRATE_ALEATOR: Aleator[] = ['dominanta', 'asemenea', 'simetrica', 'diagonala', 'bidiagonalaInf', 'bidiagonalaSup', 'tridiagonala', 'hessenberg', 'ortogonala', 'singulara']
 
 // natura sau tipul cer o matrice patrata
 export const cerePatrata = (a: Aleator | undefined): boolean => !!a && (PATRATE.includes(a as Natura) || PATRATE_ALEATOR.includes(a))
+
+// Pe diagonala, un element mai mare in modul decat suma modulelor celorlalte de pe linie: strict
+// diagonal dominanta pe linii, deci cu submatricele lider principale nesingulare.
+function cuDiagonalaDominanta(A: number[][], rnd: Rnd): number[][] {
+  return A.map((l, i) => l.map((x, j) => (i === j ? semn(rnd) * (l.reduce((s, y, k) => s + (k === i ? 0 : Math.abs(y)), 0) + intre(rnd, 1, 3)) : x)))
+}
 
 // O matrice ortogonala cu zecimale scurte: rotatii cu cos = 0.6 si sin = 0.8 pe doua perechi de
 // linii, apoi liniile permutate si cu semne schimbate. Fiecare factor este ortogonal, deci si produsul.
@@ -533,6 +557,8 @@ export function proprietati(A: number[][], iteratie?: 'jacobi' | 'gs'): Propriet
   )
   if (n > 1) {
     if (jos === 0 && sus === 0) rez.push(p('propDiagonala'))
+    else if (n > 2 && sus === 0 && jos === 1) rez.push(p('propBidiagonalaInf'))
+    else if (n > 2 && jos === 0 && sus === 1) rez.push(p('propBidiagonalaSup'))
     else if (sus === 0) rez.push(p('propInferior'))
     else if (jos === 0) rez.push(p('propSuperior'))
     // orice matrice 2 x 2 este tridiagonala si Hessenberg; structura de banda se spune de la n = 3

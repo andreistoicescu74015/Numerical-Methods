@@ -2,11 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { MotionConfig } from 'motion/react'
 import { CodPython } from './componente/CodPython'
 import { Comparatie } from './componente/Comparatie'
+import { Conditionare } from './componente/Conditionare'
+import { CostPeN } from './componente/CostPeN'
 import { Comenzi, type Marcaj } from './componente/Comenzi'
 import { Convergenta, fmtNumar, type Punct } from './componente/Convergenta'
 import { Editor } from './componente/Editor'
 import { Formula } from './componente/Formula'
 import { Geometrie, areGeometrie } from './componente/Geometrie'
+import { Invariant, invariantOk } from './componente/Invariant'
 import { Grila, TEXT_ROL, fmtCelula } from './componente/Grila'
 import { Intrari } from './componente/Intrari'
 import { Notiuni } from './componente/Notiuni'
@@ -14,7 +17,12 @@ import { OperatiiAlgoritm, OperatiiPas, etapaCurenta, type Etapa } from './compo
 import { Panou } from './componente/Panou'
 import { Raspuns } from './componente/Raspuns'
 import { RanduriVerificare, Verificare, randOk } from './componente/Verificare'
+import { ADAPTARI, adaptare as gasesteAdaptare, type Adaptare } from './adaptari'
+import { ExercitiuAdaptare } from './componente/ExercitiuAdaptare'
 import { CONTRAEXEMPLE, type Contraexemplu } from './contraexemple'
+import { areInvariant, invariant } from './invarianti'
+import { areCostPeN } from './costuri'
+import { areConditionare, matriceaSistemului, type ExempluCarte } from './conditionare'
 import { asteptat } from './exercitiu'
 import { nrFlopi, text, type CheieText } from './i18n'
 import { blocaj, definitiiDin, intrariDinDefinitii, textDinValoare, type Definitie } from './intrari'
@@ -84,10 +92,22 @@ function incarcaPropriu(limba: Limba): Salvat {
   }
 }
 
+// Exercitiile de adaptare au id-ul "adaptare:" urmat de id-ul exercitiului.
+const PREFIX_ADAPTARE = 'adaptare:'
+const adaptareDin = (id: string): Adaptare | null => (id.startsWith(PREFIX_ADAPTARE) ? (gasesteAdaptare(id.slice(PREFIX_ADAPTARE.length)) ?? null) : null)
+// intrarile exemplului unui exercitiu: matricea, apoi vectorii
+const definitiiAdaptare = (e: Adaptare): Definitie[] =>
+  Object.entries(e.exemplu).map(([nume, v]) => ({
+    nume,
+    tip: typeof v === 'number' ? 'scalar' : Array.isArray(v[0]) ? 'matrice' : 'vector',
+    text: textDinValoare(v),
+    ...(nume === e.matrice ? { structura: e.structura } : {}),
+  }))
+
 // ?algoritm=GPP sau ?algoritm=propriu deschide direct acel program; ?pas=12 sare la acel pas.
 function idInitial(): string {
   const cerut = new URLSearchParams(window.location.search).get('algoritm')
-  if (cerut === PROPRIU || (cerut && algoritm(cerut))) return cerut
+  if (cerut === PROPRIU || (cerut && (algoritm(cerut) || adaptareDin(cerut)))) return cerut
   return 'G'
 }
 
@@ -121,8 +141,8 @@ interface Rulare {
 const aceleasi = (a: Definitie[], b: Definitie[]) => a.length === b.length && a.every((d, k) => d.nume === b[k].nume && d.tip === b[k].tip && d.text === b[k].text)
 
 // panourile din sertar; Convergenta si Geometria pornesc deschise, restul inchise
-type NumePanou = 'despre' | 'operatii' | 'convergenta' | 'geometrie' | 'verificare' | 'comparatie' | 'python' | 'notiuni'
-const PANOURI_DESCHISE: Record<NumePanou, boolean> = { despre: false, operatii: true, convergenta: true, geometrie: true, verificare: false, comparatie: false, python: false, notiuni: false }
+type NumePanou = 'adaptare' | 'despre' | 'operatii' | 'invariant' | 'convergenta' | 'geometrie' | 'verificare' | 'conditionare' | 'costN' | 'comparatie' | 'python' | 'notiuni'
+const PANOURI_DESCHISE: Record<NumePanou, boolean> = { adaptare: true, despre: false, operatii: true, invariant: true, convergenta: true, geometrie: true, verificare: false, conditionare: false, costN: false, comparatie: false, python: false, notiuni: false }
 
 const ROLURI_LEGENDA = ['pivot', 'scris', 'citit', 'gata', 'mult'] as const
 const EXPLICATII: Record<(typeof ROLURI_LEGENDA)[number], CheieText> = { pivot: 'legendaPivot', scris: 'legendaScris', citit: 'legendaCitit', gata: 'legendaGata', mult: 'legendaMult' }
@@ -151,8 +171,10 @@ function Continut() {
   const { limba, tema, t, setLimba, setTema } = usePreferinte()
   const [id, setId] = useState(idInitial)
   const alg = id === PROPRIU ? null : (algoritm(id) ?? null)
-  const [sursa, setSursa] = useState(() => (alg ? sursaIn(alg, limba) : incarcaPropriu(limba).sursa))
-  const [definitii, setDefinitii] = useState<Definitie[]>(() => (alg ? definitiiDin(alg) : incarcaPropriu(limba).definitii))
+  // un exercitiu de adaptare: pseudocodul algoritmului de pornire si intrarile cu structura
+  const ex = adaptareDin(id)
+  const [sursa, setSursa] = useState(() => (alg ? sursaIn(alg, limba) : ex ? sursaIn(algoritm(ex.pornire)!, limba) : incarcaPropriu(limba).sursa))
+  const [definitii, setDefinitii] = useState<Definitie[]>(() => (alg ? definitiiDin(alg) : ex ? definitiiAdaptare(ex) : incarcaPropriu(limba).definitii))
   const [rulare, setRulare] = useState<Rulare | null>(null)
   const [eroare, setEroare] = useState<Eroare | null>(null)
   const [k, setK] = useState(0)
@@ -230,7 +252,8 @@ function Continut() {
     const acelasi = idAnterior.current === id
     idAnterior.current = id
     // pseudocodul din biblioteca, needitat, trece in limba noua
-    const s = alg && eSursa(alg, sursa) ? sursaIn(alg, limba) : sursa
+    const baza = alg ?? (ex ? algoritm(ex.pornire)! : null)
+    const s = baza && eSursa(baza, sursa) ? sursaIn(baza, limba) : sursa
     if (s !== sursa) setSursa(s)
     ruleaza(s, definitii, acelasi ? k : undefined)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -275,6 +298,14 @@ function Continut() {
       setDefinitii(s.definitii)
       return
     }
+    const e = adaptareDin(nou)
+    if (e) {
+      setSursa(sursaIn(algoritm(e.pornire)!, limba))
+      setDefinitii(definitiiAdaptare(e))
+      setCifre(0)
+      cifreAlese.current = 0
+      return
+    }
     const a = algoritm(nou)!
     setSursa(sursaIn(a, limba))
     // cu "pastreaza", intrarile raman cand noul algoritm are aceleasi nume si tipuri, si precizia la fel
@@ -305,6 +336,15 @@ function Continut() {
     setCifre(0)
     cifreAlese.current = 0
     cuValori(alg.intrari.map((i) => ({ nume: i.nume, tip: i.tip, text: textDinValoare(c.valori[i.nume]) })))
+  }
+
+  // un exemplu de conditionare din carte: matricea sistemului si b, in dubla precizie, si rularea
+  const incarcaExemplu = (ex: ExempluCarte) => {
+    if (!alg) return
+    setCifre(0)
+    cifreAlese.current = 0
+    const valori: Record<string, number[] | number[][]> = { [matriceaSistemului(alg.id)]: ex.A, b: ex.b }
+    cuValori(alg.intrari.map((i) => ({ nume: i.nume, tip: i.tip, text: textDinValoare(valori[i.nume] ?? i.exemplu) })))
   }
 
   const deschide = (p: NumePanou) => (d: boolean) => setDeschise((s) => ({ ...s, [p]: d }))
@@ -563,6 +603,11 @@ function Continut() {
   }, [cuVerificare, stareVerificare])
 
   const geometrie = !!alg && dinBiblioteca && !!rulare && areGeometrie(alg.id, rulare.intrari)
+  // invariantul se verifica si pe un pseudocod modificat, cat timp are tablourile algoritmului
+  // in modul exercitiu, invariantul algoritmului de pornire: o adaptare corecta il pastreaza
+  const idInvariant = alg?.id ?? ex?.pornire ?? null
+  const cuInvariant = !!idInvariant && areInvariant(idInvariant) && !!rulare
+  const inv = useMemo(() => (cuInvariant && rulare ? invariant(idInvariant!, rulare.program, rulare.rez, rulare.intrari, k) : null), [cuInvariant, idInvariant, rulare, k])
   const etapa = etapaCurenta(etape, pas && pas.linie > 0 ? pas.linie : null)
   const ultimaIteratie = iteratii[vazute - 1]
   const rezumatVerificare = stareVerificare === 'inainte' ? t('verificareRezumatLaFinal') : stareVerificare === 'oprit' ? (verificari.length ? '' : t('verificareRezumatOprit')) : verificari.every(randOk) ? t('verificareOk') : t('verificareRau')
@@ -588,6 +633,13 @@ function Continut() {
                 ))}
               </optgroup>
             ))}
+            <optgroup label={t('adaptari')}>
+              {ADAPTARI.map((a) => (
+                <option key={a.id} value={PREFIX_ADAPTARE + a.id}>
+                  {a.titlu[limba]}
+                </option>
+              ))}
+            </optgroup>
             <option value={PROPRIU}>{t('propriu')}</option>
           </select>
         </label>
@@ -669,7 +721,8 @@ function Continut() {
             )}
             <Intrari
               definitii={definitii}
-              cerute={alg?.intrari ?? []}
+              // in modul exercitiu, intrarile algoritmului de pornire: b urmeaza dimensiunea matricei
+              cerute={alg?.intrari ?? (ex ? algoritm(ex.pornire)!.intrari : [])}
               onChange={setDefinitii}
               onAleator={cuValori}
               onExemplu={
@@ -857,6 +910,18 @@ function Continut() {
       />
 
       <aside className="sertar" aria-label={t('panouri')}>
+        {ex && (
+          <Panou clasa="adaptare" titlu={t('adaptare')} deschis={deschise.adaptare} onToggle={deschide('adaptare')}>
+            <ExercitiuAdaptare
+              ex={ex}
+              sursaRulata={rulare?.sursa ?? null}
+              onSolutie={(s) => {
+                setSursa(s)
+                ruleaza(s, definitii)
+              }}
+            />
+          </Panou>
+        )}
         <Panou clasa="despre" titlu={t('despre')} rezumat={alg ? alg.cost[limba] : undefined} deschis={deschise.despre} onToggle={deschide('despre')}>
           <p className="descriere">
             {alg ? alg.descriere[limba] : t('propriuAjutor')}
@@ -916,6 +981,17 @@ function Continut() {
         >
           <OperatiiAlgoritm forma={dinBiblioteca ? alg?.forma : undefined} etape={etape} linie={pas && pas.linie > 0 ? pas.linie : null} />
         </Panou>
+        {cuInvariant && (
+          <Panou
+            clasa="invariant"
+            titlu={t('invariant')}
+            rezumat={inv ? `${t('invariantRezumat', inv.complete)} · ${invariantOk(inv, rulare!.cifre) ? t('verificareOk') : t('verificareRau')}` : undefined}
+            deschis={deschise.invariant}
+            onToggle={deschide('invariant')}
+          >
+            <Invariant inv={inv} cifre={rulare!.cifre} onPas={(x) => mergi(x)} />
+          </Panou>
+        )}
         {iteratii.length >= 2 && (
           <Panou
             clasa="convergenta"
@@ -935,6 +1011,16 @@ function Continut() {
         {cuVerificare && (
           <Panou clasa="verificare" titlu={t('verificare')} rezumat={rezumatVerificare} deschis={deschise.verificare} onToggle={deschide('verificare')}>
             <Verificare randuri={verificari} stare={stareVerificare} cifre={rulare?.cifre ?? 0} onFinal={() => mergi(total - 1)} />
+          </Panou>
+        )}
+        {alg && dinBiblioteca && rulare && rulare.rez.final === 'gata' && areConditionare(alg.id) && (
+          <Panou clasa="conditionare" titlu={t('conditionare')} deschis={deschise.conditionare} onToggle={deschide('conditionare')}>
+            <Conditionare alg={alg} intrari={rulare.intrari} onExemplu={incarcaExemplu} deschis={deschise.conditionare} />
+          </Panou>
+        )}
+        {alg && dinBiblioteca && rulare && areCostPeN(alg) && (
+          <Panou clasa="cost-n" titlu={t('costN')} deschis={deschise.costN} onToggle={deschide('costN')}>
+            <CostPeN alg={alg} intrari={rulare.intrari} deschis={deschise.costN} />
           </Panou>
         )}
         {alg && dinBiblioteca && rulare && (

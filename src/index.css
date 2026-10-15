@@ -1166,6 +1166,26 @@ button.mic {
   color: var(--c-gata);
 }
 
+/* ce ramane adevarat: verificarea invariantului, cu aceleasi culori ca verificarea de la final */
+.invariant .moment {
+  font-size: 0.82rem;
+  color: var(--text);
+}
+
+.invariant .verificat {
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.invariant .verificat.ok {
+  color: var(--c-gata);
+}
+
+.invariant .verificat.rau {
+  color: var(--c-pivot);
+  font-weight: 600;
+}
+
 .verificare-scurta tr.rau td.stare,
 .verificare-scurta tr.rau td.numar,
 .verificare tr.rau td.stare,
@@ -1688,12 +1708,14 @@ button.mic {
 }
 
 .operatii details,
-.convergenta details {
+.convergenta details,
+.cost-n details {
   font-size: 0.82rem;
 }
 
 .operatii summary,
-.convergenta summary {
+.convergenta summary,
+.cost-n summary {
   cursor: pointer;
   font-weight: 600;
   color: var(--titlu);
@@ -1702,6 +1724,8 @@ button.mic {
 .operatii table,
 .convergenta table,
 .verificare table,
+.conditionare table,
+.cost-n table,
 .comparatie table {
   border-collapse: collapse;
   margin: 0.3rem 0;
@@ -1712,6 +1736,9 @@ button.mic {
 .convergenta td,
 .convergenta th,
 .verificare td,
+.conditionare td,
+.cost-n td,
+.cost-n th,
 .comparatie td,
 .comparatie th {
   padding: 0.15rem 0.9rem 0.15rem 0;
@@ -1724,6 +1751,7 @@ button.mic {
   color: var(--text-sters);
 }
 
+.conditionare td.numar,
 .comparatie td.numar {
   font-family: var(--mono);
   font-variant-numeric: tabular-nums;
@@ -1747,32 +1775,38 @@ button.mic {
   font-variant-numeric: tabular-nums;
 }
 
-.convergenta .grafic {
+.convergenta .grafic,
+.cost-n .grafic {
   position: relative;
 }
 
-.convergenta svg {
+.convergenta svg,
+.cost-n svg {
   display: block;
   width: 100%;
   height: auto;
 }
 
-.convergenta .rigla {
+.convergenta .rigla,
+.cost-n .rigla {
   stroke: var(--rigla);
   stroke-width: 1;
 }
 
-.convergenta .rigla.tinta {
+.convergenta .rigla.tinta,
+.cost-n .rigla.tinta {
   stroke: var(--text-slab);
 }
 
-.convergenta .gradatie {
+.convergenta .gradatie,
+.cost-n .gradatie {
   fill: var(--text-sters);
   font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
 
-.convergenta .eticheta {
+.convergenta .eticheta,
+.cost-n .eticheta {
   fill: var(--text);
   font-size: 12px;
 }
@@ -1785,7 +1819,8 @@ button.mic {
   stroke-dasharray: 5 4;
 }
 
-.convergenta .serie {
+.convergenta .serie,
+.cost-n .serie {
   fill: none;
   stroke: var(--serie);
   stroke-width: 2;
@@ -1793,18 +1828,21 @@ button.mic {
   stroke-linecap: round;
 }
 
-.convergenta .punct {
+.convergenta .punct,
+.cost-n .punct {
   fill: var(--serie);
   stroke: var(--panou);
   stroke-width: 2;
 }
 
-.convergenta .lovire {
+.convergenta .lovire,
+.cost-n .lovire {
   fill: transparent;
   cursor: pointer;
 }
 
-.convergenta .indiciu {
+.convergenta .indiciu,
+.cost-n .indiciu {
   position: absolute;
   transform: translate(-50%, calc(-100% - 12px));
   display: flex;
@@ -1819,7 +1857,8 @@ button.mic {
   pointer-events: none;
 }
 
-.convergenta .indiciu strong {
+.convergenta .indiciu strong,
+.cost-n .indiciu strong {
   font-size: 0.9rem;
   color: var(--text);
 }
@@ -2150,4 +2189,89 @@ button.mic {
   .intrari-panou > summary::before {
     transition: none;
   }
+}
+
+/* exemplele de conditionare din carte */
+.exemple-carte ul {
+  list-style: none;
+  margin: 0.3rem 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+}
+
+/* exercitiul de adaptare: cerintele cu starea lor si solutia */
+.adaptare .cerinte {
+  margin: 0.3rem 0;
+  padding-left: 1.1rem;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.adaptare .ok {
+  color: var(--c-gata);
+}
+
+.adaptare .rau {
+  color: var(--c-pivot);
+  font-weight: 600;
+}
+
+.adaptare pre.solutie {
+  margin: 0.4rem 0;
+  padding: 0.5rem 0.6rem;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  white-space: pre;
+  overflow-x: auto;
+  background: var(--panou);
+  border: 1px solid var(--contur-control);
+  border-radius: 0.375rem;
+}
+
+/* costul in functie de n: formula din curs e o referinta, intrerupta si in culoarea textului */
+.cost-n .formula {
+  fill: none;
+  stroke: var(--text-sters);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+
+.cost-n .eticheta.sters {
+  fill: var(--text-sters);
+}
+
+.cost-n td {
+  font-variant-numeric: tabular-nums;
+}
+
+.legenda-cost {
+  list-style: none;
+  margin: 0.2rem 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1rem;
+  font-size: 0.8rem;
+  color: var(--text-sters);
+}
+
+/* mostra sta pe randul textului, chiar cand textul se rupe pe doua randuri */
+.legenda-cost .mostra {
+  display: inline-block;
+  width: 1.2rem;
+  height: 0.7rem;
+  vertical-align: -0.05rem;
+}
+
+.legenda-cost .punct {
+  fill: var(--serie);
+}
+
+.legenda-cost .formula {
+  stroke: var(--text-sters);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
 }

@@ -22,6 +22,8 @@ const TIP: Record<Structura, CheieText> = {
   diagonala: 'tipDiagonala',
   inferior: 'tipInferior',
   superior: 'tipSuperior',
+  bidiagonalaInf: 'tipBidiagonalaInf',
+  bidiagonalaSup: 'tipBidiagonalaSup',
   tridiagonala: 'tipTridiagonala',
   hessenberg: 'tipHessenberg',
   dominanta: 'tipDominanta',
@@ -34,7 +36,7 @@ const TIP: Record<Structura, CheieText> = {
 // cel mult atatea linii sau coloane din butoanele de dimensiune: grila ramane lizibila
 const MAX_DIM = 8
 
-const TITLU_ALEATOR: Record<Exclude<Aleator, 'oarecare' | 'simetrica' | 'diagonala' | 'tridiagonala' | 'hessenberg' | 'ortogonala' | 'singulara'>, CheieText> = {
+const TITLU_ALEATOR: Record<Exclude<Aleator, 'oarecare' | 'simetrica' | 'diagonala' | 'bidiagonalaInf' | 'bidiagonalaSup' | 'tridiagonala' | 'hessenberg' | 'ortogonala' | 'singulara'>, CheieText> = {
   inferior: 'aleatorInferior',
   superior: 'aleatorSuperior',
   lider: 'aleatorLider',

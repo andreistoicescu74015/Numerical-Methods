@@ -16,8 +16,11 @@ const ARE: Record<Exclude<Structura, 'oarecare'>, string[]> = {
   diagonala: ['propDiagonala', 'propNesingulara'],
   inferior: ['propNesingulara'],
   superior: ['propNesingulara'],
-  tridiagonala: ['propTridiagonala'],
-  hessenberg: ['propHessenbergSup'],
+  bidiagonalaInf: ['propBidiagonalaInf', 'propNesingulara'],
+  bidiagonalaSup: ['propBidiagonalaSup', 'propNesingulara'],
+  // diagonala dominanta, ca eliminarea fara pivotare sa mearga
+  tridiagonala: ['propTridiagonala', 'propDominanta', 'propLider'],
+  hessenberg: ['propHessenbergSup', 'propDominanta', 'propLider'],
   dominanta: ['propDominanta', 'propNesingulara', 'propLider'],
   ortogonala: ['propOrtogonala', 'propNesingulara'],
   nesingulara: ['propNesingulara'],
@@ -29,8 +32,8 @@ describe('tipurile de matrice din meniu', () => {
   it('fiecare tip generează matrice pătrate cu proprietatea lui, la mai multe dimensiuni', () => {
     const rnd = generator(11)
     for (const s of STRUCTURI.filter((x) => x !== 'oarecare') as Exclude<Structura, 'oarecare'>[]) {
-      // o matrice tridiagonala sau Hessenberg are nevoie de cel putin 3 linii ca sa se deosebeasca
-      for (const n of s === 'tridiagonala' || s === 'hessenberg' ? [3, 4, 6] : [2, 3, 5]) {
+      // o matrice cu banda (bidiagonala, tridiagonala, Hessenberg) are nevoie de cel putin 3 linii ca sa se deosebeasca
+      for (const n of ['bidiagonalaInf', 'bidiagonalaSup', 'tridiagonala', 'hessenberg'].includes(s) ? [3, 4, 6] : [2, 3, 5]) {
         for (let rep = 0; rep < 5; rep++) {
           const A = genereaza({ tip: 'matrice', natura: s, forma: [n, n + 1] }, rnd) as number[][]
           const unde = `${s}, n = ${n}`

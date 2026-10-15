@@ -584,6 +584,87 @@ describe('aplicația montată', () => {
     expect(gazda.querySelector('.oprire')?.textContent).toContain('împărțire la zero')
   })
 
+  // montarea si drumul pana la ultimul pas dureaza peste o secunda: sub incarcare, limita implicita de 5 s nu ajunge
+  it('panoul "Ce rămâne adevărat" verifică invariantul lui G pe valorile din grilă', { timeout: 20000 }, async () => {
+    const gazda = await monteaza()
+    const panou = () => gazda.querySelector('.panou.invariant')!
+    expect(panou().textContent).toContain('Încă niciun pas complet')
+    await act(async () => {
+      document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }))
+    })
+    expect(panou().textContent).toContain('La ieșirea din buclă, după toți cei 2 pași')
+    expect(panou().querySelector('.verificat')?.className).toBe('verificat ok')
+    expect(panou().querySelector('summary .rezumat')?.textContent).toBe('2 pași compleți · ok')
+  })
+
+  it('panoul de condiționare încarcă matricea Hilbert din carte și arată κ∞ ≈ 748', async () => {
+    const gazda = await monteaza()
+    await scrieIn(gazda.querySelector<HTMLSelectElement>('header select')!, 'S_GPP')
+    const panou = () => gazda.querySelector<HTMLDetailsElement>('.panou.conditionare')!
+    // inchis, experimentul nu ruleaza
+    expect(panou().querySelector('table')).toBeNull()
+    await act(async () => {
+      panou().open = true
+      panou().dispatchEvent(new Event('toggle'))
+    })
+    expect(panou().textContent).toContain('κ∞(A) = ‖A⁻¹‖∞ ‖A‖∞')
+    await apasa(gazda, 'matricea Hilbert H₃ (h_ij = 1/(i + j − 1)): κ∞ ≈ 748')
+    expect(gazda.querySelector<HTMLTextAreaElement>('.intrare.matrice textarea')!.value.split('\n')[0]).toBe('1 0.5 0.3333333333333333')
+    const randuri = [...panou().querySelectorAll('tbody tr')].map((r) => [...r.querySelectorAll('td')].map((c) => c.textContent))
+    expect(Number(randuri[2][1])).toBeCloseTo(748, 0)
+    // b este ales ca marginea sa fie atinsa: x se schimba de κ∞ ori mai mult decat b
+    expect(panou().textContent).toContain('de 748 ori cea a lui b')
+  })
+
+  it('un exercițiu de adaptare pornește de la G, iar soluția lui trece toate cerințele', async () => {
+    const gazda = await monteaza()
+    await scrieIn(gazda.querySelector<HTMLSelectElement>('header select')!, 'adaptare:G-tridiagonala')
+    const panou = () => gazda.querySelector('.panou.adaptare')!
+    expect(panou().textContent).toContain('A este tridiagonală')
+    // "aleator" si dimensiunile pastreaza structura exercitiului
+    expect(gazda.querySelector<HTMLSelectElement>('.tip-matrice select')!.value).toBe('tridiagonala')
+    // pseudocodul de pornire este G nemodificat: rezultat corect, dar atinge zerourile
+    expect(gazda.querySelector('.cm-content')?.textContent).toContain('pentru j = k+1 : n')
+    const cerinte = () => [...panou().querySelectorAll('.cerinte li')].map((li) => li.className)
+    expect(cerinte()).toEqual(['ok', 'rau', 'rau'])
+    await apasa(gazda, 'pune soluția în editor și rulează')
+    expect(cerinte()).toEqual(['ok', 'ok', 'ok'])
+    expect(panou().textContent).toContain('Adaptare reușită')
+    expect(window.location.search).toContain('algoritm=adaptare%3AG-tridiagonala')
+    // in modul exercitiu se arata si invariantul algoritmului de pornire
+    expect(gazda.querySelector('.panou.invariant')).not.toBeNull()
+  })
+
+  it('în exercițiul LTRIS, butonul de dimensiune mărește L și vectorul b împreună', async () => {
+    const gazda = await monteaza()
+    await scrieIn(gazda.querySelector<HTMLSelectElement>('header select')!, 'adaptare:LTRIS-bidiagonala')
+    const plus = gazda.querySelector<HTMLButtonElement>('.forma-intrare button[aria-label="ordinul: cu unu mai mult"]')!
+    await act(async () => {
+      plus.click()
+    })
+    const L = gazda.querySelector<HTMLTextAreaElement>('.intrare.matrice textarea')!.value.split('\n')
+    const b = gazda.querySelector<HTMLTextAreaElement>('.intrare.vector textarea')!.value.trim().split(/\s+/)
+    expect(L).toHaveLength(6)
+    expect(b).toHaveLength(6)
+    expect(gazda.querySelector('.oprire')).toBeNull()
+  })
+
+  it('panoul de cost în funcție de n desenează flopii numărați lângă formulă, doar când e deschis', async () => {
+    const gazda = await monteaza()
+    const panou = gazda.querySelector<HTMLDetailsElement>('.panou.cost-n')!
+    // inchis, nu ruleaza nimic
+    expect(panou.querySelector('.grafic')).toBeNull()
+    await act(async () => {
+      panou.open = true
+      panou.dispatchEvent(new Event('toggle'))
+    })
+    expect(panou.querySelectorAll('.grafic svg .punct')).toHaveLength(7)
+    expect(panou.querySelector('.legenda-cost')?.textContent).toContain('formula: ≈ 2n³/3 flopi')
+    const randuri = [...panou.querySelectorAll('tbody tr')].map((r) => [...r.querySelectorAll('td')].map((c) => c.textContent))
+    // n = 3: G numara 13 flopi, iar formula da 2·27/3 = 18
+    expect(randuri[1].slice(0, 3)).toEqual(['3', '13', '18'])
+  })
+
   it('panoul de comparație rulează aceleași intrări cu GPP și trece la el păstrând intrările', async () => {
     const gazda = await monteaza()
     await apasa(gazda, 'pivot nul, deși A este nesingulară')

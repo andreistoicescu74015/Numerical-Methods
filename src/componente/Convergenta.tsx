@@ -37,7 +37,7 @@ export function fmtNumar(x: number): string {
 }
 
 // Pasi rotunzi (1, 2, 5 ori o putere a lui 10) pentru o axa liniara.
-function gradatii(min: number, max: number, cate: number): number[] {
+export function gradatii(min: number, max: number, cate: number): number[] {
   if (max <= min) return [min]
   const brut = (max - min) / cate
   const p = 10 ** Math.floor(Math.log10(brut))
