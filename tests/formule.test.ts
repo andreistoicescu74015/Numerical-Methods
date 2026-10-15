@@ -1,5 +1,6 @@
 import katex from 'katex'
 import { describe, expect, it } from 'vitest'
+import { rupturi } from '../src/componente/Formula'
 import { TEXTE } from '../src/i18n'
 import { BIBLIOTECA, type Algoritm } from '../src/motor/biblioteca'
 import { urma } from '../src/motor/interpretor'
@@ -75,5 +76,25 @@ describe('formulele fiecărui pas sunt LaTeX valid pentru KaTeX', () => {
     )
     const html = katex.renderToString(primul.formula!, { throwOnError: true, trust: true, strict: false })
     expect(html).toContain('rol-pivot')
+  })
+})
+
+describe('formulele care se pot rupe pe rânduri păstrează intervalele și indicii întregi', () => {
+  it('\\nobreak după ":" și după "+" sau "-" urmate de o cifră; textul, clasele și termenii rămân neatinși', () => {
+    expect(rupturi('i = k+1 : n')).toBe('i = k+\\nobreak 1 :\\nobreak  n')
+    expect(rupturi('A(i,\\, k+1\\!:\\!n)')).toBe('A(i,\\, k+\\nobreak 1\\!:\\nobreak \\!n)')
+    expect(rupturi('x^{k-1}')).toBe('x^{k-\\nobreak 1}')
+    // doua formule alaturate pot trece una sub alta
+    expect(rupturi('L = 1, \\quad U = 2')).toBe('L = 1, \\quad\\allowbreak  U = 2')
+    expect(rupturi('L = 1, \\qquad U = 2')).toBe('L = 1, \\qquad\\allowbreak  U = 2')
+    for (const tex of ['\\htmlClass{rol-pivot}{a_{11}}', '\\text{pasul 1-2: gata}', 'a_{ij} - \\mu_{ik} a_{kj}']) expect(rupturi(tex)).toBe(tex)
+  })
+
+  it('forma, etapele și definițiile rămân LaTeX valid după transformare', () => {
+    const tex = [...BIBLIOTECA.flatMap((a) => [a.forma, ...a.etape.map((e) => e.tex)]), ...Object.values(OPERATII).map((o) => o.definitie)]
+    for (const t of tex) {
+      expect(() => katex.renderToString(rupturi(t), { throwOnError: true, trust: true, strict: false }), t).not.toThrow()
+      expect(() => katex.renderToString(`\\displaystyle ${rupturi(t)}`, { throwOnError: true, trust: true, strict: false }), t).not.toThrow()
+    }
   })
 })

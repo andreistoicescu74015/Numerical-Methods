@@ -949,7 +949,7 @@ r ← ‖b(n+1:m)‖    % din slide-ul de dinainte`,
     },
     cost: { ro: '≈ 2n² flopi pe iterație', en: '≈ 2n² flops per iteration' },
     estimare: (x) => 2 * x.iteratii * x.forme.A[0] ** 2,
-    forma: 'y^{(k)} = \\frac{A\\, y^{(k-1)}}{\\|A\\, y^{(k-1)}\\|}, \\qquad e_k = \\bigl|1 - |(y^{(k)})^T y^{(k-1)}|\\bigr|',
+    forma: 'y^{(k)} = \\frac{A\\, y^{(k-1)}}{\\|A\\, y^{(k-1)}\\|}, \\qquad e_k = \\left|1 - |(y^{(k)})^T y^{(k-1)}|\\right|',
     etape: [
       { linii: [1, 1], tex: 'y \\leftarrow y / \\|y\\|', text: { ro: 'vectorul de pornire se normează', en: 'the starting vector is normalized' } },
       {

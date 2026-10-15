@@ -53,7 +53,7 @@ export function OperatiiAlgoritm({ forma, etape, linie }: Props) {
   return (
     <>
       <p className="ajutor">{etape.length > 0 ? t('operatiiAjutor') : t('operatiiNiciuna')}</p>
-      {forma && <Formula tex={forma} />}
+      {forma && <Formula tex={forma} rupt />}
       {etape.length > 0 && (
         <ol>
           {etape.map((e, k) => {

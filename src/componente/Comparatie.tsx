@@ -5,6 +5,8 @@ import type { Algoritm } from '../motor/biblioteca'
 import type { Intrari, Rezultat } from '../motor/interpretor'
 import { nrFlopi } from '../i18n'
 import { usePreferinte } from '../preferinte'
+import { fmtNumar } from './Convergenta'
+import { Formula } from './Formula'
 import { fmtValoare } from './Verificare'
 
 interface Props {
@@ -52,6 +54,15 @@ export function Comparatie({ alg, rez, intrari, cifre, definitii, onTreci }: Pro
     const s = r.rez.scalari[nume]
     return s === undefined ? '' : `${nume} = ${fmtValoare(s)}`
   }
+  // o matrice rezultat de cel mult 4 x 4 se arata intreaga, ca cele doua rezultate sa se compare
+  const matrice = (r: Rulat): string | null => {
+    if (r.rez.final !== 'gata') return null
+    const nume = r.alg.iesiri[0]
+    const v = r.rez.stare[nume]
+    if (v?.tip !== 'matrice' || v.m > 4 || v.n > 4) return null
+    const randuri = Array.from({ length: v.m }, (_, i) => v.d.slice(i * v.n, i * v.n + v.n).map(fmtNumar).join(' & '))
+    return `${nume} = \\begin{bmatrix} ${randuri.join(' \\\\ ')} \\end{bmatrix}`
+  }
   const iterative = curent.iteratii > 0 || (alt?.iteratii ?? 0) > 0
   const dif = alt ? diferenta(curent, alt) : null
 
@@ -96,13 +107,30 @@ export function Comparatie({ alg, rez, intrari, cifre, definitii, onTreci }: Pro
                   <td className="numar">{alt.iteratii}</td>
                 </tr>
               )}
-              <tr>
-                <td>{t('comparatieRezultat')}</td>
-                <td className="numar">{rezultat(curent)}</td>
-                <td className="numar">{rezultat(alt)}</td>
-              </tr>
+              {!(matrice(curent) && matrice(alt)) && (
+                <tr>
+                  <td>{t('comparatieRezultat')}</td>
+                  <td className="numar">{rezultat(curent)}</td>
+                  <td className="numar">{rezultat(alt)}</td>
+                </tr>
+              )}
             </tbody>
           </table>
+          {(matrice(curent) || matrice(alt)) && (
+            <div className="matrice-comparate">
+              {[curent, alt].map((r) => {
+                const tex = matrice(r)
+                return (
+                  tex && (
+                    <figure key={r.alg.id}>
+                      <figcaption>{scurt(r.alg, limba)}</figcaption>
+                      <Formula tex={tex} inline />
+                    </figure>
+                  )
+                )
+              })}
+            </div>
+          )}
           {dif && <p className="ajutor">{t('comparatieDiferenta', dif.nume, fmtValoare(dif.valoare))}</p>}
           <button type="button" className="mic" onClick={() => onTreci(alt.alg.id)}>
             {t('comparatieTreci', scurt(alt.alg, limba))}

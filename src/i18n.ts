@@ -89,7 +89,6 @@ export const TEXTE = {
   pauza: { ro: 'Pauză', en: 'Pause' },
   deLaInceput: { ro: 'De la început', en: 'From the start' },
   viteza: { ro: 'viteză', en: 'speed' },
-  pasiPeSecunda: { ro: '{0} pași/s', en: '{0} steps/s' },
   pasulCurent: { ro: 'pasul curent', en: 'current step' },
   legenda: { ro: 'legenda culorilor și a contururilor', en: 'legend of the colours and outlines' },
   legendaPivot: {
@@ -98,7 +97,10 @@ export const TEXTE = {
   },
   legendaScris: { ro: 'ce se scrie la pasul curent (contur gros)', en: 'written at the current step (thick outline)' },
   legendaCitit: { ro: 'ce se citește la pasul curent (contur întrerupt)', en: 'read at the current step (dashed outline)' },
-  legendaGata: { ro: 'calculat la pașii dinainte, nu se mai schimbă (colț marcat)', en: 'computed at earlier steps, final (marked corner)' },
+  legendaGata: {
+    ro: 'nu se mai schimbă: calculat la pașii dinainte sau, într-un tablou pe care algoritmul îl modifică, folosit și lăsat cum era, ca prima linie a lui U la G (colț marcat)',
+    en: 'final: computed at earlier steps or, in an array the algorithm changes, used and left as it was, like the first row of U in G (marked corner)',
+  },
   legendaMult: { ro: 'multiplicator, păstrat pentru mai târziu (litera μ)', en: 'multiplier, kept for later (the letter μ)' },
   rolPivot: { ro: 'împărțitor sau pivot', en: 'divisor or pivot' },
   rolScris: { ro: 'se scrie acum', en: 'written now' },
@@ -133,7 +135,7 @@ export const TEXTE = {
   convergentaFata: { ro: 'față de', en: 'against' },
   convergentaLog: { ro: 'La fiecare evaluare a condiției buclei, pe scară logaritmică.', en: 'At every evaluation of the loop condition, on a logarithmic scale.' },
   convergentaLiniar: { ro: 'La fiecare evaluare a condiției buclei.', en: 'At every evaluation of the loop condition.' },
-  convergentaDescriere: { ro: 'grafic cu {0} iterații; ultima valoare {1}, pragul {2}', en: 'chart with {0} iterations; last value {1}, threshold {2}' },
+  convergentaDescriere: { ro: 'grafic cu {0|iterație|iterații}; ultima valoare {1}, pragul {2}', en: 'chart with {0|iteration|iterations}; last value {1}, threshold {2}' },
   convergentaSalt: { ro: 'sari la această iterație', en: 'jump to this iteration' },
   convergentaDirect: {
     ro: 'Până la această iterație: {0}. Pe aceeași matrice (n = {1}), {2} costă ≈ {3}. Pe o matrice fără zerouri metoda iterativă e mai ieftină doar dacă se oprește în mai puțin de n/6 iterații; pe una cu multe zerouri, o iterație care sare peste zerouri costă mai puțin, iar pragul crește (contorul de aici numără și înmulțirile cu zero, pentru că buclele din pseudocod trec prin toate elementele).',
@@ -259,11 +261,10 @@ export const TEXTE = {
     ro: 'Proprietatea se verifică la începutul fiecărui pas al buclei exterioare; parcurgerea nu a ajuns încă acolo.',
     en: 'The property is checked at the start of every step of the outer loop; the walkthrough has not reached it yet.',
   },
-  invariantDupa: { ro: 'La începutul pasului {0}, după {1} pași compleți:', en: 'At the start of step {0}, after {1} complete steps:' },
-  invariantFinal: { ro: 'La ieșirea din buclă, după toți cei {0} pași:', en: 'On leaving the loop, after all {0} steps:' },
+  invariantDupa: { ro: 'La începutul pasului {0}, după {1}:', en: 'At the start of the step {0}, after {1}:' },
+  invariantFinal: { ro: 'La ieșirea din buclă, după {0}:', en: 'On leaving the loop, after {0}:' },
   invariantZero: { ro: 'Încă niciun pas complet: matricea (sau vectorul) de la care se pornește.', en: 'No complete step yet: the matrix (or vector) the algorithm starts from.' },
   invariantMergi: { ro: 'mergi la acel pas', en: 'go to that step' },
-  invariantRezumat: { ro: '{0} pași compleți', en: '{0} complete steps' },
   invariantVerificat: { ro: 'Verificat pe valorile din grilă: abaterea {0}, {1}.', en: 'Checked on the values in the grid: deviation {0}, {1}.' },
   contraexemple: { ro: 'Contraexemple din curs ({0})', en: 'Counterexamples from the course ({0})' },
   comparatie: { ro: 'Comparație', en: 'Comparison' },
@@ -345,7 +346,7 @@ export const TEXTE = {
   propColoane: { ro: 'coloane liniar independente', en: 'linearly independent columns' },
   propRang: { ro: 'rang {0}', en: 'rank {0}' },
   // de ce o valoare scrisa de mana nu are natura ceruta; {0} este numele intrarii
-  naturaPatrata: { ro: '{0} trebuie să fie pătrată; are {1} linii și {2} coloane.', en: '{0} must be square; it has {1} rows and {2} columns.' },
+  naturaPatrata: { ro: '{0} trebuie să fie pătrată; are {1|linie|linii} și {2|coloană|coloane}.', en: '{0} must be square; it has {1|row|rows} and {2|column|columns}.' },
   naturaInferior: {
     ro: '{0} nu este inferior triunghiulară: elementul ({1}, {2}), de deasupra diagonalei, este {3}. Algoritmul nu îl citește, deci rezolvă alt sistem decât cel scris.',
     en: '{0} is not lower triangular: entry ({1}, {2}), above the diagonal, is {3}. The algorithm does not read it, so it solves a different system from the one written.',
@@ -372,7 +373,7 @@ export const TEXTE = {
     en: '{0} is not positive definite or is borderline: step {1} of the factorization gives α ≤ 0 or practically 0 (below 10⁻⁹ relative to the largest entry of {0}).',
   },
   naturaLinieNula: { ro: 'Linia {1} a lui {0} are toate elementele 0, iar pasul ei împarte la norma liniei.', en: 'Row {1} of {0} is all zeros, and its step divides by the norm of the row.' },
-  naturaInalta: { ro: '{0} trebuie să aibă mai multe linii decât coloane (m > n); are {1} linii și {2} coloane.', en: '{0} must have more rows than columns (m > n); it has {1} rows and {2} columns.' },
+  naturaInalta: { ro: '{0} trebuie să aibă mai multe linii decât coloane (m > n); are {1|linie|linii} și {2|coloană|coloane}.', en: '{0} must have more rows than columns (m > n); it has {1|row|rows} and {2|column|columns}.' },
   naturaColoane: {
     ro: 'Coloanele lui {0} nu sunt liniar independente (rangul este {1}, iar n = {2}): R are un zero pe diagonală și soluția nu este unică.',
     en: 'The columns of {0} are not linearly independent (the rank is {1} and n = {2}): R has a zero on its diagonal and the solution is not unique.',
@@ -405,9 +406,9 @@ export const TEXTE = {
   },
   garantieSub: { ro: 'deci metoda converge.', en: 'so the method converges.' },
   garantiePeste: { ro: 'deci nici această condiție nu este îndeplinită.', en: 'so this condition is not met either.' },
-  naturaLungimeLinii: { ro: '{0} trebuie să aibă {1} elemente, câte linii are {2}; are {3}.', en: '{0} must have {1} entries, as many as {2} has rows; it has {3}.' },
-  naturaLungimeColoane: { ro: '{0} trebuie să aibă {1} elemente, câte coloane are {2}; are {3}.', en: '{0} must have {1} entries, as many as {2} has columns; it has {3}.' },
-  naturaLiniiColoane: { ro: '{0} trebuie să aibă {1} linii, câte coloane are {2}; are {3}.', en: '{0} must have {1} rows, as many as {2} has columns; it has {3}.' },
+  naturaLungimeLinii: { ro: '{0} trebuie să aibă {1|element|elemente}, câte linii are {2}; are {3}.', en: '{0} must have {1|entry|entries}, as many as {2} has rows; it has {3}.' },
+  naturaLungimeColoane: { ro: '{0} trebuie să aibă {1|element|elemente}, câte coloane are {2}; are {3}.', en: '{0} must have {1|entry|entries}, as many as {2} has columns; it has {3}.' },
+  naturaLiniiColoane: { ro: '{0} trebuie să aibă {1|linie|linii}, câte coloane are {2}; are {3}.', en: '{0} must have {1|row|rows}, as many as {2} has columns; it has {3}.' },
   nuRuleaza: { ro: 'Nu pot rula: {0}', en: 'Cannot run: {0}' },
   pastreaza: { ro: 'păstrează la alt algoritm', en: 'keep for another algorithm' },
   pastreazaAjutor: {
@@ -499,8 +500,18 @@ export const TEXTE = {
 
 export type CheieText = keyof typeof TEXTE
 
+// in romana, un numar de la 20 in sus cere "de" in fata substantivului, daca nu se termina in 1-19
+const de = (limba: Limba, n: number) => (limba === 'ro' && n >= 20 && (n % 100 === 0 || n % 100 >= 20) ? 'de ' : '')
+
+// "{1}" pune argumentul; "{1|linie|linii}" pune numarul cu substantivul acordat: "1 linie",
+// "3 linii", "20 de linii"
 export function text(limba: Limba, cheie: CheieText, ...args: (string | number)[]): string {
-  return TEXTE[cheie][limba].replace(/\{(\d+)\}/g, (_, k: string) => String(args[Number(k)] ?? ''))
+  return TEXTE[cheie][limba].replace(/\{(\d+)(?:\|([^|}]*)\|([^}]*))?\}/g, (_, k: string, unu?: string, multe?: string) => {
+    const v = args[Number(k)]
+    if (unu === undefined || multe === undefined) return String(v ?? '')
+    const n = Number(v)
+    return `${v} ${de(limba, n)}${n === 1 ? unu : multe}`
+  })
 }
 
 // "1 flop", "19 flopi", "20 de flopi", "120 de flopi", "105 flopi"; in engleza "1 flop", "2 flops"
@@ -509,4 +520,12 @@ export function nrFlopi(limba: Limba, n: number): string {
   if (limba === 'en') return `${n} flops`
   const rest = n % 100
   return n >= 20 && (rest === 0 || rest >= 20) ? `${n} de flopi` : `${n} flopi`
+}
+
+// "1 pas", "2 pași", "20 de pași"; cu `complet`: "1 pas complet", "2 pași compleți"; in engleza
+// "1 step", "2 complete steps"
+export function nrPasi(limba: Limba, n: number, complet = false): string {
+  if (limba === 'en') return `${n} ${complet ? 'complete ' : ''}${n === 1 ? 'step' : 'steps'}`
+  if (n === 1) return complet ? '1 pas complet' : '1 pas'
+  return `${n} ${de(limba, n)}pași${complet ? ' compleți' : ''}`
 }

@@ -990,8 +990,11 @@ button.mic {
   padding: 2px 3px;
 }
 
+/* spatiul e padding, nu margine: .katex-display taie ce iese din el, iar chenarul pivotului
+   iese cu cativa pixeli deasupra si dedesubtul literei */
 .formula .katex-display {
-  margin: 0.3rem 0;
+  margin: 0;
+  padding: 0.3rem 3px;
 }
 
 /* o formula lata se deruleaza in interiorul ei, nu largeste pagina */
@@ -1003,6 +1006,19 @@ button.mic {
 
 .formula {
   max-width: 100%;
+}
+
+/* "safe": un rand prea lat ramane lipit de stanga si se deruleaza, nu iese taiat pe ambele parti */
+.formula-rupta {
+  justify-content: safe center;
+  text-align: center;
+}
+
+/* KaTeX pune in formule cutii invizibile (.pstrut) mai inalte decat randul; fara overflow-y
+   ascuns, ele dau o bara de derulare verticala langa fiecare formula care se poate derula lateral */
+.formula-rupta,
+.formula-mica {
+  overflow-y: hidden;
 }
 
 .formula-mica {
@@ -1769,6 +1785,24 @@ button.mic {
 .alegere-comparatie select {
   font-size: 0.8rem;
   max-width: 100%;
+}
+
+/* cele doua matrice rezultat una langa alta; intr-un panou ingust, una sub alta */
+.matrice-comparate {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.2rem;
+  margin: 0.2rem 0 0.4rem;
+}
+
+.matrice-comparate figure {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.matrice-comparate figcaption {
+  color: var(--text-sters);
+  font-size: 0.8rem;
 }
 
 .convergenta td {

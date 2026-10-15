@@ -54,6 +54,17 @@ describe('ce rămâne adevărat după fiecare pas', () => {
     }
   })
 
+  it('după un singur pas, enunțul e la singular, în ambele limbi', () => {
+    for (const c of cazuri(generator(4))) {
+      const program = parseaza(algoritm(c.id)!.sursa)
+      const rez = urma(program, c.intrari)
+      const inv = invariant(c.id, program, rez, c.intrari, limite(program, rez)[1].pas)!
+      expect(inv.complete, c.id).toBe(1)
+      const text = `${inv.text.ro} ${inv.text.en}`.replaceAll('{0}', '1')
+      expect(text, c.id).not.toMatch(/(primele|primii|ultimele|first|last) 1\b/i)
+    }
+  })
+
   it('o linie stricată în G, CHOL sau QR face invariantul să pice', () => {
     const rnd = generator(7)
     const strica = (id: string, linie: string, stricata: string, intrari: Intrari) => {

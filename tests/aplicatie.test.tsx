@@ -168,10 +168,23 @@ describe('aplicația montată', () => {
     for (let k = 0; k < 8; k++) await comanda(gazda, 'pasInainte')
     expect(celule(gazda, '.rol-gata').length).toBeGreaterThan(0)
     await comanda(gazda, 'laSfarsit')
+    // prima linie a lui U nu e scrisa niciodata, dar e folosita: e si ea "gata", ca restul lui U
+    expect(celule(gazda, '.rol-gata')).toHaveLength(6)
+    expect(celule(gazda, '.rol-mult')).toHaveLength(3)
     const randuri = [...gazda.querySelectorAll('.verificare tbody tr')]
     expect(randuri.length).toBeGreaterThan(0)
     expect(randuri.every((r) => r.classList.contains('ok'))).toBe(true)
     expect(gazda.querySelector('.mesaj.gata')?.textContent).toBe('algoritmul s-a terminat')
+  })
+
+  it('un tablou doar citit nu devine "gata": la LTRIS, L și b rămân neatinse, iar x se termină', async () => {
+    const gazda = await monteaza()
+    await scrieIn(gazda.querySelector('header select')!, 'LTRIS')
+    await comanda(gazda, 'laSfarsit')
+    const grila = (nume: string) => [...gazda.querySelectorAll('.grila .celule')].find((g) => g.getAttribute('aria-label')?.startsWith(`${nume},`))!
+    expect(grila('L').querySelectorAll('.rol-gata')).toHaveLength(0)
+    expect(grila('b').querySelectorAll('.rol-gata')).toHaveLength(0)
+    expect(grila('x').querySelectorAll('.rol-gata')).toHaveLength(3)
   })
 
   it('panoul de cod Python arată traducerea NumPy a programului curent', async () => {
@@ -272,7 +285,13 @@ describe('aplicația montată', () => {
     expect(gazda.querySelector('header select optgroup[label="Sisteme liniare, metode iterative"]')).not.toBeNull()
     expect(gazda.querySelector('.convergenta')?.textContent).toContain('Convergență')
     expect(gazda.querySelectorAll('.convergenta circle')).toHaveLength(0)
+    // rezumatul spune relatia adevarata: ">" cat timp bucla continua, "≤" la evaluarea care o opreste
+    await faraIntrebari(gazda)
+    const rezumat = () => gazda.querySelector('.convergenta summary .rezumat')?.textContent
+    for (let k = 0; k < 10 && !rezumat(); k++) await comanda(gazda, 'pasInainte')
+    expect(rezumat()).toBe('0.4734 > 0.001')
     await comanda(gazda, 'laSfarsit')
+    expect(gazda.querySelector('.convergenta summary .rezumat')?.textContent).toBe('9.82e-4 ≤ 0.001')
     // 12 iteratii: conditia buclei se evalueaza de 13 ori
     expect(gazda.querySelectorAll('.convergenta circle')).toHaveLength(13)
     expect(gazda.querySelectorAll('.convergenta tbody tr')).toHaveLength(13)
@@ -592,9 +611,22 @@ describe('aplicația montată', () => {
     await act(async () => {
       document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }))
     })
-    expect(panou().textContent).toContain('La ieșirea din buclă, după toți cei 2 pași')
+    expect(panou().textContent).toContain('La ieșirea din buclă, după 2 pași:')
     expect(panou().querySelector('.verificat')?.className).toBe('verificat ok')
     expect(panou().querySelector('summary .rezumat')?.textContent).toBe('2 pași compleți · ok')
+  })
+
+  it('invariantul numește pasul prin variabila buclei, cu singularul la un singur pas', async () => {
+    // pasul 16 al urmei este antetul buclei exterioare pentru k = 2
+    window.history.pushState({}, '', '/?algoritm=G&pas=16')
+    try {
+      const gazda = await monteaza()
+      const panou = gazda.querySelector('.panou.invariant')!
+      expect(panou.textContent).toContain('La începutul pasului k = 2, după 1 pas complet:')
+      expect(panou.querySelector('summary .rezumat')?.textContent).toBe('1 pas complet · ok')
+    } finally {
+      window.history.pushState({}, '', '/')
+    }
   })
 
   it('panoul de condiționare încarcă matricea Hilbert din carte și arată κ∞ ≈ 748', async () => {
@@ -663,6 +695,14 @@ describe('aplicația montată', () => {
     const randuri = [...panou.querySelectorAll('tbody tr')].map((r) => [...r.querySelectorAll('td')].map((c) => c.textContent))
     // n = 3: G numara 13 flopi, iar formula da 2·27/3 = 18
     expect(randuri[1].slice(0, 3)).toEqual(['3', '13', '18'])
+  })
+
+  it('comparația arată matricele rezultat mici una lângă alta, în locul formei lor', async () => {
+    const gazda = await monteaza()
+    const panou = gazda.querySelector('.panou.comparatie')!
+    expect([...panou.querySelectorAll('.matrice-comparate figcaption')].map((f) => f.textContent)).toEqual(['G', 'GPP'])
+    expect(panou.querySelectorAll('.matrice-comparate .katex')).toHaveLength(2)
+    expect([...panou.querySelectorAll('tbody tr')].some((r) => r.textContent?.startsWith('rezultat'))).toBe(false)
   })
 
   it('panoul de comparație rulează aceleași intrări cu GPP și trece la el păstrând intrările', async () => {

@@ -5,7 +5,7 @@ import { Comparatie } from './componente/Comparatie'
 import { Conditionare } from './componente/Conditionare'
 import { CostPeN } from './componente/CostPeN'
 import { Comenzi, type Marcaj } from './componente/Comenzi'
-import { Convergenta, fmtNumar, type Punct } from './componente/Convergenta'
+import { Convergenta, relatie, type Punct } from './componente/Convergenta'
 import { Editor } from './componente/Editor'
 import { Formula } from './componente/Formula'
 import { Geometrie, areGeometrie } from './componente/Geometrie'
@@ -24,7 +24,7 @@ import { areInvariant, invariant } from './invarianti'
 import { areCostPeN } from './costuri'
 import { areConditionare, matriceaSistemului, type ExempluCarte } from './conditionare'
 import { asteptat } from './exercitiu'
-import { nrFlopi, text, type CheieText } from './i18n'
+import { nrFlopi, nrPasi, text, type CheieText } from './i18n'
 import { blocaj, definitiiDin, intrariDinDefinitii, textDinValoare, type Definitie } from './intrari'
 import { operatiiPeLinii, variabilePeLinie } from './motor/analiza'
 import { EroareSintaxa, type Program } from './motor/ast'
@@ -142,7 +142,7 @@ const aceleasi = (a: Definitie[], b: Definitie[]) => a.length === b.length && a.
 
 // panourile din sertar; Convergenta si Geometria pornesc deschise, restul inchise
 type NumePanou = 'adaptare' | 'despre' | 'operatii' | 'invariant' | 'convergenta' | 'geometrie' | 'verificare' | 'conditionare' | 'costN' | 'comparatie' | 'python' | 'notiuni'
-const PANOURI_DESCHISE: Record<NumePanou, boolean> = { adaptare: true, despre: false, operatii: true, invariant: true, convergenta: true, geometrie: true, verificare: false, conditionare: false, costN: false, comparatie: false, python: false, notiuni: false }
+const PANOURI_DESCHISE: Record<NumePanou, boolean> = { adaptare: true, despre: true, operatii: true, invariant: false, convergenta: true, geometrie: true, verificare: false, conditionare: false, costN: false, comparatie: false, python: false, notiuni: false }
 
 const ROLURI_LEGENDA = ['pivot', 'scris', 'citit', 'gata', 'mult'] as const
 const EXPLICATII: Record<(typeof ROLURI_LEGENDA)[number], CheieText> = { pivot: 'legendaPivot', scris: 'legendaScris', citit: 'legendaCitit', gata: 'legendaGata', mult: 'legendaMult' }
@@ -480,18 +480,39 @@ function Continut() {
     return m
   }, [rez])
 
+  // O celula citita, dar niciodata scrisa, intr-un tablou pe care programul il modifica pe loc:
+  // valoarea ei de intrare ramane in rezultat (prima linie a lui U la G, b_1 la S_G), deci e
+  // "gata" dupa prima citire. Tablourile doar citite (L la LTRIS, A la Jacobi) raman neatinse.
+  const primaCitire = useMemo(() => {
+    const m = new Map<string, number>()
+    if (!rez) return m
+    const modificate = new Set<string>()
+    const inlocuite = new Set<string>()
+    for (const p of rez.pasi) {
+      for (const c of p.celule) if (c.rol === 'scris') modificate.add(c.nume)
+      for (const [nume, n] of Object.entries(p.noi ?? {})) if (n.vechi) inlocuite.add(nume)
+    }
+    rez.pasi.forEach((p, idx) => {
+      for (const c of p.celule) {
+        const cheie = `${c.nume}:${c.i}:${c.j ?? 1}`
+        if (c.rol !== 'scris' && modificate.has(c.nume) && !inlocuite.has(c.nume) && !ultimaScriere.has(cheie) && !m.has(cheie)) m.set(cheie, idx)
+      }
+    })
+    return m
+  }, [rez, ultimaScriere])
+
   const finale = useMemo(() => {
     const gata = new Map<string, Set<string>>()
     const mult = new Map<string, Set<string>>()
-    for (const [cheie, u] of ultimaScriere) {
-      if (u.idx >= k) continue
+    const adauga = (tinta: Map<string, Set<string>>, cheie: string) => {
       const [nume, i, j] = cheie.split(':')
-      const tinta = u.mult ? mult : gata
       if (!tinta.has(nume)) tinta.set(nume, new Set())
       tinta.get(nume)!.add(`${i}:${j}`)
     }
+    for (const [cheie, u] of ultimaScriere) if (u.idx < k) adauga(u.mult ? mult : gata, cheie)
+    for (const [cheie, idx] of primaCitire) if (idx < k) adauga(gata, cheie)
     return { gata, mult }
-  }, [ultimaScriere, k])
+  }, [ultimaScriere, primaCitire, k])
 
   // o metoda iterativa oprita de maxiter are si ea o stare de verificat: reziduul de la oprire
   const verificari = useMemo(
@@ -512,7 +533,7 @@ function Continut() {
 
   // evaluarile conditiei primei bucle "cat timp": marimea testata la fiecare iteratie
   const iteratii: Punct[] = useMemo(() => {
-    const toate = (rez?.pasi ?? []).flatMap((p, idx) => (p.iteratie ? [{ ...p.iteratie, pas: idx }] : []))
+    const toate = (rez?.pasi ?? []).flatMap((p, idx) => (p.iteratie ? [{ ...p.iteratie, pas: idx, adevarat: !!p.adevarat }] : []))
     // o bucla interioara reia numaratoarea; se pastreaza prima parcurgere a primei bucle
     const prima = toate.filter((p) => p.linie === toate[0]?.linie)
     const reluare = prima.findIndex((p, i) => i > 0 && p.iter === 0)
@@ -985,7 +1006,7 @@ function Continut() {
           <Panou
             clasa="invariant"
             titlu={t('invariant')}
-            rezumat={inv ? `${t('invariantRezumat', inv.complete)} · ${invariantOk(inv, rulare!.cifre) ? t('verificareOk') : t('verificareRau')}` : undefined}
+            rezumat={inv ? `${nrPasi(limba, inv.complete, true)} · ${invariantOk(inv, rulare!.cifre) ? t('verificareOk') : t('verificareRau')}` : undefined}
             deschis={deschise.invariant}
             onToggle={deschide('invariant')}
           >
@@ -996,7 +1017,7 @@ function Continut() {
           <Panou
             clasa="convergenta"
             titlu={t('convergenta')}
-            rezumat={ultimaIteratie ? `${fmtNumar(ultimaIteratie.stanga)} ${ultimaIteratie.op} ${fmtNumar(ultimaIteratie.dreapta)}` : undefined}
+            rezumat={ultimaIteratie ? relatie(ultimaIteratie) : undefined}
             deschis={deschise.convergenta}
             onToggle={deschide('convergenta')}
           >

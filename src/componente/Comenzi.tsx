@@ -1,3 +1,4 @@
+import { nrPasi } from '../i18n'
 import { usePreferinte } from '../preferinte'
 
 export const VITEZE = [0.5, 1, 2, 4, 8, 16]
@@ -38,7 +39,7 @@ const Icon = ({ d, scriere }: { d: string; scriere?: boolean }) => (
 // Bara de parcurgere: butoanele cu pictograma si eticheta, cursorul pe urma cu crestaturi,
 // redarea si viteza. Pasul inainte e singurul buton plin.
 export function Comenzi({ k, total, poateInapoi, poateInainte, ascuns, redare, viteza, marcaje, onK, onInainte, onInapoi, onScriere, onRedare, onViteza }: Props) {
-  const { t } = usePreferinte()
+  const { t, limba } = usePreferinte()
   const ultimul = Math.max(total - 1, 0)
   const oprit = (f: () => void) => () => {
     onRedare(false)
@@ -101,7 +102,7 @@ export function Comenzi({ k, total, poateInapoi, poateInainte, ascuns, redare, v
         <select value={viteza} onChange={(e) => onViteza(Number(e.target.value))}>
           {VITEZE.map((v) => (
             <option key={v} value={v}>
-              {t('pasiPeSecunda', v)}
+              {nrPasi(limba, v)}/s
             </option>
           ))}
         </select>

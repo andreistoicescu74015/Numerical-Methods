@@ -34,13 +34,18 @@ export const areInvariant = (id: string): boolean => id in FEL
 const produs = (factor: (j: number) => string, c: number): string => (c === 0 ? '' : c === 1 ? `${factor(1)}\\, ` : `${factor(c)} \\cdots ${factor(1)}\\, `)
 
 // Enuntul, ca formula si ca text; {0} este numarul de pasi completi, {1} cel urmator
+// `unu`: textul dupa un singur pas, la singular ("prima coloana", nu "primele 1 coloane")
 // `final`: enuntul dupa toti pasii, cand proprietatea partiala a devenit identitatea intreaga
-const ENUNT: Record<Fel, { tex: (c: number) => string; text: Text; curs: Text; final?: { tex: string; text: Text } }> = {
+const ENUNT: Record<Fel, { tex: (c: number) => string; text: Text; unu: Text; curs: Text; final?: { tex: string; text: Text } }> = {
   eliminare: {
     tex: (c) => `A_{${c + 1}} = ${produs((j) => `M_{${j}}`, c)}A`,
     text: {
       ro: 'Matricea curentă A_({1}) este A înmulțită cu primele {0} matrice M_k: are zerouri sub diagonală în primele {0} coloane (în grilă, acolo stau multiplicatorii). Cu multiplicatorii păstrați, L A_({1}) = A, unde L are 1 pe diagonală și multiplicatorii sub ea.',
       en: 'The current matrix A_({1}) is A multiplied by the first {0} matrices M_k: it has zeros below the diagonal in the first {0} columns (in the grid, the multipliers sit there). With the stored multipliers, L A_({1}) = A, where L has ones on the diagonal and the multipliers below it.',
+    },
+    unu: {
+      ro: 'Matricea curentă A_({1}) este A înmulțită cu prima matrice, M_1: are zerouri sub diagonală în prima coloană (în grilă, acolo stau multiplicatorii). Cu multiplicatorii păstrați, L A_({1}) = A, unde L are 1 pe diagonală și multiplicatorii sub ea.',
+      en: 'The current matrix A_({1}) is A multiplied by the first matrix, M_1: it has zeros below the diagonal in the first column (in the grid, the multipliers sit there). With the stored multipliers, L A_({1}) = A, where L has ones on the diagonal and the multipliers below it.',
     },
     curs: {
       ro: 'Curs III, demonstrația teoremei de triangularizare prin eliminare gaussiană (A_k este superior triunghiulară în primele k−1 coloane) și slide-ul "Factorizari LU rezultate din eliminarea gaussiana" (L = M₁⁻¹ ⋯ M_(n−1)⁻¹).',
@@ -52,6 +57,10 @@ const ENUNT: Record<Fel, { tex: (c: number) => string; text: Text; curs: Text; f
     text: {
       ro: 'Matricea curentă A_({1}) se obține din A cu primele {0} interschimbări P_k și eliminări M_k, în ordinea lor: are zerouri sub diagonală în primele {0} coloane (în grilă, acolo stau multiplicatorii), iar vectorul p ține interschimbările.',
       en: 'The current matrix A_({1}) comes from A by the first {0} swaps P_k and eliminations M_k, in their order: it has zeros below the diagonal in the first {0} columns (in the grid, the multipliers sit there), and the vector p holds the swaps.',
+    },
+    unu: {
+      ro: 'Matricea curentă A_({1}) se obține din A cu prima interschimbare, P_1, și prima eliminare, M_1: are zerouri sub diagonală în prima coloană (în grilă, acolo stau multiplicatorii), iar vectorul p ține interschimbarea.',
+      en: 'The current matrix A_({1}) comes from A by the first swap, P_1, and the first elimination, M_1: it has zeros below the diagonal in the first column (in the grid, the multipliers sit there), and the vector p holds the swap.',
     },
     curs: {
       ro: 'Curs III, slide-ul "Algoritmul GPP - Eliminare gaussiana cu pivotare partiala": U = M_(n−1)P_(n−1) ⋯ M₁P₁A, construită pas cu pas.',
@@ -65,6 +74,10 @@ const ENUNT: Record<Fel, { tex: (c: number) => string; text: Text; curs: Text; f
       ro: 'Primele {0} coloane ale lui L și primele {0} linii ale lui U sunt gata: în primele {0} coloane și în primele {0} linii, A este deja egală cu produsul LU.',
       en: 'The first {0} columns of L and the first {0} rows of U are done: in the first {0} columns and in the first {0} rows, A already equals the product LU.',
     },
+    unu: {
+      ro: 'Prima coloană a lui L și prima linie a lui U sunt gata: în prima coloană și în prima linie, A este deja egală cu produsul LU.',
+      en: 'The first column of L and the first row of U are done: in the first column and in the first row, A already equals the product LU.',
+    },
     curs: {
       ro: 'Curs III, slide-urile "Factorizari LU compacte": din relația A = LU se calculează succesiv câte o coloană din L și câte o linie din U.',
       en: 'Course III, slides "Factorizari LU compacte": from A = LU, one column of L and one row of U are computed in turn.',
@@ -77,6 +90,10 @@ const ENUNT: Record<Fel, { tex: (c: number) => string; text: Text; curs: Text; f
       ro: 'Primele {0} coloane ale lui L sunt gata: în primele {0} coloane, A este deja egală cu produsul LLᵀ, iar restul lui L se calculează din coloanele următoare.',
       en: 'The first {0} columns of L are done: in the first {0} columns, A already equals the product LLᵀ, and the rest of L comes from the next columns.',
     },
+    unu: {
+      ro: 'Prima coloană a lui L este gata: în prima coloană, A este deja egală cu produsul LLᵀ, iar restul lui L se calculează din coloanele următoare.',
+      en: 'The first column of L is done: in the first column, A already equals the product LLᵀ, and the rest of L comes from the next columns.',
+    },
     curs: {
       ro: 'Curs III, slide-urile "Sisteme simetrice pozitiv definite": elementele lui L se obțin coloană cu coloană din identitatea A = LLᵀ.',
       en: 'Course III, slides "Sisteme simetrice pozitiv definite": the entries of L come column by column from the identity A = LLᵀ.',
@@ -87,6 +104,10 @@ const ENUNT: Record<Fel, { tex: (c: number) => string; text: Text; curs: Text; f
     text: {
       ro: 'Matricea curentă A_({1}) este A înmulțită cu primii {0} reflectori U_k: are zerouri sub diagonală în primele {0} coloane (în grilă, acolo stau vectorii Householder), iar reflectorii păstrează norma euclidiană (lungimea) fiecărei coloane.',
       en: 'The current matrix A_({1}) is A multiplied by the first {0} reflectors U_k: it has zeros below the diagonal in the first {0} columns (in the grid, the Householder vectors sit there), and the reflectors keep the Euclidean norm (the length) of every column.',
+    },
+    unu: {
+      ro: 'Matricea curentă A_({1}) este A înmulțită cu primul reflector, U_1: are zerouri sub diagonală în prima coloană (în grilă, acolo stă vectorul Householder), iar reflectorul păstrează norma euclidiană (lungimea) fiecărei coloane.',
+      en: 'The current matrix A_({1}) is A multiplied by the first reflector, U_1: it has zeros below the diagonal in the first column (in the grid, the Householder vector sits there), and the reflector keeps the Euclidean norm (the length) of every column.',
     },
     curs: {
       ro: 'Curs IV, demonstrația triangularizării ortogonale: A_(k+1) = U_k A_k este superior triunghiulară în primele k coloane.',
@@ -99,6 +120,10 @@ const ENUNT: Record<Fel, { tex: (c: number) => string; text: Text; curs: Text; f
     text: {
       ro: 'Primele {0} necunoscute sunt aflate și verifică primele {0} ecuații; fiecare ecuație următoare aduce o singură necunoscută nouă.',
       en: 'The first {0} unknowns are found and satisfy the first {0} equations; each following equation brings one new unknown.',
+    },
+    unu: {
+      ro: 'Prima necunoscută este aflată și verifică prima ecuație; fiecare ecuație următoare aduce o singură necunoscută nouă.',
+      en: 'The first unknown is found and satisfies the first equation; each following equation brings one new unknown.',
     },
     curs: {
       ro: 'Curs II, slide-urile "Rezolvarea sistemelor triunghiulare".',
@@ -116,6 +141,10 @@ const ENUNT: Record<Fel, { tex: (c: number) => string; text: Text; curs: Text; f
       ro: 'Ultimele {0} necunoscute sunt aflate și verifică ultimele {0} ecuații; fiecare ecuație de deasupra aduce o singură necunoscută nouă.',
       en: 'The last {0} unknowns are found and satisfy the last {0} equations; each equation above brings one new unknown.',
     },
+    unu: {
+      ro: 'Ultima necunoscută este aflată și verifică ultima ecuație; fiecare ecuație de deasupra aduce o singură necunoscută nouă.',
+      en: 'The last unknown is found and satisfies the last equation; each equation above brings one new unknown.',
+    },
     curs: {
       ro: 'Curs II, slide-ul "Rezolvarea sistemelor triunghiulare": se cunosc x_n, ..., x_(i+1) și se rezolvă a i-a ecuație.',
       en: 'Course II, slide "Rezolvarea sistemelor triunghiulare": x_n, ..., x_(i+1) are known and equation i is solved.',
@@ -130,6 +159,8 @@ export interface Invariant {
   final: boolean
   // pasul urmei la care s-a verificat (inceputul pasului urmator, sau iesirea din bucla)
   pas: number
+  // variabila buclei exterioare la inceputul pasului verificat ("k = 2"); lipsa la iesirea din bucla
+  variabila?: string
   tex: string
   text: Text
   curs: Text
@@ -145,17 +176,19 @@ function ultimaLinie(s: Instr): number {
 }
 
 // Pasii urmei la care incepe o iteratie a primei bucle "pentru" de pe primul nivel, plus primul
-// pas de dupa ea: la fiecare, cati pasi completi are bucla.
-export function limite(program: Program, rez: Rezultat): { pas: number; complete: number; final: boolean }[] {
+// pas de dupa ea: la fiecare, cati pasi completi are bucla si, la inceputul unui pas, valoarea
+// variabilei buclei.
+export function limite(program: Program, rez: Rezultat): { pas: number; complete: number; final: boolean; variabila?: string }[] {
   const bucla = program.instr.find((s) => s.tip === 'pentru')
-  if (!bucla) return []
+  if (!bucla || bucla.tip !== 'pentru') return []
   const ultima = ultimaLinie(bucla)
-  const rez2: { pas: number; complete: number; final: boolean }[] = []
+  const rez2: { pas: number; complete: number; final: boolean; variabila?: string }[] = []
   let iteratii = 0
   for (let idx = 0; idx < rez.pasi.length; idx++) {
     const p = rez.pasi[idx]
     if (p.fel === 'antet' && p.linie === bucla.linie) {
-      rez2.push({ pas: idx, complete: iteratii, final: false })
+      const v = p.scalari[bucla.var]
+      rez2.push({ pas: idx, complete: iteratii, final: false, variabila: v === undefined ? undefined : `${bucla.var} = ${v}` })
       iteratii++
     } else if (iteratii > 0 && (p.fel === 'final' ? rez.final === 'gata' : p.linie < bucla.linie || p.linie > ultima)) {
       // o rulare oprita in bucla (stop, eroare) nu iese din ea: ultima limita ramane inceputul
@@ -306,5 +339,5 @@ function calculeaza(id: string, program: Program, rez: Rezultat, intrari: Intrar
   }
   const e = ENUNT[fel]
   const f = lim.final ? e.final : undefined
-  return { complete: c, final: lim.final, pas: lim.pas, tex: f?.tex ?? e.tex(c), text: f?.text ?? e.text, curs: e.curs, abatere }
+  return { complete: c, final: lim.final, pas: lim.pas, variabila: lim.variabila, tex: f?.tex ?? e.tex(c), text: f?.text ?? (c === 1 ? e.unu : e.text), curs: e.curs, abatere }
 }

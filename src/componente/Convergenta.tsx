@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import type { Iteratie } from '../motor/interpretor'
 import { usePreferinte } from '../preferinte'
 import { Formula } from './Formula'
@@ -7,7 +7,15 @@ import { nrFlopi } from '../i18n'
 export interface Punct extends Iteratie {
   // indicele pasului din urma la care s-a evaluat conditia
   pas: number
+  // conditia la aceasta evaluare: adevarata cat timp bucla continua, falsa la evaluarea care o opreste
+  adevarat: boolean
 }
+
+const OPUS: Record<string, string> = { '<': '≥', '>': '≤', '≤': '>', '≥': '<', '=': '≠', '≠': '=' }
+
+// Relatia dintre cele doua parti, asa cum iese la evaluare: "0.0166 > 0.001" cat timp bucla
+// continua, "9.82e-4 ≤ 0.001" la evaluarea care o opreste.
+export const relatie = (p: Punct): string => `${fmtNumar(p.stanga)} ${p.adevarat ? p.op : OPUS[p.op]} ${fmtNumar(p.dreapta)}`
 
 interface Props {
   // toate evaluarile conditiei buclei, in ordine
@@ -19,7 +27,6 @@ interface Props {
   nota?: string
 }
 
-const L = 600
 const H = 230
 const M = { sus: 16, jos: 36, stanga: 58, dreapta: 86 }
 // cea mai mica valoare pozitiva care isi are locul ei pe scara logaritmica
@@ -34,6 +41,22 @@ export function fmtNumar(x: number): string {
   const a = Math.abs(x)
   // 1e-6, nu 1.00e-6
   return a >= 1e-3 && a < 1e5 ? String(Number(x.toPrecision(4))) : x.toExponential(2).replace(/\.?0+e/, 'e')
+}
+
+// Latimea graficului in pixeli CSS. viewBox-ul o urmeaza, ca textul din SVG sa iasa la marimea
+// din CSS, nu micsorat odata cu panoul; pana la prima masurare (si in jsdom) ramane 600.
+export function useLatime() {
+  const [latime, setLatime] = useState(600)
+  const ref = useCallback((el: HTMLDivElement | null) => {
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const o = new ResizeObserver(([e]) => {
+      const w = Math.round(e.contentRect.width)
+      if (w > 0) setLatime(w)
+    })
+    o.observe(el)
+    return () => o.disconnect()
+  }, [])
+  return [ref, latime] as const
 }
 
 // Pasi rotunzi (1, 2, 5 ori o putere a lui 10) pentru o axa liniara.
@@ -52,6 +75,7 @@ export function gradatii(min: number, max: number, cate: number): number[] {
 export function Convergenta({ puncte, vazute, onPas, nota }: Props) {
   const { t, limba } = usePreferinte()
   const [peste, setPeste] = useState<number | null>(null)
+  const [ref, L] = useLatime()
   if (puncte.length < 2) return null
 
   const valori = puncte.flatMap((p) => [p.stanga, p.dreapta])
@@ -94,7 +118,7 @@ export function Convergenta({ puncte, vazute, onPas, nota }: Props) {
         {'. '}
         {t(logaritmic ? 'convergentaLog' : 'convergentaLiniar')}
       </p>
-      <div className="grafic">
+      <div className="grafic" ref={ref}>
         <svg viewBox={`0 0 ${L} ${H}`} role="img" aria-label={t('convergentaDescriere', vizibile.length, ultim ? fmtNumar(ultim.stanga) : '', fmtNumar(prag))} onPointerLeave={() => setPeste(null)}>
           {gradY.map((g, k) => (
             <g key={k}>

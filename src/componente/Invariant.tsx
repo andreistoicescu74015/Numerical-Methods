@@ -1,3 +1,4 @@
+import { nrPasi } from '../i18n'
 import type { Invariant as Inv } from '../invarianti'
 import { PRAG, pragCifre } from '../motor/verificare'
 import { usePreferinte } from '../preferinte'
@@ -24,12 +25,12 @@ export function Invariant({ inv, cifre, onPas }: Props) {
     <>
       <p className="ajutor">{t('invariantAjutor')}</p>
       <p className="moment">
-        {inv.final ? t('invariantFinal', inv.complete) : t('invariantDupa', inv.complete + 1, inv.complete)}{' '}
+        {inv.final ? t('invariantFinal', nrPasi(limba, inv.complete)) : t('invariantDupa', inv.variabila ?? inv.complete + 1, nrPasi(limba, inv.complete, true))}{' '}
         <button type="button" className="mic" onClick={() => onPas(inv.pas)}>
           {t('invariantMergi')}
         </button>
       </p>
-      <Formula tex={inv.tex} />
+      <Formula tex={inv.tex} rupt />
       <p>{inv.complete === 0 ? t('invariantZero') : text}</p>
       <p className={`verificat ${ok ? 'ok' : 'rau'}`}>{t('invariantVerificat', fmtValoare(inv.abatere), ok ? t('verificareOk') : t('verificareRau'))}</p>
       <p className="in-curs">

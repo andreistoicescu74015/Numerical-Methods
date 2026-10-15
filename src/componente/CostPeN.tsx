@@ -3,7 +3,7 @@ import { DIMENSIUNI, costuriPeN, cuLiniaInPlus } from '../costuri'
 import type { Algoritm } from '../motor/biblioteca'
 import type { Intrari } from '../motor/interpretor'
 import { usePreferinte } from '../preferinte'
-import { fmtNumar, gradatii } from './Convergenta'
+import { fmtNumar, gradatii, useLatime } from './Convergenta'
 
 interface Props {
   alg: Algoritm
@@ -12,7 +12,6 @@ interface Props {
   deschis: boolean
 }
 
-const L = 600
 const H = 230
 const M = { sus: 16, jos: 36, stanga: 58, dreapta: 96 }
 
@@ -21,6 +20,7 @@ const M = { sus: 16, jos: 36, stanga: 58, dreapta: 96 }
 export function CostPeN({ alg, intrari, deschis }: Props) {
   const { t, limba } = usePreferinte()
   const [peste, setPeste] = useState<number | null>(null)
+  const [ref, L] = useLatime()
   const puncte = useMemo(() => (deschis ? costuriPeN(alg, intrari) : []), [deschis, alg, intrari])
   if (!deschis || puncte.length < 2) return null
 
@@ -56,7 +56,7 @@ export function CostPeN({ alg, intrari, deschis }: Props) {
           {t('costNFormula', alg.cost[limba])}
         </li>
       </ul>
-      <div className="grafic">
+      <div className="grafic" ref={ref}>
         <svg viewBox={`0 0 ${L} ${H}`} role="img" aria-label={t('costNDescriere', n0, n1, ultim.flopi, fmtNumar(ultim.formula))} onPointerLeave={() => setPeste(null)}>
           {gradY.map((v) => (
             <g key={v}>
