@@ -679,6 +679,58 @@ button.mic {
   line-height: 1;
 }
 
+/* tipul matricei si dimensiunile, pe un rand sub antet */
+.forma-intrare {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.8rem;
+  font-size: 0.78rem;
+  color: var(--text-sters);
+}
+
+.forma-intrare .tip-matrice {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.forma-intrare select {
+  font-size: 0.78rem;
+  padding: 0.15rem 0.3rem;
+}
+
+.forma-intrare .dim {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.forma-intrare .dim button {
+  min-width: 1.6rem;
+  line-height: 1;
+}
+
+.forma-intrare .valoare-dim {
+  min-width: 1ch;
+  text-align: center;
+  font-family: var(--mono);
+  color: var(--text);
+}
+
+/* proprietatile din curs ale matricei scrise */
+.intrare .proprietati {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--text-sters);
+}
+
+.intrare .proprietati .eticheta {
+  font-weight: 600;
+}
+
 .intrare textarea {
   width: 100%;
   font-size: 0.85rem;

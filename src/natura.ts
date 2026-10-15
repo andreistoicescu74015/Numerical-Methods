@@ -38,8 +38,27 @@ export type Natura =
   | 'latime'
 
 // Ce genereaza "aleator" cand e nevoie de mai mult decat cere natura, de exemplu o conditie
-// suficienta de convergenta.
-export type Aleator = Natura | 'dominanta' | 'liniiDominante' | 'asemenea'
+// suficienta de convergenta, sau tipul de matrice ales de student din meniu.
+export type Aleator = Natura | 'dominanta' | 'liniiDominante' | 'asemenea' | Structura
+
+// Tipurile de matrice din meniul de langa o matrice, cu definitiile din curs (notatiile din cursul I,
+// matricele banda din carte). 'oarecare' nu cere nimic; 'singulara' este un contraexemplu.
+export type Structura =
+  | 'oarecare'
+  | 'simetrica'
+  | 'spd'
+  | 'diagonala'
+  | 'inferior'
+  | 'superior'
+  | 'tridiagonala'
+  | 'hessenberg'
+  | 'dominanta'
+  | 'ortogonala'
+  | 'nesingulara'
+  | 'lider'
+  | 'singulara'
+
+export const STRUCTURI: Structura[] = ['oarecare', 'simetrica', 'spd', 'diagonala', 'inferior', 'superior', 'tridiagonala', 'hessenberg', 'dominanta', 'ortogonala', 'nesingulara', 'lider', 'singulara']
 
 export type Valoare = number | number[] | number[][]
 export type Tip = 'matrice' | 'vector' | 'scalar'
@@ -360,7 +379,7 @@ export function genereaza(c: Cerere, rnd: Rnd = Math.random): Valoare {
   }
 
   let [m, n] = [Math.max(1, c.forma[0]), Math.max(1, c.forma[1])]
-  if (c.natura && (PATRATE.includes(c.natura as Natura) || c.natura === 'dominanta' || c.natura === 'asemenea')) n = m
+  if (c.natura && (PATRATE.includes(c.natura as Natura) || PATRATE_ALEATOR.includes(c.natura))) n = m
   const [r, q] = c.natura === 'superiorBanda' ? [0, c.latimi?.[1] ?? n - 1] : (c.latimi ?? [n - 1, n - 1])
   const inBanda = (i: number, j: number) => i - j <= r && j - i <= q
   switch (c.natura) {
@@ -419,7 +438,128 @@ export function genereaza(c: Cerere, rnd: Rnd = Math.random): Valoare {
       )
     case 'asemenea':
       return asemenea(n, rnd)
+    case 'simetrica': {
+      const A = matrice(m, n, oarecare)
+      return A.map((l, i) => l.map((x, j) => (j < i ? A[j][i] : x)))
+    }
+    case 'diagonala':
+      return matrice(m, n, (i, j) => (i === j ? semn(rnd) * intre(rnd, 1, 5) : 0))
+    case 'tridiagonala':
+      // diagonalele de langa cea principala nenule, ca matricea sa fie chiar tridiagonala
+      return matrice(m, n, (i, j) => (Math.abs(i - j) > 1 ? 0 : i === j ? semn(rnd) * intre(rnd, 1, 5) : semn(rnd) * intre(rnd, 1, 3)))
+    case 'hessenberg':
+      // superior Hessenberg: zerouri sub prima subdiagonala; subdiagonala si coltul din dreapta sus
+      // nenule, ca matricea sa nu fie o banda mai ingusta
+      return matrice(m, n, (i, j) => (i - j > 1 ? 0 : i - j === 1 || j - i === n - 1 ? semn(rnd) * intre(rnd, 1, 3) : oarecare()))
+    case 'ortogonala':
+      return ortogonala(n, rnd)
+    case 'singulara':
+      return singulara(n, rnd)
     default:
       return matrice(m, n, oarecare)
   }
+}
+
+// tipurile din meniu care cer o matrice patrata, pe langa naturile din PATRATE
+const PATRATE_ALEATOR: Aleator[] = ['dominanta', 'asemenea', 'simetrica', 'diagonala', 'tridiagonala', 'hessenberg', 'ortogonala', 'singulara']
+
+// natura sau tipul cer o matrice patrata
+export const cerePatrata = (a: Aleator | undefined): boolean => !!a && (PATRATE.includes(a as Natura) || PATRATE_ALEATOR.includes(a))
+
+// O matrice ortogonala cu zecimale scurte: rotatii cu cos = 0.6 si sin = 0.8 pe doua perechi de
+// linii, apoi liniile permutate si cu semne schimbate. Fiecare factor este ortogonal, deci si produsul.
+function ortogonala(n: number, rnd: Rnd): number[][] {
+  let Q = matrice(n, n, (i, j) => (i === j ? 1 : 0))
+  for (let t = 0; t < Math.min(2, n - 1); t++) {
+    const i = intre(rnd, 0, n - 2)
+    const j = intre(rnd, i + 1, n - 1)
+    const V = Q
+    Q = V.map((l, a) => (a === i ? l.map((x, c) => 0.6 * x - 0.8 * V[j][c]) : a === j ? l.map((x, c) => 0.8 * V[i][c] + 0.6 * x) : l))
+  }
+  const linii = Array.from({ length: n }, (_, i) => i)
+  for (let i = n - 1; i > 0; i--) {
+    const j = intre(rnd, 0, i)
+    ;[linii[i], linii[j]] = [linii[j], linii[i]]
+  }
+  // produsele lui 0.6 si 0.8 au cel mult patru zecimale; rotunjirea scoate zgomotul de la inmultiri
+  return linii.map((i) => {
+    const s = semn(rnd)
+    return Q[i].map((x) => Math.round(s * x * 1e4) / 1e4 + 0)
+  })
+}
+
+// O matrice de rang n - 1: ultima linie este o combinatie a primelor doua (sau un multiplu al primei).
+function singulara(n: number, rnd: Rnd): number[][] {
+  if (n === 1) return [[0]]
+  return pana(
+    () => {
+      const A = matrice(n, n, () => intre(rnd, -5, 5))
+      const c = alege(rnd, [-2, -1, 1, 2])
+      A[n - 1] = n > 2 ? A[0].map((x, k) => x + c * A[1][k]) : A[0].map((x) => c * x)
+      return A
+    },
+    (A) => rang(A) === n - 1,
+    // I cu ultima linie inlocuita de prima
+    () => matrice(n, n, (i, j) => (i === n - 1 ? (j === 0 ? 1 : 0) : i === j ? 1 : 0)),
+  )
+}
+
+// Ce proprietati din curs are o matrice, pentru randul de sub ea: forma (diagonala, triunghiulara,
+// tridiagonala, Hessenberg, banda), simetria, ortogonalitatea, dominanta diagonala, rangul,
+// submatricele lider, pozitiv definirea si, pentru o metoda iterativa, raza spectrala a matricei de iteratie.
+export interface Proprietate {
+  cheie: CheieText
+  args: (string | number)[]
+}
+
+export function proprietati(A: number[][], iteratie?: 'jacobi' | 'gs'): Proprietate[] {
+  const p = (cheie: CheieText, ...args: (string | number)[]): Proprietate => ({ cheie, args })
+  const m = A.length
+  const n = A[0].length
+  if (m !== n) {
+    const r = rang(A)
+    return [m > n && r === n ? p('propColoane') : p('propRang', r)]
+  }
+  const rez: Proprietate[] = []
+  // latimile de banda: cat de departe de diagonala ajunge un element nenul, sub ea si deasupra ei
+  let jos = 0
+  let sus = 0
+  A.forEach((l, i) =>
+    l.forEach((x, j) => {
+      if (x === 0) return
+      jos = Math.max(jos, i - j)
+      sus = Math.max(sus, j - i)
+    }),
+  )
+  if (n > 1) {
+    if (jos === 0 && sus === 0) rez.push(p('propDiagonala'))
+    else if (sus === 0) rez.push(p('propInferior'))
+    else if (jos === 0) rez.push(p('propSuperior'))
+    // orice matrice 2 x 2 este tridiagonala si Hessenberg; structura de banda se spune de la n = 3
+    else if (n > 2 && jos === 1 && sus === 1) rez.push(p('propTridiagonala'))
+    // Hessenberg este banda cu o singura diagonala de o parte si toate de cealalta
+    else if (n > 2 && jos === 1 && sus === n - 1) rez.push(p('propHessenbergSup'))
+    else if (n > 2 && sus === 1 && jos === n - 1) rez.push(p('propHessenbergInf'))
+    else if (n > 2 && (jos < n - 1 || sus < n - 1)) rez.push(p('propBanda', jos, sus))
+  }
+  const simetrica = A.every((l, i) => l.every((x, j) => x === A[j][i]))
+  if (simetrica && n > 1) rez.push(p('propSimetrica'))
+  const QtQ = A[0].map((_, i) => A[0].map((_, j) => A.reduce((s, l) => s + l[i] * l[j], 0)))
+  if (QtQ.every((l, i) => l.every((x, j) => Math.abs(x - (i === j ? 1 : 0)) <= 1e-9))) rez.push(p('propOrtogonala'))
+  if (esteDominanta(A)) rez.push(p('propDominanta'))
+  const r = rang(A)
+  rez.push(r === n ? p('propNesingulara') : p('propSingulara', r))
+  if (n > 1) {
+    const k = pivotNul(A, n - 1)
+    rez.push(k ? p('propLiderNu', k) : p('propLider'))
+  }
+  if (simetrica) {
+    const k = pasNepozitiv(A)
+    rez.push(k ? p('propNuSpd', k) : p('propSpd'))
+  }
+  if (iteratie && A.every((l, i) => l[i] !== 0)) {
+    const rho = Number(razaSpectrala(matriceIteratie(A, iteratie)).toPrecision(3))
+    rez.push(p(iteratie === 'jacobi' ? 'propRhoJacobi' : 'propRhoGS', rho))
+  }
+  return rez
 }

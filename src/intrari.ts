@@ -4,7 +4,7 @@ import type { Algoritm, Intrare } from './motor/biblioteca'
 import type { Intrari } from './motor/interpretor'
 import { mesaj } from './motor/mesaje'
 import type { CheieText } from './i18n'
-import { esteDominanta, esteMatrice, esteVector, genereaza, incalca, matriceIteratie, razaSpectrala, type Abatere, type Valoare } from './natura'
+import { esteDominanta, esteMatrice, esteVector, genereaza, incalca, matriceIteratie, razaSpectrala, type Abatere, type Structura, type Valoare } from './natura'
 
 export type TipIntrare = Intrare['tip']
 
@@ -12,6 +12,8 @@ export interface Definitie {
   nume: string
   tip: TipIntrare
   text: string
+  // tipul ales din meniu pentru o matrice; lipsa: cel cerut de algoritm
+  structura?: Structura
 }
 
 export class EroareIntrare extends Error {}
@@ -110,18 +112,32 @@ function latimiPentru(c: Intrare | undefined, definitii: Definitie[]): [number, 
 // intrarea `c` depinde de intrarea numita `nume`: o foloseste ca matrice a sistemului, vector indexat sau latime de banda
 const depinde = (c: Intrare, nume: string): boolean => c.cu === nume || !!c.latimi?.includes(nume) || c.dimensiune?.[0] === nume
 
-// Valori noi pentru intrarea k, cu dimensiunile ei si cu natura ceruta de algoritm. Intrarile a
-// caror natura depinde de ea (termenul liber al unui sistem compatibil, o matrice banda dupa o
-// latime noua) si nu mai e respectata se genereaza si ele din nou.
-export function aleatoare(definitii: Definitie[], k: number, cerute: Intrare[], rnd: () => number = Math.random): Definitie[] {
+// Valori noi pentru intrarea k, cu dimensiunile ei si cu natura ceruta de algoritm, sau cu tipul
+// ales din meniu. `schimbare` da alt tip sau alte dimensiuni pentru intrarea k. Intrarile a caror
+// natura sau dimensiune depinde de ea (termenul liber al unui sistem compatibil, un vector cu
+// lungimea data de matrice, o matrice banda dupa o latime noua) si nu mai e respectata se
+// genereaza si ele din nou.
+export function aleatoare(
+  definitii: Definitie[],
+  k: number,
+  cerute: Intrare[],
+  rnd: () => number = Math.random,
+  schimbare: { structura?: Structura | null; forma?: [number, number] } = {},
+): Definitie[] {
   const rez = [...definitii]
+  if (schimbare.structura !== undefined) {
+    const { structura: _, ...fara } = rez[k]
+    rez[k] = schimbare.structura === null ? fara : { ...fara, structura: schimbare.structura }
+  }
   const noua = (idx: number) => {
     const d = rez[idx]
     const c = cerinta(d, cerute)
     // un vector cu dimensiunea legata de o matrice primeste lungimea ei
     const ref = valoare(dupaNume(rez, c?.dimensiune?.[0]))
     const dorita: [number, number] | null = c?.dimensiune && esteMatrice(ref) ? [c.dimensiune[1] === 'linii' ? ref.length : ref[0].length, forma(d)[1]] : null
-    const cerere = { tip: d.tip, natura: c?.aleator ?? c?.natura, forma: dorita ?? forma(d), cu: valoare(dupaNume(rez, c?.cu)), latimi: latimiPentru(c, rez) }
+    const ceruta = idx === k ? schimbare.forma : undefined
+    const natura = d.tip === 'matrice' && d.structura ? d.structura : (c?.aleator ?? c?.natura)
+    const cerere = { tip: d.tip, natura, forma: ceruta ?? dorita ?? forma(d), cu: valoare(dupaNume(rez, c?.cu)), latimi: latimiPentru(c, rez) }
     rez[idx] = { ...d, text: textDinValoare(genereaza(cerere, rnd)) }
   }
   noua(k)

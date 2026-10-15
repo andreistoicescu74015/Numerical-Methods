@@ -552,4 +552,26 @@ describe('aplicația montată', () => {
     await apasa(gazda, 'Light theme')
     expect(document.documentElement.dataset.tema).toBe('luminos')
   })
+
+  it('meniul de tip și butoanele de dimensiune generează matricea cerută, iar rândul de proprietăți o descrie', async () => {
+    const gazda = await monteaza()
+    // exemplul de la G: proprietatile lui apar sub matrice
+    expect(gazda.querySelector('.intrare .proprietati')?.textContent).toContain('submatricele lider principale nesingulare')
+    await scrieIn(gazda.querySelector<HTMLSelectElement>('.tip-matrice select')!, 'tridiagonala')
+    const A = () => gazda.querySelector<HTMLTextAreaElement>('.intrare.matrice textarea')!.value.split('\n').map((l) => l.trim().split(/\s+/).map(Number))
+    expect(A()).toHaveLength(3)
+    expect(A()[0][2]).toBe(0)
+    expect(A()[2][0]).toBe(0)
+    expect(gazda.querySelector('.intrare .proprietati')?.textContent).toContain('tridiagonală')
+    // G cere o matrice patrata: un singur control, ordinul
+    const plus = gazda.querySelector<HTMLButtonElement>('.forma-intrare button[aria-label="ordinul: cu unu mai mult"]')!
+    await act(async () => {
+      plus.click()
+    })
+    expect(A()).toHaveLength(4)
+    expect(A().every((l) => l.length === 4)).toBe(true)
+    // tipul ales ramane: matricea noua e tot tridiagonala, iar rularea a pornit pe ea
+    expect(A()[0][3]).toBe(0)
+    expect(gazda.querySelectorAll('.grila')[0].querySelectorAll('.celula').length).toBe(16)
+  })
 })
