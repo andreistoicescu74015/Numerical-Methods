@@ -1,6 +1,6 @@
 import katex from 'katex'
 import { describe, expect, it } from 'vitest'
-import { rupturi } from '../src/componente/Formula'
+import { bucatiFormula, grupuriRupt, rupturi } from '../src/componente/Formula'
 import { TEXTE } from '../src/i18n'
 import { BIBLIOTECA, type Algoritm } from '../src/motor/biblioteca'
 import { urma } from '../src/motor/interpretor'
@@ -90,11 +90,31 @@ describe('formulele care se pot rupe pe rânduri păstrează intervalele și ind
     for (const tex of ['\\htmlClass{rol-pivot}{a_{11}}', '\\text{pasul 1-2: gata}', 'a_{ij} - \\mu_{ik} a_{kj}']) expect(rupturi(tex)).toBe(tex)
   })
 
+  it('formula pasului se taie în bucăți la „=” de pe primul nivel, nu în paranteze sau acolade', () => {
+    expect(bucatiFormula('a_{21} \\leftarrow \\mu_{21} = a_{21} / a_{11} = 2 / 1 = 2')).toEqual(['a_{21} \\leftarrow \\mu_{21}', '= a_{21} / a_{11}', '= 2 / 1', '= 2'])
+    expect(bucatiFormula('k \\leftarrow 2 \\qquad (k = 1 : 3)')).toEqual(['k \\leftarrow 2 \\qquad (k = 1 : 3)'])
+    expect(bucatiFormula('s \\leftarrow \\sum_{j=1}^{k-1} x_j = 3')).toEqual(['s \\leftarrow \\sum_{j=1}^{k-1} x_j', '= 3'])
+    expect(bucatiFormula('y \\leftarrow \\left( b_2 - 1 \\right) / \\htmlClass{rol-pivot}{a_{22}} = (13 - 5) / 7 = \\;?')).toEqual([
+      'y \\leftarrow \\left( b_2 - 1 \\right) / \\htmlClass{rol-pivot}{a_{22}}',
+      '= (13 - 5) / 7',
+      '= \\;?',
+    ])
+    expect(bucatiFormula('a_{11} = 0 \\text{fals}')).toEqual(['a_{11}', '= 0 \\text{fals}'])
+  })
+
+  it('o formulă din sertar se rupe doar între relațiile despărțite prin \\quad', () => {
+    expect(grupuriRupt('D\\, x = N\\, x + b, \\qquad A = D - N, \\quad D = \\mathrm{diag}(a_{11})')).toBe('{D\\, x = N\\, x + b,} \\qquad {A = D - N,} \\quad {D = \\mathrm{diag}(a_{11})}')
+    expect(grupuriRupt('A = LU')).toBe('A = LU')
+    const html = katex.renderToString(`\\displaystyle ${rupturi(grupuriRupt('A = D - N, \\qquad D = I'))}`, { throwOnError: true, strict: false })
+    // KaTeX rupe randul doar intre cutiile .katex-base; cele doua relatii raman fiecare intr-una
+    expect(html.match(/class="katex-base"/g)?.length).toBe(2)
+  })
+
   it('forma, etapele și definițiile rămân LaTeX valid după transformare', () => {
     const tex = [...BIBLIOTECA.flatMap((a) => [a.forma, ...a.etape.map((e) => e.tex)]), ...Object.values(OPERATII).map((o) => o.definitie)]
     for (const t of tex) {
       expect(() => katex.renderToString(rupturi(t), { throwOnError: true, trust: true, strict: false }), t).not.toThrow()
-      expect(() => katex.renderToString(`\\displaystyle ${rupturi(t)}`, { throwOnError: true, trust: true, strict: false }), t).not.toThrow()
+      expect(() => katex.renderToString(`\\displaystyle ${rupturi(grupuriRupt(t))}`, { throwOnError: true, trust: true, strict: false }), t).not.toThrow()
     }
   })
 })

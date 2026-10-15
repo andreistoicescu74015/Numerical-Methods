@@ -256,7 +256,7 @@ describe('aplicația montată', () => {
     const gazda = await monteaza()
     await comanda(gazda, 'urmatoareaScriere')
     expect(gazda.querySelector('.stare')?.textContent).toContain('pasul 3 din 22')
-    expect(gazda.querySelector('.cm-anotare')?.textContent).toBe('i = 2, k = 1')
+    expect(gazda.querySelector('.cm-anotare')?.textContent).toBe('k = 1, i = 2')
     await comanda(gazda, 'urmatoareaScriere')
     expect(gazda.querySelector('.stare')?.textContent).toContain('pasul 5 din 22')
     await comanda(gazda, 'scriereaAnterioara')

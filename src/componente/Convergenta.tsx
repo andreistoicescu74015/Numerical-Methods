@@ -49,6 +49,9 @@ export function useLatime() {
   const [latime, setLatime] = useState(600)
   const ref = useCallback((el: HTMLDivElement | null) => {
     if (!el || typeof ResizeObserver === 'undefined') return
+    // masurat si acum, nu doar la prima notificare a observatorului, care vine abia cu un cadru nou
+    const w0 = Math.round(el.getBoundingClientRect().width)
+    if (w0 > 0) setLatime(w0)
     const o = new ResizeObserver(([e]) => {
       const w = Math.round(e.contentRect.width)
       if (w > 0) setLatime(w)

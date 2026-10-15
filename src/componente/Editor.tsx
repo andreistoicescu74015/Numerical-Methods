@@ -56,6 +56,8 @@ const temaEditor = (tema: Tema) =>
         backgroundColor: tema === 'intunecat' ? '#2f4a73' : '#cfe0ff',
       },
       '.cm-activeLine': { backgroundColor: tema === 'intunecat' ? 'rgba(255, 255, 255, 0.04)' : 'rgba(0, 0, 0, 0.03)' },
+      // fara focus, singura linie evidentiata ramane cea a pasului
+      '&:not(.cm-focused) .cm-activeLine': { backgroundColor: 'transparent' },
       '.cm-activeLineGutter': { backgroundColor: 'transparent' },
       '.cm-gutters': { backgroundColor: 'var(--panou)', color: 'var(--text-slab)', border: 'none' },
     },

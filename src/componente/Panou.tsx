@@ -15,7 +15,7 @@ interface Props {
 // cand panoul e inchis, ca graficele sa fie gata la deschidere.
 export function Panou({ clasa, titlu, rezumat, deschis, onToggle, children }: Props) {
   return (
-    <details className={`panou ${clasa}`} open={deschis} onToggle={(e) => onToggle((e.currentTarget as HTMLDetailsElement).open)}>
+    <details id={`panou-${clasa}`} className={`panou ${clasa}`} open={deschis} onToggle={(e) => onToggle((e.currentTarget as HTMLDetailsElement).open)}>
       <summary>
         <h2>{titlu}</h2>
         {rezumat !== undefined && rezumat !== null && rezumat !== '' && <span className="rezumat">{rezumat}</span>}

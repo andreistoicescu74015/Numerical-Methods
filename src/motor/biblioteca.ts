@@ -131,8 +131,8 @@ const triangularizare = (x: Marimi) => {
 }
 
 const LIDER: Text = {
-  ro: 'n x n, cu submatricele lider principale A[k] nesingulare (A[k] = primele k linii și coloane, k = 1 : n-1)',
-  en: 'n x n, with nonsingular leading principal submatrices A[k] (A[k] = the first k rows and columns, k = 1 : n-1)',
+  ro: 'n × n, cu submatricele lider principale A[k] nesingulare (A[k] = primele k linii și coloane, k = 1 : n-1)',
+  en: 'n × n, with nonsingular leading principal submatrices A[k] (A[k] = the first k rows and columns, k = 1 : n-1)',
 }
 const TOLERANTA: Text = { ro: 'toleranța pentru ‖Ax − b‖ / ‖b‖, între 0 și 1', en: 'tolerance for ‖Ax − b‖ / ‖b‖, between 0 and 1' }
 const MAXITER: Text = { ro: 'numărul maxim de iterații', en: 'maximum number of iterations' }
@@ -180,7 +180,7 @@ const ETAPE_QR: Etapa[] = [
   },
   {
     linii: [11, 13],
-    tex: 'A(k\\!:\\!m,\\, j) \\leftarrow A(k\\!:\\!m,\\, j) - \\nu\\, u_k(k\\!:\\!m), \\qquad \\nu = \\frac{u_k^T A(:,\\, j)}{\\beta_k}',
+    tex: 'A(k\\!:\\!m,\\, j) \\leftarrow A(k\\!:\\!m,\\, j) - \\nu\\, u_k(k\\!:\\!m), \\qquad \\nu = \\dfrac{u_k^T A(:,\\, j)}{\\beta_k}',
     text: { ro: 'reflectorul U_k aplicat pe fiecare coloană j > k: un produs scalar și o actualizare de vector', en: 'the reflector U_k applied to every column j > k: one dot product and one vector update' },
   },
   {
@@ -255,7 +255,7 @@ pentru i = 1 : m
     pentru j = 1 : n
         y_i ← y_i + a_ij x_j`,
     intrari: [
-      { nume: 'A', tip: 'matrice', exemplu: [[1, 2, 0], [0, 1, 3], [4, 0, 1], [2, 2, 2]], descriere: { ro: 'm x n', en: 'm x n' } },
+      { nume: 'A', tip: 'matrice', exemplu: [[1, 2, 0], [0, 1, 3], [4, 0, 1], [2, 2, 2]], descriere: { ro: 'm × n', en: 'm × n' } },
       { nume: 'x', tip: 'vector', exemplu: [1, 2, 3], descriere: { ro: 'lungime n, câte coloane are A', en: 'length n, the number of columns of A' }, dimensiune: ['A', 'coloane'] },
     ],
   },
@@ -300,8 +300,8 @@ pentru j = 1 : n
         pentru k = 1 : l
             c_ij ← c_ij + a_ik b_kj`,
     intrari: [
-      { nume: 'A', tip: 'matrice', exemplu: [[1, 2], [0, 1], [3, 1]], descriere: { ro: 'm x l', en: 'm x l' } },
-      { nume: 'B', tip: 'matrice', exemplu: [[1, 0, 2], [2, 1, 0]], descriere: { ro: 'l x n, cu atâtea linii câte coloane are A', en: 'l x n, with as many rows as A has columns' }, dimensiune: ['A', 'coloane'] },
+      { nume: 'A', tip: 'matrice', exemplu: [[1, 2], [0, 1], [3, 1]], descriere: { ro: 'm × l', en: 'm × l' } },
+      { nume: 'B', tip: 'matrice', exemplu: [[1, 0, 2], [2, 1, 0]], descriere: { ro: 'l × n, cu atâtea linii câte coloane are A', en: 'l × n, with as many rows as A has columns' }, dimensiune: ['A', 'coloane'] },
     ],
   },
   {
@@ -344,7 +344,7 @@ pentru i = 1 : n
         x_i ← x_i - l_ij x_j
     x_i ← x_i / l_ii`,
     intrari: [
-      { nume: 'L', tip: 'matrice', exemplu: [[2, 0, 0], [1, 3, 0], [-1, 2, 4]], descriere: { ro: 'n x n, inferior triunghiulară, cu diagonala nenulă', en: 'n x n, lower triangular, with a nonzero diagonal' }, natura: 'inferior' },
+      { nume: 'L', tip: 'matrice', exemplu: [[2, 0, 0], [1, 3, 0], [-1, 2, 4]], descriere: { ro: 'n × n, inferior triunghiulară, cu diagonala nenulă', en: 'n × n, lower triangular, with a nonzero diagonal' }, natura: 'inferior' },
       { nume: 'b', tip: 'vector', exemplu: [2, 7, 9], descriere: { ro: 'lungime n', en: 'length n' }, dimensiune: ['L', 'linii'] },
     ],
   },
@@ -388,7 +388,7 @@ pentru i = n : -1 : 1
         x_i ← x_i - u_ij x_j
     x_i ← x_i / u_ii`,
     intrari: [
-      { nume: 'U', tip: 'matrice', exemplu: [[2, 1, -1], [0, 3, 2], [0, 0, 4]], descriere: { ro: 'n x n, superior triunghiulară, cu diagonala nenulă', en: 'n x n, upper triangular, with a nonzero diagonal' }, natura: 'superior' },
+      { nume: 'U', tip: 'matrice', exemplu: [[2, 1, -1], [0, 3, 2], [0, 0, 4]], descriere: { ro: 'n × n, superior triunghiulară, cu diagonala nenulă', en: 'n × n, upper triangular, with a nonzero diagonal' }, natura: 'superior' },
       { nume: 'b', tip: 'vector', exemplu: [3, 11, 8], descriere: { ro: 'lungime n', en: 'length n' }, dimensiune: ['U', 'linii'] },
     ],
   },
@@ -474,7 +474,7 @@ pentru k = 1 : n-1
     sursa: `μ peste A
 fie p[n-1]
 ${SURSA_GPP}`,
-    intrari: [{ nume: 'A', tip: 'matrice', exemplu: [[1, 2, 1], [2, 1, 2], [1, 1, 2]], descriere: { ro: 'n x n, nesingulară', en: 'n x n, nonsingular' }, natura: 'nesingulara' }],
+    intrari: [{ nume: 'A', tip: 'matrice', exemplu: [[1, 2, 1], [2, 1, 2], [1, 1, 2]], descriere: { ro: 'n × n, nesingulară', en: 'n × n, nonsingular' }, natura: 'nesingulara' }],
   },
   {
     id: 'S_GPP',
@@ -524,7 +524,7 @@ pentru i = n : -1 : 1
         x_i ← x_i - u_ij x_j
     x_i ← x_i / u_ii`,
     intrari: [
-      { nume: 'A', tip: 'matrice', exemplu: [[1, 2, 1], [2, 1, 2], [1, 1, 2]], descriere: { ro: 'n x n, nesingulară', en: 'n x n, nonsingular' }, natura: 'nesingulara' },
+      { nume: 'A', tip: 'matrice', exemplu: [[1, 2, 1], [2, 1, 2], [1, 1, 2]], descriere: { ro: 'n × n, nesingulară', en: 'n × n, nonsingular' }, natura: 'nesingulara' },
       { nume: 'b', tip: 'vector', exemplu: [4, 5, 4], descriere: { ro: 'lungime n', en: 'length n' }, dimensiune: ['A', 'linii'] },
     ],
   },
@@ -616,7 +616,7 @@ pentru k = 1 : n
     a_kk ← l_kk = √α
     pentru i = k+1 : n
         a_ik ← l_ik = (a_ik - Σ_{j=1}^{k-1} l_ij l_kj) / l_kk`,
-    intrari: [{ nume: 'A', tip: 'matrice', exemplu: [[4, 2, 2], [2, 5, 3], [2, 3, 6]], descriere: { ro: 'n x n, simetrică și pozitiv definită', en: 'n x n, symmetric and positive definite' }, natura: 'spd' }],
+    intrari: [{ nume: 'A', tip: 'matrice', exemplu: [[4, 2, 2], [2, 5, 3], [2, 3, 6]], descriere: { ro: 'n × n, simetrică și pozitiv definită', en: 'n × n, symmetric and positive definite' }, natura: 'spd' }],
   },
   {
     id: 'JACOBI',
@@ -665,7 +665,7 @@ cât timp e > tol    % bucla nu este pe slide
     x ← y
     r ← A x - b; e ← ‖r‖ / ‖b‖; k ← k + 1`,
     intrari: [
-      { nume: 'A', tip: 'matrice', exemplu: [[2, 1], [5, 7]], descriere: { ro: 'n x n, cu diagonala nenulă', en: 'n x n, with a nonzero diagonal' }, natura: 'diagonalaNenula', aleator: 'dominanta', garantie: 'dominanta' },
+      { nume: 'A', tip: 'matrice', exemplu: [[2, 1], [5, 7]], descriere: { ro: 'n × n, cu diagonala nenulă', en: 'n × n, with a nonzero diagonal' }, natura: 'diagonalaNenula', aleator: 'dominanta', garantie: 'dominanta' },
       { nume: 'b', tip: 'vector', exemplu: [11, 13], descriere: { ro: 'lungime n, nenul', en: 'length n, nonzero' }, natura: 'nenul', dimensiune: ['A', 'linii'] },
       { nume: 'x', tip: 'vector', exemplu: [1, 1], descriere: PORNIRE, dimensiune: ['A', 'coloane'] },
       { nume: 'tol', tip: 'scalar', exemplu: 1e-3, descriere: TOLERANTA, natura: 'toleranta' },
@@ -715,7 +715,7 @@ cât timp e > tol    % bucla nu este pe slide
         x_i ← (b_i - Σ_{j=1}^{i-1} a_ij x_j - Σ_{j=i+1}^{n} a_ij x_j) / a_ii
     r ← A x - b; e ← ‖r‖ / ‖b‖; k ← k + 1`,
     intrari: [
-      { nume: 'A', tip: 'matrice', exemplu: [[16, 3], [7, -11]], descriere: { ro: 'n x n, cu diagonala nenulă', en: 'n x n, with a nonzero diagonal' }, natura: 'diagonalaNenula', aleator: 'dominanta', garantie: 'dominantaSauSpd' },
+      { nume: 'A', tip: 'matrice', exemplu: [[16, 3], [7, -11]], descriere: { ro: 'n × n, cu diagonala nenulă', en: 'n × n, with a nonzero diagonal' }, natura: 'diagonalaNenula', aleator: 'dominanta', garantie: 'dominantaSauSpd' },
       { nume: 'b', tip: 'vector', exemplu: [11, 13], descriere: { ro: 'lungime n, nenul', en: 'length n, nonzero' }, natura: 'nenul', dimensiune: ['A', 'linii'] },
       { nume: 'x', tip: 'vector', exemplu: [1, 1], descriere: PORNIRE, dimensiune: ['A', 'coloane'] },
       { nume: 'tol', tip: 'scalar', exemplu: 1e-6, descriere: TOLERANTA, natura: 'toleranta' },
@@ -740,12 +740,12 @@ cât timp e > tol    % bucla nu este pe slide
       en: '≈ 6n flops per row (4n when the row norms are computed once), plus ≈ 2mn for the residual',
     },
     estimare: (x) => (8 * x.iteratii + 2) * x.forme.A[0] * x.forme.A[1],
-    forma: 'x^{(k+1)} = x^{(k)} - \\frac{a_i^T x^{(k)} - b_i}{\\|a_i\\|^2}\\, a_i, \\qquad a_i^T = A(i, :)',
+    forma: 'x^{(k+1)} = x^{(k)} - \\dfrac{a_i^T x^{(k)} - b_i}{\\|a_i\\|^2}\\, a_i, \\qquad a_i^T = A(i, :)',
     etape: [
       { linii: [1, 1], tex: 'r = A x - b, \\qquad e = \\|r\\| / \\|b\\|', text: REZIDUU_PORNIRE },
       {
         linii: [5, 5],
-        tex: '\\alpha = \\frac{A(i, :)\\, x - b_i}{\\|A(i, :)\\|^2}',
+        tex: '\\alpha = \\dfrac{A(i, :)\\, x - b_i}{\\|A(i, :)\\|^2}',
         text: { ro: 'cu cât greșește x ecuația i, împărțit la pătratul normei liniei', en: 'by how much x misses equation i, divided by the squared norm of the row' },
       },
       {
@@ -774,7 +774,7 @@ cât timp e > tol    % bucla nu este pe slide
         x ← x - α A(i, :)^T
     r ← A x - b; e ← ‖r‖ / ‖b‖; k ← k + 1`,
     intrari: [
-      { nume: 'A', tip: 'matrice', exemplu: [[2, 1], [1, 3]], descriere: { ro: 'm x n, fără linii nule', en: 'm x n, with no zero rows' }, natura: 'liniiNenule', aleator: 'liniiDominante' },
+      { nume: 'A', tip: 'matrice', exemplu: [[2, 1], [1, 3]], descriere: { ro: 'm × n, fără linii nule', en: 'm × n, with no zero rows' }, natura: 'liniiNenule', aleator: 'liniiDominante' },
       { nume: 'b', tip: 'vector', exemplu: [5, 10], descriere: { ro: 'lungime m, nenul, pentru care Ax = b are soluție', en: 'length m, nonzero, for which Ax = b has a solution' }, natura: 'compatibil', cu: 'A', dimensiune: ['A', 'linii'] },
       { nume: 'x', tip: 'vector', exemplu: [0, 0], descriere: PORNIRE, dimensiune: ['A', 'coloane'] },
       { nume: 'tol', tip: 'scalar', exemplu: 1e-3, descriere: TOLERANTA, natura: 'toleranta' },
@@ -796,7 +796,7 @@ cât timp e > tol    % bucla nu este pe slide
     },
     cost: { ro: '≈ 3(m − k + 1) flopi și un radical', en: '≈ 3(m − k + 1) flops and one square root' },
     estimare: (x) => 3 * (x.forme.x[0] - x.scalari.k + 1),
-    forma: 'U_k = I_m - \\frac{u u^T}{\\beta}, \\qquad U_k x = (x_1, \\dots, x_{k-1}, -\\sigma, 0, \\dots, 0)^T',
+    forma: 'U_k = I_m - \\dfrac{u u^T}{\\beta}, \\qquad U_k x = (x_1, \\dots, x_{k-1}, -\\sigma, 0, \\dots, 0)^T',
     etape: [
       {
         linii: [4, 6],
@@ -853,7 +853,7 @@ dacă k < m atunci
     },
     cost: { ro: '≈ 2(mn² − n³/3) flopi, pentru m ≥ n', en: '≈ 2(mn² − n³/3) flops, for m ≥ n' },
     estimare: triangularizare,
-    forma: 'U_s \\cdots U_2 U_1 A = R, \\qquad U_k = I_m - \\frac{u_k u_k^T}{\\beta_k}, \\qquad s = \\min(m-1, n)',
+    forma: 'U_s \\cdots U_2 U_1 A = R, \\qquad U_k = I_m - \\dfrac{u_k u_k^T}{\\beta_k}, \\qquad s = \\min(m-1, n)',
     etape: ETAPE_QR,
     practic: {
       ro: 'Reflectorii sunt matrice ortogonale, deci păstrează norma coloanelor (cursul: ‖Ux‖ = ‖x‖); nu este nevoie de pivotare, iar cartea cursului arată că algoritmul este numeric stabil. Pentru o matrice pătrată costul este ≈ 4n³/3, dublu față de eliminarea gaussiană, de aceea cursul preferă eliminarea gaussiană în cazul pătrat și folosește QR pentru problema celor mai mici pătrate. Matricea Q nu se formează: se păstrează vectorii u_k și scalarii β_k, iar Qᵀb se calculează aplicând reflectorii pe rând. numpy.linalg.qr dă aceeași factorizare, cu liniile lui R eventual de semn opus.',
@@ -867,7 +867,7 @@ dacă k < m atunci
       dif('np.abs(R)', 'np.abs(np.linalg.qr(A)[1])'),
     ],
     sursa: SURSA_QR,
-    intrari: [{ nume: 'A', tip: 'matrice', exemplu: [[2, 3], [-1, 1], [2, -1]], descriere: { ro: 'm x n', en: 'm x n' } }],
+    intrari: [{ nume: 'A', tip: 'matrice', exemplu: [[2, 3], [-1, 1], [2, -1]], descriere: { ro: 'm × n', en: 'm × n' } }],
   },
   {
     id: 'SQR',
@@ -930,7 +930,7 @@ pentru k = n : -1 : 1
     x_k ← (b_k - Σ_{j=k+1}^{n} a_kj x_j) / a_kk
 r ← ‖b(n+1:m)‖    % din slide-ul de dinainte`,
     intrari: [
-      { nume: 'A', tip: 'matrice', exemplu: [[2, 3], [-1, 1], [2, -1]], descriere: { ro: 'm x n, cu m > n și coloane liniar independente', en: 'm x n, with m > n and linearly independent columns' }, natura: 'coloaneIndependente' },
+      { nume: 'A', tip: 'matrice', exemplu: [[2, 3], [-1, 1], [2, -1]], descriere: { ro: 'm × n, cu m > n și coloane liniar independente', en: 'm × n, with m > n and linearly independent columns' }, natura: 'coloaneIndependente' },
       { nume: 'b', tip: 'vector', exemplu: [1, 2, 3], descriere: { ro: 'lungime m', en: 'length m' }, dimensiune: ['A', 'linii'] },
     ],
   },
@@ -949,12 +949,12 @@ r ← ‖b(n+1:m)‖    % din slide-ul de dinainte`,
     },
     cost: { ro: '≈ 2n² flopi pe iterație', en: '≈ 2n² flops per iteration' },
     estimare: (x) => 2 * x.iteratii * x.forme.A[0] ** 2,
-    forma: 'y^{(k)} = \\frac{A\\, y^{(k-1)}}{\\|A\\, y^{(k-1)}\\|}, \\qquad e_k = \\left|1 - |(y^{(k)})^T y^{(k-1)}|\\right|',
+    forma: 'y^{(k)} = \\dfrac{A\\, y^{(k-1)}}{\\|A\\, y^{(k-1)}\\|}, \\qquad e_k = \\left|1 - |(y^{(k)})^T y^{(k-1)}|\\right|',
     etape: [
       { linii: [1, 1], tex: 'y \\leftarrow y / \\|y\\|', text: { ro: 'vectorul de pornire se normează', en: 'the starting vector is normalized' } },
       {
         linii: [4, 5],
-        tex: 'z = \\frac{A y}{\\|A y\\|}',
+        tex: 'z = \\dfrac{A y}{\\|A y\\|}',
         text: { ro: 'o iterație: un produs matrice-vector și o normare', en: 'one iteration: a matrix-vector product and a normalization' },
       },
       {
@@ -986,7 +986,7 @@ cât timp e > tol
     e ← |1 - |z^T y||
     y ← z; i ← i + 1`,
     intrari: [
-      { nume: 'A', tip: 'matrice', exemplu: [[2, 1], [1, 2]], descriere: { ro: 'n x n, cu o valoare proprie dominantă', en: 'n x n, with a dominant eigenvalue' }, aleator: 'asemenea' },
+      { nume: 'A', tip: 'matrice', exemplu: [[2, 1], [1, 2]], descriere: { ro: 'n × n, cu o valoare proprie dominantă', en: 'n × n, with a dominant eigenvalue' }, aleator: 'asemenea' },
       {
         nume: 'y',
         tip: 'vector',
@@ -1116,7 +1116,7 @@ pentru k = 1 : n-1
         nume: 'A',
         tip: 'matrice',
         exemplu: [[2, 1, 0, 0, 0], [4, 3, 1, 0, 0], [0, 3, 4, 1, 0], [0, 0, 2, 3, 1], [0, 0, 0, 1, 2]],
-        descriere: { ro: 'n x n, bandă cu lățimile r și q, cu submatricele lider principale nesingulare', en: 'n x n, banded with widths r and q, with nonsingular leading principal submatrices' },
+        descriere: { ro: 'n × n, bandă cu lățimile r și q, cu submatricele lider principale nesingulare', en: 'n × n, banded with widths r and q, with nonsingular leading principal submatrices' },
         natura: 'bandaLider',
         aleator: 'bandaLider',
         latimi: ['r', 'q'],
@@ -1191,7 +1191,7 @@ pentru k = 1 : n-1
         nume: 'A',
         tip: 'matrice',
         exemplu: [[1, 2, 0, 0, 0], [3, 1, 1, 0, 0], [0, 4, 1, 2, 0], [0, 0, 1, 3, 1], [0, 0, 0, 2, 1]],
-        descriere: { ro: 'n x n, bandă cu lățimile r și q, nesingulară', en: 'n x n, banded with widths r and q, nonsingular' },
+        descriere: { ro: 'n × n, bandă cu lățimile r și q, nesingulară', en: 'n × n, banded with widths r and q, nonsingular' },
         natura: 'bandaNesingulara',
         latimi: ['r', 'q'],
       },
@@ -1250,7 +1250,7 @@ pentru i = n : -1 : 1
         nume: 'U',
         tip: 'matrice',
         exemplu: [[2, 1, 0, 0, 0], [0, 1, 1, 0, 0], [0, 0, 1, 1, 0], [0, 0, 0, 1, 1], [0, 0, 0, 0, 1]],
-        descriere: { ro: 'n x n, superior triunghiulară, bandă cu q diagonale deasupra diagonalei, cu diagonala nenulă', en: 'n x n, upper triangular, banded with q diagonals above the main one, with a nonzero diagonal' },
+        descriere: { ro: 'n × n, superior triunghiulară, bandă cu q diagonale deasupra diagonalei, cu diagonala nenulă', en: 'n × n, upper triangular, banded with q diagonals above the main one, with a nonzero diagonal' },
         natura: 'superiorBanda',
         latimi: [0, 'q'],
       },

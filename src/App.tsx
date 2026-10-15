@@ -157,6 +157,18 @@ function rezumatDefinitie(d: Definitie): string {
   return d.tip === 'vector' ? `${nume} ${coloane}` : `${nume} ${linii.length}×${coloane}`
 }
 
+// rezumatul panoului "Despre algoritm": costul pana la prima virgula din afara parantezelor,
+// ca sa incapa langa titlu („≈ 2n² flopi pe iterație”); restul ramane in descriere
+function rezumatCost(cost: string): string {
+  let adancime = 0
+  for (let i = 0; i < cost.length; i++) {
+    if (cost[i] === '(') adancime++
+    else if (cost[i] === ')') adancime--
+    else if (cost[i] === ',' && adancime === 0) return cost.slice(0, i)
+  }
+  return cost
+}
+
 export default function App() {
   return (
     <Preferinte>
@@ -231,6 +243,7 @@ function Continut() {
     if (b) {
       const l = limbaCurenta.current
       setRulare(null)
+      setK(0)
       setAscuns(false)
       setEroare({ linie: null, mesaj: text(l, 'nuRuleaza', text(l, b.abatere.cheie, b.nume, ...b.abatere.args)) })
       return
@@ -254,6 +267,7 @@ function Continut() {
       else setAscuns((a) => a && !!rez.pasi[nou].intrebare)
     } catch (e) {
       setRulare(null)
+      setK(0)
       setAscuns(false)
       setEroare({ linie: e instanceof EroareSintaxa ? e.linie : null, mesaj: e instanceof Error ? e.message : String(e) })
     }
@@ -577,11 +591,14 @@ function Continut() {
   const variabile = useMemo(() => (rulare ? variabilePeLinie(rulare.program) : new Map<number, string[]>()), [rulare])
   // langa linia curenta stau valorile cu care se calculeaza: scalarul scris apare cu valoarea veche
   const inainteDePas = (nume: string): number | undefined => (pas?.scalarScris?.nume === nume ? pas.scalarScris.vechi : pas?.scalari[nume])
+  // in ordinea din card (a primei atribuiri: bucla exterioara intai), nu a aparitiei pe linie
+  const ordineScalari = pas ? Object.keys(pas.scalari) : []
   const anotare =
     pas && pas.linie > 0
       ? (variabile.get(pas.linie) ?? [])
           .map((v) => [v, inainteDePas(v)] as const)
           .filter((x): x is readonly [string, number] => x[1] !== undefined)
+          .sort((a, b) => ordineScalari.indexOf(a[0]) - ordineScalari.indexOf(b[0]))
           .map(([v, val]) => `${v} = ${fmtCelula(val)}`)
           .join(', ')
       : ''
@@ -827,8 +844,9 @@ function Continut() {
               {pas && (
                 <>
                   <strong>{t('pasul', k + 1, total)}</strong>
-                  {pas.linie > 0 && <> · {t('linia', pas.linie)}</>} · {nrFlopi(limba, pas.flopi)}
-                  {rulare && rulare.cifre > 0 && <> · {t('cuCifre', rulare.cifre)}</>}
+                  {pas.linie > 0 && <span> · {t('linia', pas.linie)}</span>}
+                  <span> · {nrFlopi(limba, pas.flopi)}</span>
+                  {rulare && rulare.cifre > 0 && <span> · {t('cuCifre', rulare.cifre)}</span>}
                 </>
               )}
             </p>
@@ -884,7 +902,23 @@ function Continut() {
             </p>
           )}
           {pas?.mesaj && <p className={`mesaj ${pas.final ?? ''}`}>{pas.mesaj}</p>}
-          {pas?.final === 'gata' && cuVerificare && verificari.length > 0 && <RanduriVerificare randuri={verificari} clasa="verificare-scurta" />}
+          {pas?.final === 'gata' && cuVerificare && verificari.length > 0 && (
+            <>
+              <RanduriVerificare randuri={verificari} clasa="verificare-scurta" />
+              <p className="catre-verificare">
+                <a
+                  href="#panou-verificare"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setDeschise((s) => ({ ...s, verificare: true }))
+                    document.getElementById('panou-verificare')?.scrollIntoView({ block: 'start' })
+                  }}
+                >
+                  {t('detaliiVerificare')}
+                </a>
+              </p>
+            </>
+          )}
           <OperatiiPas operatii={pas?.operatii} />
         </div>
         {!animat && <p className="ajutor matrice-mare">{t('matriceMare', CELULE_ANIMATE)}</p>}
@@ -965,7 +999,7 @@ function Continut() {
             />
           </Panou>
         )}
-        <Panou clasa="despre" titlu={t('despre')} rezumat={alg ? alg.cost[limba] : undefined} deschis={deschise.despre} onToggle={deschide('despre')}>
+        <Panou clasa="despre" titlu={t('despre')} rezumat={alg ? rezumatCost(alg.cost[limba]) : undefined} deschis={deschise.despre} onToggle={deschide('despre')}>
           <p className="descriere">
             {alg ? alg.descriere[limba] : t('propriuAjutor')}
             {alg && (

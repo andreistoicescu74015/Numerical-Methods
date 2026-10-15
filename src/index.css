@@ -369,15 +369,18 @@ button.icon svg {
   stroke-linejoin: round;
 }
 
+/* starea apasata: fond deschis si o linie dedesubt; pasul inainte ramane singurul buton plin */
 button.icon[aria-pressed='true'] {
-  background: var(--titlu);
+  background: var(--f-info);
   border-color: var(--titlu);
-  color: var(--pe-titlu);
+  color: var(--c-info);
+  box-shadow: inset 0 -2px 0 var(--titlu);
 }
 
 button.mic {
   font-size: 0.78rem;
   padding: 0.15rem 0.45rem;
+  min-height: 1.75rem;
 }
 
 /* harta tastelor: un popover din antet */
@@ -458,6 +461,19 @@ button.mic {
   padding: 0.75rem 1rem 0.75rem 0.5rem;
   gap: 0.5rem;
   border-left: 1px solid var(--contur);
+}
+
+/* o umbra la marginea de jos cat timp sertarul mai are panouri sub pliu; la capat dispare */
+.sertar::after {
+  content: '';
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  flex: none;
+  height: 1.25rem;
+  margin-top: -0.5rem;
+  background: linear-gradient(to bottom, transparent, var(--fundal));
+  pointer-events: none;
 }
 
 .antet-cod {
@@ -708,7 +724,8 @@ button.mic {
 }
 
 .forma-intrare .dim button {
-  min-width: 1.6rem;
+  min-width: 1.75rem;
+  min-height: 1.75rem;
   line-height: 1;
 }
 
@@ -879,10 +896,11 @@ button.mic {
   left: 0.7rem;
 }
 
+/* fara culorile de rol, dar lizibila: studentul compara rularea veche cu ce urmeaza */
 .scena.veche .grile,
 .scena.veche .pas {
-  opacity: 0.55;
-  filter: saturate(0.5);
+  filter: grayscale(1);
+  opacity: 0.85;
 }
 
 .pas {
@@ -916,6 +934,12 @@ button.mic {
   font-weight: 600;
 }
 
+/* un segment („linia 9”, „2 flopi”) nu se rupe in interior: randul se rupe doar la „·” */
+.stare strong,
+.stare span {
+  white-space: nowrap;
+}
+
 /* comutatorul de mod: parcurgere | exercitiu */
 .mod {
   display: flex;
@@ -943,8 +967,10 @@ button.mic {
 }
 
 .mod .segmente button[aria-pressed='true'] {
-  background: var(--titlu);
-  color: var(--pe-titlu);
+  background: var(--f-info);
+  color: var(--c-info);
+  font-weight: 600;
+  box-shadow: inset 0 -2px 0 var(--titlu);
 }
 
 .mod .scor {
@@ -985,7 +1011,10 @@ button.mic {
   overflow-x: auto;
   min-height: 3.4rem;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  /* intre bucatile care incep cu "=" ramane doar umplutura lor de 3px, cat spatiul KaTeX din jurul unei relatii */
+  gap: 0;
   /* loc pentru chenarul pivotului, care altfel ar fi taiat de derulare */
   padding: 2px 3px;
 }
@@ -1012,6 +1041,20 @@ button.mic {
 .formula-rupta {
   justify-content: safe center;
   text-align: center;
+}
+
+/* in sertar formulele nu au inaltime rezervata ca in card si sunt putin mai mici, ca forma
+   matriceala sa incapa pe un rand in sertarul de 17 rem */
+.sertar .formula {
+  min-height: 0;
+  font-size: 1rem;
+}
+
+/* in sertarul de 17 rem forma matriceala (M_{n-1} P_{n-1} ... M_1 P_1 A = U) incape pe un rand */
+@media (max-width: 74.99em) {
+  .sertar .formula {
+    font-size: 0.85rem;
+  }
 }
 
 /* KaTeX pune in formule cutii invizibile (.pstrut) mai inalte decat randul; fara overflow-y
@@ -1062,6 +1105,8 @@ button.mic {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.8rem;
+  /* ia tot randul actiunilor, ca sa aiba loc campul de raspuns */
+  flex: 1 1 auto;
 }
 
 .raspuns label {
@@ -1070,11 +1115,16 @@ button.mic {
   align-items: center;
   gap: 0.4rem;
   color: var(--text-sters);
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
 }
 
 .raspuns input {
-  width: 14rem;
-  max-width: 60vw;
+  flex: 1 1 12rem;
+  width: auto;
+  min-width: 0;
+  max-width: 24rem;
   border-color: var(--c-scris);
   font-family: var(--mono);
 }
@@ -1158,6 +1208,17 @@ button.mic {
 
 .operatii-pas .forme {
   color: var(--text-sters);
+}
+
+/* de la reziduurile din card la panoul Verificare, care e sub pliu la 1440 x 900 */
+.catre-verificare {
+  margin: 0;
+  font-size: 0.78rem;
+}
+
+.catre-verificare a {
+  color: var(--titlu);
+  text-decoration: underline dotted;
 }
 
 /* reziduurile de la sfarsit, in card */
@@ -1244,12 +1305,15 @@ button.mic {
   gap: 1.25rem;
   align-items: flex-start;
   padding: 0.25rem 0;
+  /* nu se strange sub inaltimea celulelor: la o fereastra joasa scena deruleaza, grila nu se taie */
+  flex: none;
 }
 
 .grile.compact {
   --cel: 1.9rem;
   --cel-min: 2.1rem;
   --indice: 1.1rem;
+  gap: 1rem;
 }
 
 .grila {
@@ -1340,6 +1404,8 @@ button.mic {
 
 .celula.rol-mult {
   border-color: var(--c-mult);
+  /* loc pentru litera μ din colt, ca sa nu se lipeasca de un minus */
+  padding-left: 0.65rem;
 }
 
 .celula.rol-mult::after {
@@ -1367,7 +1433,7 @@ button.mic {
 .legenda-rand {
   display: flex;
   align-items: center;
-  gap: 0.4rem 1rem;
+  gap: 0.4rem 0.75rem;
   flex-wrap: wrap;
   font-size: 0.78rem;
   color: var(--text-sters);
@@ -1378,7 +1444,7 @@ button.mic {
   margin: 0;
   padding: 0;
   display: flex;
-  gap: 0.3rem 0.9rem;
+  gap: 0.3rem 0.75rem;
   flex-wrap: wrap;
 }
 
@@ -1509,6 +1575,7 @@ button.mic {
 }
 
 .urma input[type='range'] {
+  accent-color: var(--titlu);
   position: absolute;
   inset: 0;
   width: 100%;
@@ -2156,8 +2223,14 @@ button.mic {
     min-width: 2.9rem;
   }
 
+  /* bara pe doua randuri: cursorul cu redarea si viteza, apoi cele sase butoane de parcurgere */
   .urma {
-    flex-basis: 100%;
+    flex: 1 1 6rem;
+    order: -1;
+  }
+
+  .comenzi > button.tasta:last-of-type,
+  .comenzi > label {
     order: -1;
   }
 
@@ -2170,6 +2243,22 @@ button.mic {
 @media (max-width: 37.49em) {
   .comenzi .tasta.principal {
     min-width: 4.5rem;
+  }
+
+  /* cele sase butoane de parcurgere incap pe un rand de 390 px */
+  .comenzi {
+    gap: 0.3rem;
+  }
+
+  .comenzi .tasta {
+    padding: 0.2rem 0.3rem;
+  }
+
+  /* tinte de atins cu degetul */
+  .forma-intrare .dim button,
+  .intrare .actiuni button {
+    min-width: 2.5rem;
+    min-height: 2.5rem;
   }
 
   .comenzi .tasta {
@@ -2215,6 +2304,14 @@ button.mic {
 
   .celula {
     print-color-adjust: exact;
+  }
+}
+
+/* in modul de contrast ridicat starea apasata ia culorile de selectie ale sistemului */
+@media (forced-colors: active) {
+  button[aria-pressed='true'] {
+    background: Highlight;
+    color: HighlightText;
   }
 }
 
