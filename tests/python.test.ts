@@ -181,6 +181,15 @@ p ← Σ_{i=1}^{n} (x_i > 2)`,
     iesiri: ['s', 't', 'c', 'u', 'v', 'p'],
   },
   {
+    // o comparatie folosita ca valoare da 1 sau 0: se aduna, se scade si se neaga ca un numar
+    nume: 'comparatii_ca_valori',
+    sursa: `c ← (x_1 > 0) + (x_2 > 0)
+d ← (x_1 > 0) - (x_2 > 0)
+e ← -(x_1 > 0)`,
+    intrari: { x: [1, 1] },
+    iesiri: ['c', 'd', 'e'],
+  },
+  {
     // scalari cu expresii in nume: p_{k-1} si p_{k+1} sunt nume diferite
     nume: 'nume_cu_expresii',
     sursa: `p_{k-1} ← 1

@@ -28,6 +28,19 @@ describe('mesajele motorului urmează limba aleasă', () => {
     const chol = urma(parseaza(algoritm('CHOL')!.sursa), { A: [[4, 2], [2, 5]] })
     expect(chol.pasi.find((p) => p.formula?.includes('\\text{false}'))).toBeDefined()
   })
+
+  it('tipurile și numele funcțiilor din mesaje și formule urmează limba, fără nume interne românești', () => {
+    const eroare = (sursa: string, intrari = {}) => urma(parseaza(sursa), intrari).eroare
+    const A = { A: [[1, 2], [3, 4]] }
+    expect(eroare('y ← |A|', A)).toBe('linia 1: modulul: se aștepta un număr, nu o matrice 2 x 2')
+    setLimba('en')
+    expect(eroare('y ← |A|', A)).toBe('line 1: the absolute value: expected a number, not a 2 x 2 matrix')
+    expect(eroare('y ← A(1,:) A(2,:)', A)).toBe('line 1: unsupported operation: a row of 2 * a row of 2')
+    expect(eroare('y ← rows(3)')).toBe('line 1: rows takes a vector or a matrix, not a number')
+    const mm = urma(parseaza(algoritm('matmul')!.sursa), { A: [[1, 2], [3, 4]], B: [[1, 0], [0, 1]] })
+    expect(mm.pasi.some((p) => p.formula?.includes('\\operatorname{rows}(A)'))).toBe(true)
+    expect(mm.pasi.some((p) => p.formula?.includes('linii'))).toBe(false)
+  })
 })
 
 describe('numărul de pași, acordat', () => {

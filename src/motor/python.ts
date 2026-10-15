@@ -610,8 +610,9 @@ class Emitator {
 
   private prec(e: Expr): number {
     switch (e.tip) {
+      // o comparatie folosita ca valoare se scrie float(...), deci e un singur operand
       case 'cmp':
-        return 0
+        return 5
       case 'bin':
         return e.op === '+' || e.op === '-' ? 1 : e.op === '^' ? 4 : 2
       case 'neg':
@@ -705,11 +706,21 @@ class Emitator {
         const interval = this.interval(e.de, e.la)
         return this.leaga(e.var, (py) => `${e.fel}(${this.expr(e.corp)} for ${py} in ${interval})`)
       }
-      case 'cmp': {
-        const OP: Record<string, string> = { '<': '<', '>': '>', '≤': '<=', '≥': '>=', '=': '==', '≠': '!=' }
-        return `${this.copil(e.a, 1)} ${OP[e.op]} ${this.copil(e.b, 1)}`
-      }
+      case 'cmp':
+        // ca valoare, o comparatie da 1 sau 0, ca in interpretor; un bool NumPy ar aduna logic
+        // (True + True este True) si nu s-ar putea scadea
+        return `float(${this.comparatie(e)})`
     }
+  }
+
+  // comparatia goala, pentru conditia unui "daca" sau "cat timp"
+  private comparatie(e: Extract<Expr, { tip: 'cmp' }>): string {
+    const OP: Record<string, string> = { '<': '<', '>': '>', '≤': '<=', '≥': '>=', '=': '==', '≠': '!=' }
+    return `${this.copil(e.a, 1)} ${OP[e.op]} ${this.copil(e.b, 1)}`
+  }
+
+  private conditie(e: Expr): string {
+    return e.tip === 'cmp' ? this.comparatie(e) : this.expr(e)
   }
 
   // ---- instructiuni ----
@@ -798,7 +809,7 @@ class Emitator {
       }
       case 'daca':
         this.scoateSume(s.cond, nivel)
-        this.linie(nivel, `if ${this.expr(s.cond)}:`)
+        this.linie(nivel, `if ${this.conditie(s.cond)}:`)
         this.bloc(s.atunci, nivel + 1)
         if (s.altfel) {
           this.linie(nivel, 'else:')
@@ -807,7 +818,7 @@ class Emitator {
         return
       case 'cattimp':
         // conditia se reevalueaza la fiecare iteratie, deci sumele ei raman in expresie
-        this.linie(nivel, `while ${this.expr(s.cond)}:`)
+        this.linie(nivel, `while ${this.conditie(s.cond)}:`)
         this.bloc(s.corp, nivel + 1)
         return
       case 'stop':

@@ -60,6 +60,40 @@ describe('urma de execuție', () => {
     expect(rez.flopi).toBe(2 + 8 + 1 + 2)
   })
 
+  it('aritmetica pe indici și contoare nu e flop, nici în condiții; aritmetica pe date este, chiar cu rezultat întreg', () => {
+    const flopi = (sursa: string, intrari = {}) => urma(parseaza(sursa), intrari).flopi
+    expect(flopi('x ← 0\ndacă n - 1 > 0 atunci x ← 1', { A: [[1, 2], [3, 4]] })).toBe(0)
+    expect(flopi('k ← 0\ncât timp k + 1 < 4\n    k ← k + 1')).toBe(0)
+    // t vine din A: t * t e o înmulțire, oricare ar fi valoarea lui t
+    expect(flopi('t ← a_11\ns ← t * t', { A: [[2]] })).toBe(1)
+    expect(flopi('t ← a_11\ns ← t * t', { A: [[1.5]] })).toBe(1)
+    // s adună elemente din A: fiecare adunare e un flop, deși valorile sunt întregi
+    expect(flopi('s ← 0\npentru k = 1 : 4\n    s ← s + a_kk', { A: [[1, 0, 0, 0], [0, 2, 0, 0], [0, 0, 3, 0], [0, 0, 0, 4]] })).toBe(4)
+  })
+
+  it('adunarea de matrice cere aceeași formă, nu doar același număr de elemente', () => {
+    const rez = urma(parseaza('C ← A + B'), { A: [[1, 2, 3], [4, 5, 6]], B: [[1, 2], [3, 4], [5, 6]] })
+    expect(rez.final).toBe('eroare')
+    expect(rez.eroare).toBe('linia 1: adunare între tablouri de forme diferite: o matrice 2 x 3 și o matrice 3 x 2')
+  })
+
+  it('formulele: minus în fața unei valori negative, o sumă cu un termen și rezultatul rotunjit la t cifre', () => {
+    const formula = (sursa: string, intrari = {}, cifre?: number) => urma(parseaza(sursa), intrari, { cifre }).pasi.find((p) => p.formula)!.formula
+    expect(formula('y ← -x', { x: -2 })).toBe('y \\leftarrow -x = -\\left(-2\\right) = 2')
+    expect(formula('y ← 5 - Σ_{j=1}^{1} (x_j - 1)', { x: [4, 9] })).toContain('= 5 - (4 - 1) = 2')
+    expect(formula('z ← 1 - 0.0001234567', {}, 6)).toContain('rotunjit la 6 cifre}}\\; 0.999877')
+    // QR cu pivot negativ: a_11 ← -σ scrie -(-5), nu --5
+    const qr = ruleaza('QR', { A: [[-3, 1], [4, 2], [0, 1]] })
+    expect(qr.pasi.some((p) => p.formula?.includes('-\\left(-5\\right)'))).toBe(true)
+    expect(qr.pasi.some((p) => p.formula?.includes('--'))).toBe(false)
+  })
+
+  it('un bloc 1 x n primește o linie de lungime n', () => {
+    const rez = urma(parseaza('A(1:1, 1:2) ← x^T'), { A: [[1, 2], [3, 4]], x: [7, 8] })
+    expect(rez.final).toBe('gata')
+    expect(rez.stare.A.d).toEqual([7, 8, 3, 4])
+  })
+
   it('LTRIS: bucla goală j = 1 : 0 lasă un pas fără iterații', () => {
     const rez = ruleaza('LTRIS', { L: [[2, 0], [1, 4]], b: [2, 9] })
     const gol = rez.pasi.find((p) => p.mesaj?.startsWith('nicio iterație'))

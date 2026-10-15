@@ -1,6 +1,7 @@
 // Randarea expresiilor ca siruri KaTeX, in doua moduri: simbolic (indicii inlocuiti cu
 // valorile lor, numele pastrate) si numeric (fiecare frunza inlocuita cu valoarea ei).
 import type { Expr } from './ast'
+import { numeFunctie } from './mesaje'
 import type { Valoare } from './valori'
 
 const GRECESTI: Record<string, string> = {
@@ -43,11 +44,14 @@ export function numeLatex(nume: string): string {
   return `\\mathit{${nume}}`
 }
 
-export function fmt(x: number): string {
+// cu 4 cifre semnificative; un singur parametru, ca sa mearga si in .map(fmt)
+export const fmt = (x: number): string => fmtCifre(x, 4)
+
+export function fmtCifre(x: number, cifre: number): string {
   if (Number.isNaN(x)) return '\\mathrm{NaN}'
   if (!Number.isFinite(x)) return x > 0 ? '\\infty' : '-\\infty'
   if (Number.isInteger(x)) return String(x)
-  const s = String(Number(x.toPrecision(4)))
+  const s = String(Number(x.toPrecision(cifre)))
   const m = /^(-?[\d.]+)e([+-]\d+)$/.exec(s)
   if (m) return `${m[1]} \\cdot 10^{${Number(m[2])}}`
   return s
@@ -177,7 +181,8 @@ export function latex(e: Expr, info: InfoLatex, mod: Mod): string {
       return `${a} ${e.op} ${b}`
     }
     case 'neg':
-      return `-${copil(e.a, 3, info, mod)}`
+      // o valoare negativa intra in paranteza: -σ = -(-5), nu --5
+      return `-${copil(e.a, 3, info, mod, true)}`
     case 'abs':
       return `\\left|${latex(e.a, info, mod)}\\right|`
     case 'norma':
@@ -188,13 +193,16 @@ export function latex(e: Expr, info: InfoLatex, mod: Mod): string {
       const args = e.args.map((a) => latex(a, info, mod))
       if (e.nume === 'sqrt') return `\\sqrt{${args[0]}}`
       if (e.nume === 'abs') return `\\left|${args[0]}\\right|`
-      const f = e.nume === 'min' || e.nume === 'max' ? `\\${e.nume}` : `\\operatorname{${e.nume}}`
+      const f = e.nume === 'min' || e.nume === 'max' ? `\\${e.nume}` : `\\operatorname{${numeFunctie(e.nume)}}`
       return `${f}(${args.join(', ')})`
     }
     case 'suma': {
       if (mod === 'numeric') {
         const t = (info.termeni(e) ?? []).map((x) => (x.startsWith('-') ? `\\left(${x}\\right)` : x))
-        return t.length === 0 ? '0' : t.length === 1 ? t[0] : `(${t.join(' + ')})`
+        // un singur termen ramane fara paranteza doar daca nu e el insusi o suma sau o diferenta:
+        // 5 - Σ (x_j - 1) cu un termen se scrie 5 - (4 - 1), nu 5 - 4 - 1
+        if (t.length === 1) return e.corp.tip === 'bin' && (e.corp.op === '+' || e.corp.op === '-') ? `(${t[0]})` : t[0]
+        return t.length === 0 ? '0' : `(${t.join(' + ')})`
       }
       info.simbolice.add(e.var)
       const corp = copil(e.corp, 2, info, 'simbolic')

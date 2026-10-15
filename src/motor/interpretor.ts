@@ -4,8 +4,8 @@
 // de la orice pas sa se refaca ieftin (stareLa); vederea reda urma, iar derularea inapoi e o
 // indexare.
 import type { Expr, Instr, Program, Tinta } from './ast'
-import { MAX_DESFASURAT, ROL, colorat, contine, fmt, latex, numeLatex, valoareLatex, type InfoLatex } from './latex'
-import { mesaj } from './mesaje'
+import { MAX_DESFASURAT, ROL, colorat, contine, fmt, fmtCifre, latex, numeLatex, valoareLatex, type InfoLatex } from './latex'
+import { mesaj, numeFunctie } from './mesaje'
 import { norm } from './parser'
 import {
   citeste,
@@ -174,6 +174,10 @@ const formaDin = (v: Valoare): Forma =>
 
 const textForma = (f: Forma): string => (f.tip === 'scalar' ? '1' : `${f.m} x ${f.n}`)
 
+// "o matrice 2 x 3", "un vector de 3", in limba mesajelor
+const descrie = (v: Valoare): string =>
+  v.tip === 'scalar' ? mesaj('unNumar') : v.tip === 'matrice' ? mesaj('oMatrice', v.m, v.n) : mesaj(v.tip === 'rand' ? 'oLinie' : 'unVector', v.n)
+
 function felBinar(op: string, a: Valoare, b: Valoare): FelOperatie {
   if (op === '+') return 'adunare'
   if (op === '-') return 'scadere'
@@ -257,6 +261,9 @@ class Interpretor implements InfoLatex {
   private operatii: Operatie[] = []
   private scalarScris?: { nume: string; vechi?: number }
   private nrPasi = 0
+  // scalarii care tin date (venite din tablouri, din alte date sau cu zecimale), nu indici,
+  // contoare sau dimensiuni; aritmetica fara date nu se numara ca flopi
+  private date = new Set<string>()
 
   constructor(
     private program: Program,
@@ -268,6 +275,7 @@ class Interpretor implements InfoLatex {
     for (const [nume, v] of Object.entries(intrari)) {
       const x = dinIntrare(v)
       this.env.set(nume, x.tip === 'scalar' ? scalar(this.fl(x.v)) : { ...x, d: x.d.map((e) => this.fl(e)) })
+      if (x.tip === 'scalar' && !Number.isInteger(x.v)) this.date.add(nume)
     }
     for (const [nume, v] of Object.entries(dimensiuni(intrari))) if (!this.env.has(nume)) this.env.set(nume, scalar(v))
   }
@@ -434,6 +442,7 @@ class Interpretor implements InfoLatex {
         }
         for (let k = de; pas > 0 ? k <= la : k >= la; k += pas) {
           this.env.set(s.var, scalar(k))
+          this.date.delete(s.var)
           yield this.pas('antet', s.linie, [], { formula: `${numeLatex(s.var)} \\leftarrow ${k} \\qquad (${interval})` })
           yield* this.bloc(s.corp)
           this.linie = s.linie
@@ -470,7 +479,10 @@ class Interpretor implements InfoLatex {
     if (e.tip !== 'cmp') throw this.eroare(mesaj('conditieComparatie'))
     this.citite = []
     this.uita()
+    const flopiInainte = this.flopi
     const v = this.ev(e)
+    // ca la atribuiri, o comparatie intre indici sau contoare (k + 1 < n) nu numara flopi
+    if (!this.atingeDate(e)) this.flopi = flopiInainte
     const adevarat = v.tip === 'scalar' && v.v !== 0
     const inceput = `${latex(e, this, 'simbolic')}: \\; ${latex(e, this, 'numeric')} \\;\\Rightarrow\\;`
     const extra: Partial<Pas> = { formula: `${inceput} \\text{${mesaj(adevarat ? 'adevarat' : 'fals')}}`, intrebare: `${inceput} \\;?`, adevarat }
@@ -492,6 +504,7 @@ class Interpretor implements InfoLatex {
     const la = this.indice(s.bucla.la)
     for (let k = de; k <= la; k++) {
       this.env.set(s.bucla.var, scalar(k))
+      this.date.delete(s.bucla.var)
       yield* this.atribUnu(s)
     }
   }
@@ -509,11 +522,18 @@ class Interpretor implements InfoLatex {
       if (e instanceof EroareRulare && !e.formula) e.formula = this.formulaOprita(s)
       throw e
     }
-    // aritmetica pe indici si contoare (k ← k + 1, s ← min(m - 1, n)) nu este un flop
-    if (v.tip === 'scalar' && Number.isInteger(v.v) && !this.atingeTablouri(s.expr)) this.flopi = flopiInainte
+    // aritmetica pe indici si contoare (k ← k + 1, s ← min(m - 1, n)) nu este un flop: nu atinge
+    // date, iar rezultatul ei e intreg
+    const date = v.tip !== 'scalar' || !Number.isInteger(v.v) || this.atingeDate(s.expr)
+    if (!date) this.flopi = flopiInainte
     const simbolic = latex(s.expr, this, 'simbolic')
     const numeric = latex(s.expr, this, 'numeric')
     const scrise = this.scrie(s.tinta, v)
+    if (v.tip === 'scalar' && scrise.length === 0) {
+      const nume = s.tinta.tip === 'elem' ? s.tinta.sursa : s.tinta.nume
+      if (date) this.date.add(nume)
+      else this.date.delete(nume)
+    }
     const rezultat = valoareLatex(v, s.tinta.nume)
     // eticheta (μ_ik) nu se evalueaza, dar indicii ei trebuie stiuti ca sa apara ca μ_21
     if (s.eticheta?.tip === 'elem') for (const x of s.eticheta.idx) this.indice(x)
@@ -533,7 +553,9 @@ class Interpretor implements InfoLatex {
     const ultima = this.rotunjire as { exact: number; rotunjit: number } | undefined
     const rot = v.tip === 'scalar' && ultima?.rotunjit === v.v ? ultima : undefined
     const exact = rot ? `${String(Number(rot.exact.toPrecision(10)))} \\;\\xrightarrow{\\text{${mesaj('rotunjitLa', this.cifre ?? 0)}}}\\; ` : ''
-    if (scris && rezultat !== numeric && rezultat !== simbolic) f += ` = ${exact}${rezultat}`
+    // valoarea rotunjita se scrie cu toate cele t cifre ale ei, nu cu cele 4 ale formulei
+    const afisat = rot ? fmtCifre(rot.rotunjit, Math.max(this.cifre ?? 4, 4)) : rezultat
+    if (scris && rezultat !== numeric && rezultat !== simbolic) f += ` = ${exact}${afisat}`
     extra.formula = f
     yield this.pas('atrib', s.linie, [...this.citite, ...scrise], extra)
   }
@@ -615,7 +637,10 @@ class Interpretor implements InfoLatex {
     if (t.tip === 'felie') {
       // A(k+1:n, k) ← ...: un numar umple blocul, un vector sau o matrice trebuie sa aiba forma lui
       const r = this.regiune(t)
-      const seamana = r.fel === 'matrice' ? v.tip === 'matrice' && v.m === r.m && v.n === r.n : (v.tip === 'vector' || v.tip === 'rand') && v.n === r.celule.length
+      // aceeasi forma (o linie de 2 intra si intr-un bloc 1 x 2), iar pe o linie sau o coloana orice
+      // vector de lungimea ei
+      const f = formaDin(v)
+      const seamana = (f.m === r.m && f.n === r.n) || (r.fel !== 'matrice' && (v.tip === 'vector' || v.tip === 'rand') && v.n === r.celule.length)
       if (v.tip !== 'scalar' && !seamana) throw this.eroare(mesaj('blocDimensiuni', t.nume, textForma({ tip: r.fel, m: r.m, n: r.n }), textForma(formaDin(v))))
       return r.celule.map(([i, j], k) => {
         this.scrieCelula(r.nume, r.tab, v.tip === 'scalar' ? v.v : v.d[k], i, j)
@@ -662,28 +687,31 @@ class Interpretor implements InfoLatex {
 
   // Expresia citeste un tablou (element, felie, tablou intreg) sau parcurge o suma ori un extrem;
   // altfel e aritmetica pe indici si scalari.
-  private atingeTablouri(e: Expr): boolean {
+  // Expresia citeste date: un tablou, un scalar care tine date sau o suma. Dimensiunile (linii(A)) si
+  // argmax dau indici, deci nu sunt date.
+  private atingeDate(e: Expr): boolean {
     switch (e.tip) {
       case 'num':
         return false
       case 'var':
-        return this.local(e.nume) === undefined && esteTablou(this.env.get(this.rezolva(e.nume)))
+        return this.local(e.nume) === undefined && (esteTablou(this.env.get(this.rezolva(e.nume))) || this.date.has(e.nume))
       case 'elem':
-        return this.eCelula(e)
+        return this.eCelula(e) || this.date.has(e.sursa)
       case 'felie':
       case 'suma':
-      case 'extrem':
         return true
+      case 'extrem':
+        return e.fel === 'max' || e.fel === 'min'
       case 'bin':
       case 'cmp':
-        return this.atingeTablouri(e.a) || this.atingeTablouri(e.b)
+        return this.atingeDate(e.a) || this.atingeDate(e.b)
       case 'neg':
       case 'abs':
       case 'norma':
       case 'transp':
-        return this.atingeTablouri(e.a)
+        return this.atingeDate(e.a)
       case 'apel':
-        return e.args.some((x) => this.atingeTablouri(x))
+        return e.nume !== 'linii' && e.nume !== 'coloane' && e.nume !== 'lungime' && e.args.some((x) => this.atingeDate(x))
     }
   }
 
@@ -712,7 +740,7 @@ class Interpretor implements InfoLatex {
   }
 
   private scalarDin(v: Valoare, ce: string): number {
-    if (v.tip !== 'scalar') throw this.eroare(mesaj('seAsteptaNumar', ce, v.tip))
+    if (v.tip !== 'scalar') throw this.eroare(mesaj('seAsteptaNumar', ce, descrie(v)))
     return v.v
   }
 
@@ -950,7 +978,7 @@ class Interpretor implements InfoLatex {
     // dimensiunile unui tablou: linii(A), coloane(A), lungime(x)
     if (nume === 'linii' || nume === 'coloane' || nume === 'lungime') {
       const a = args[0]
-      if (!a || a.tip === 'scalar') throw this.eroare(mesaj('nuEsteTablou', nume))
+      if (!a || a.tip === 'scalar') throw this.eroare(mesaj('functieTablou', numeFunctie(nume)))
       if (nume === 'lungime') return scalar(a.tip === 'matrice' ? a.m * a.n : a.n)
       if (a.tip === 'matrice') return scalar(nume === 'linii' ? a.m : a.n)
       if (a.tip === 'rand') return scalar(nume === 'linii' ? 1 : a.n)
@@ -1044,10 +1072,14 @@ class Interpretor implements InfoLatex {
       if (b.v === 0) throw this.eroare(mesaj('impartireZero'))
       return scaleaza(a, (x) => x / b.v)
     }
-    if ((op === '+' || op === '-') && a.tip !== 'scalar' && b.tip !== 'scalar' && a.tip === b.tip && a.d.length === b.d.length) {
+    if ((op === '+' || op === '-') && a.tip !== 'scalar' && b.tip !== 'scalar' && a.tip === b.tip) {
+      // element cu element: aceeasi forma, nu doar acelasi numar de elemente (2 x 3 nu e 3 x 2)
+      const fa = formaDin(a)
+      const fb = formaDin(b)
+      if (fa.m !== fb.m || fa.n !== fb.n) throw this.eroare(mesaj('formeDiferite', mesaj(op === '+' ? 'adunarea' : 'scaderea'), descrie(a), descrie(b)))
       this.flop(a.d.length)
       return { ...a, d: a.d.map((x, k) => this.fl(op === '+' ? x + b.d[k] : x - b.d[k])) }
     }
-    throw this.eroare(mesaj('opNesuportata', a.tip, op, b.tip))
+    throw this.eroare(mesaj('opNesuportata', descrie(a), op, descrie(b)))
   }
 }

@@ -69,7 +69,11 @@ const CATALOG = {
   doarNumar: { ro: 'în {0} se poate scrie doar un număr', en: 'only a number can be stored in {0}' },
   indiceNumar: { ro: 'indicele trebuie să fie un număr', en: 'the index must be a number' },
   indiceIntreg: { ro: 'indicele {0} nu este întreg', en: 'index {0} is not an integer' },
-  seAsteptaNumar: { ro: '{0}: se aștepta un număr, nu un {1}', en: '{0}: expected a number, not a {1}' },
+  seAsteptaNumar: { ro: '{0}: se aștepta un număr, nu {1}', en: '{0}: expected a number, not {1}' },
+  unNumar: { ro: 'un număr', en: 'a number' },
+  unVector: { ro: 'un vector de {0}', en: 'a vector of {0}' },
+  oLinie: { ro: 'o linie de {0}', en: 'a row of {0}' },
+  oMatrice: { ro: 'o matrice {0} x {1}', en: 'a {0} x {1} matrix' },
   nedefinita: { ro: 'variabila {0} nu este definită', en: 'variable {0} is not defined' },
   nedefinit: { ro: '{0} nu este definit', en: '{0} is not defined' },
   modulul: { ro: 'modulul', en: 'the absolute value' },
@@ -91,6 +95,10 @@ const CATALOG = {
     en: 'two column vectors cannot be multiplied: write x^T y for the dot product or x y^T for the outer product',
   },
   opNesuportata: { ro: 'operație nesuportată: {0} {1} {2}', en: 'unsupported operation: {0} {1} {2}' },
+  formeDiferite: { ro: '{0} între tablouri de forme diferite: {1} și {2}', en: '{0} of arrays with different shapes: {1} and {2}' },
+  adunarea: { ro: 'adunare', en: 'addition' },
+  scaderea: { ro: 'scădere', en: 'subtraction' },
+  functieTablou: { ro: '{0} se aplică unui vector sau unei matrice, nu unui număr', en: '{0} takes a vector or a matrix, not a number' },
 
   rotunjitLa: { ro: 'rotunjit la {0} cifre', en: 'rounded to {0} digits' },
   nuEsteNumar: { ro: '{0}: "{1}" nu este număr', en: '{0}: "{1}" is not a number' },
@@ -103,6 +111,10 @@ const CATALOG = {
 } satisfies Record<string, { ro: string; en: string }>
 
 export type Cheie = keyof typeof CATALOG
+
+// Numele functiilor de dimensiune in limba mesajelor; parserul le aduce pe toate la forma romaneasca.
+const FUNCTII_EN: Record<string, string> = { linii: 'rows', coloane: 'cols', lungime: 'len' }
+export const numeFunctie = (nume: string): string => (limba === 'en' ? (FUNCTII_EN[nume] ?? nume) : nume)
 
 export function mesaj(cheie: Cheie, ...args: (string | number)[]): string {
   return CATALOG[cheie][limba].replace(/\{(\d+)\}/g, (_, k: string) => String(args[Number(k)] ?? ''))
