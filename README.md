@@ -75,6 +75,24 @@ the one from the image.
   tolerance from a short list. A value typed by hand that lacks the nature gets a warning under
   its field saying what is wrong and what the algorithm will do. "initial example" restores the
   inputs the algorithm starts with.
+- Under each matrix, "type" picks the kind of matrix that "random" generates, with the
+  definitions of the course: general, symmetric, symmetric positive definite, diagonal, lower or
+  upper triangular, tridiagonal, upper Hessenberg, strictly diagonally dominant, orthogonal,
+  nonsingular, with nonsingular leading submatrices, or singular as a counterexample. The default
+  is the nature the algorithm asks for; another type is allowed and gets its warning. The buttons
+  next to it change the number of rows and columns (one "order" when the matrix has to be
+  square), and the vectors tied to the matrix follow. A line under the matrix says which of these
+  properties the typed matrix has, its rank, the leading submatrix where elimination would meet a
+  zero pivot, the step where Cholesky would stop and, for Jacobi and Gauss-Seidel, the spectral
+  radius of the iteration matrix.
+- "Counterexamples from the course", under the inputs, loads inputs that break a hypothesis of
+  the algorithm or reach an edge case and runs them: a zero pivot for G and LU, a singular matrix
+  for GPP and S_GPP, a symmetric matrix that is not positive definite for Cholesky, Jacobi and
+  Gauss-Seidel with ρ > 1 and on a positive definite matrix where only Gauss-Seidel converges,
+  Kaczmarz on a system without a solution and with steps that do not reduce the error, the power
+  method without a dominant eigenvalue or with γ₁ = 0, sgn(0) = 1 and β = 0 for RFG, dependent
+  columns for SQR, a zero pivot in a banded matrix for Gb and GPPb. Each one says what it shows
+  and where the hypothesis is in the course.
 - Editing the pseudocode or an input does not run anything; a notice above the grids says they
   still show the previous run, until "Run".
 - A library algorithm does not run on inputs of the wrong shape (a non-square matrix where a
@@ -84,6 +102,12 @@ the one from the image.
 - "Keep for another algorithm", next to "Inputs", keeps the values and the precision when the
   next algorithm has inputs with the same names and types (S_G and S_GPP, Jacobi and
   Gauss-Seidel), so the two can be compared on the same data.
+- The "Comparison" panel of the drawer runs the same inputs, with the same arithmetic, through
+  another library algorithm that takes them (the pairs the course compares come first: G and
+  GPP, S_G and S_GPP, Cholesky or QR and G, Jacobi, Gauss-Seidel and Kaczmarz) and shows side by
+  side how each run finishes, the counted flops, the iterations, the result and the largest
+  difference between the two solution vectors. A button switches to the other algorithm with the
+  same inputs.
 - In English the library pseudocode is shown with the English keywords the parser accepts
   (`for`, `if`, `while`, `over`, `let`), with the same lines as in Romanian.
 - "Arithmetic" under the inputs rounds every input and the result of every operation to t
@@ -212,8 +236,10 @@ become 0 and the division by σ would fail.
   the language and the theme, `src/i18n.ts` the
   interface texts, `src/notiuni.ts` the fundamentals, `src/operatii.ts` the names and definitions
   of the operations between arrays, `src/paleta.ts` the cell colours, `src/natura.ts` the natures
-  of the inputs (the random generators and the checks on typed values), `src/exercitiu.ts` the
-  expected answer of a step and the reading of a typed answer.
+  of the inputs (the random generators, the matrix types, the properties shown under a matrix and
+  the checks on typed values), `src/contraexemple.ts` the counterexamples from the course,
+  `src/comparatie.ts` the comparison with another algorithm, `src/exercitiu.ts` the expected
+  answer of a step and the reading of a typed answer.
 - `python/mn/algoritmi.py`: the same algorithms translated literally into Python, with indices
   from 1, used as the numerical oracle. `python/genereaza_fixturi.py` writes
   `tests/fixtures/algoritmi.json` (regenerate with `npm run fixturi`), and
@@ -251,6 +277,15 @@ Identifiers in the code are Romanian, after the course and the notation of the s
 - `tests/natura.test.ts`: for every library algorithm, at several sizes, the values produced by
   "random" have the nature the algorithm asks for, the run finishes within the step limit of the
   application and its identities check; values that lack the nature are reported.
+- `tests/tipuri.test.ts`: every matrix type generates matrices with its property, the property
+  line on known matrices from the course (including the spectral radii of the Jacobi and
+  Gauss-Seidel examples), and the size buttons.
+- `tests/contraexemple.test.ts`: every counterexample has all the inputs of its algorithm and
+  ends as it says (to the end, with a `stop` or with an error), and the numbers in the
+  explanations come out of the computation.
+- `tests/comparatie.test.ts`: which algorithms can be compared, and on the course examples the
+  comparison shows what the slides say (S_G against S_GPP with 3 digits, Cholesky and QR against
+  G).
 - `tests/culori.test.ts`: WCAG contrast of the texts and separation of the cell roles under
   simulated colour blindness, read from `src/index.css` and `src/paleta.ts`.
 
