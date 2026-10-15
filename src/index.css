@@ -1701,7 +1701,8 @@ button.mic {
 
 .operatii table,
 .convergenta table,
-.verificare table {
+.verificare table,
+.comparatie table {
   border-collapse: collapse;
   margin: 0.3rem 0;
   font-size: 0.82rem;
@@ -1710,14 +1711,36 @@ button.mic {
 .operatii td,
 .convergenta td,
 .convergenta th,
-.verificare td {
+.verificare td,
+.comparatie td,
+.comparatie th {
   padding: 0.15rem 0.9rem 0.15rem 0;
   text-align: left;
   font-weight: 400;
 }
 
-.convergenta th {
+.convergenta th,
+.comparatie th {
   color: var(--text-sters);
+}
+
+.comparatie td.numar {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.alegere-comparatie {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+}
+
+.alegere-comparatie select {
+  font-size: 0.8rem;
+  max-width: 100%;
 }
 
 .convergenta td {

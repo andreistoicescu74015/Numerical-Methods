@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { MotionConfig } from 'motion/react'
 import { CodPython } from './componente/CodPython'
+import { Comparatie } from './componente/Comparatie'
 import { Comenzi, type Marcaj } from './componente/Comenzi'
 import { Convergenta, fmtNumar, type Punct } from './componente/Convergenta'
 import { Editor } from './componente/Editor'
@@ -120,8 +121,8 @@ interface Rulare {
 const aceleasi = (a: Definitie[], b: Definitie[]) => a.length === b.length && a.every((d, k) => d.nume === b[k].nume && d.tip === b[k].tip && d.text === b[k].text)
 
 // panourile din sertar; Convergenta si Geometria pornesc deschise, restul inchise
-type NumePanou = 'despre' | 'operatii' | 'convergenta' | 'geometrie' | 'verificare' | 'python' | 'notiuni'
-const PANOURI_DESCHISE: Record<NumePanou, boolean> = { despre: false, operatii: true, convergenta: true, geometrie: true, verificare: false, python: false, notiuni: false }
+type NumePanou = 'despre' | 'operatii' | 'convergenta' | 'geometrie' | 'verificare' | 'comparatie' | 'python' | 'notiuni'
+const PANOURI_DESCHISE: Record<NumePanou, boolean> = { despre: false, operatii: true, convergenta: true, geometrie: true, verificare: false, comparatie: false, python: false, notiuni: false }
 
 const ROLURI_LEGENDA = ['pivot', 'scris', 'citit', 'gata', 'mult'] as const
 const EXPLICATII: Record<(typeof ROLURI_LEGENDA)[number], CheieText> = { pivot: 'legendaPivot', scris: 'legendaScris', citit: 'legendaCitit', gata: 'legendaGata', mult: 'legendaMult' }
@@ -265,7 +266,8 @@ function Continut() {
     document.documentElement.classList.toggle('prezentare', prezentare)
   }, [prezentare])
 
-  const alege = (nou: string) => {
+  // `cuIntrarile`: intrarile raman chiar fara bifa "pastreaza" (trecerea din panoul de comparatie)
+  const alege = (nou: string, cuIntrarile = false) => {
     setId(nou)
     if (nou === PROPRIU) {
       const s = incarcaPropriu(limba)
@@ -276,7 +278,7 @@ function Continut() {
     const a = algoritm(nou)!
     setSursa(sursaIn(a, limba))
     // cu "pastreaza", intrarile raman cand noul algoritm are aceleasi nume si tipuri, si precizia la fel
-    const potrivite = pastreaza && a.intrari.every((i) => definitii.some((d) => d.nume.trim() === i.nume && d.tip === i.tip))
+    const potrivite = (pastreaza || cuIntrarile) && a.intrari.every((i) => definitii.some((d) => d.nume.trim() === i.nume && d.tip === i.tip))
     if (potrivite) return
     setDefinitii(definitiiDin(a))
     // precizia exemplului, sau dubla precizie
@@ -933,6 +935,11 @@ function Continut() {
         {cuVerificare && (
           <Panou clasa="verificare" titlu={t('verificare')} rezumat={rezumatVerificare} deschis={deschise.verificare} onToggle={deschide('verificare')}>
             <Verificare randuri={verificari} stare={stareVerificare} cifre={rulare?.cifre ?? 0} onFinal={() => mergi(total - 1)} />
+          </Panou>
+        )}
+        {alg && dinBiblioteca && rulare && (
+          <Panou clasa="comparatie" titlu={t('comparatie')} deschis={deschise.comparatie} onToggle={deschide('comparatie')}>
+            <Comparatie alg={alg} rez={rulare.rez} intrari={rulare.intrari} cifre={rulare.cifre} definitii={rulare.definitii} onTreci={(nou) => alege(nou, true)} />
           </Panou>
         )}
         <Panou clasa="python" titlu={t('codPython')} rezumat={`${numeFisier}.py`} deschis={deschise.python} onToggle={deschide('python')}>

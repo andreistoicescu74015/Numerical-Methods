@@ -583,4 +583,18 @@ describe('aplicația montată', () => {
     // rularea se opreste la impartirea la pivotul nul, iar scena anunta oprirea
     expect(gazda.querySelector('.oprire')?.textContent).toContain('împărțire la zero')
   })
+
+  it('panoul de comparație rulează aceleași intrări cu GPP și trece la el păstrând intrările', async () => {
+    const gazda = await monteaza()
+    await apasa(gazda, 'pivot nul, deși A este nesingulară')
+    const panou = gazda.querySelector('.panou.comparatie')!
+    expect(panou.querySelector('select')?.value).toBe('GPP')
+    const randuri = [...panou.querySelectorAll('tbody tr')].map((r) => [...r.querySelectorAll('td')].map((c) => c.textContent))
+    expect(randuri[0][1]).toContain('eroare')
+    expect(randuri[0][2]).toBe('până la capăt')
+    await apasa(gazda, 'Treci la GPP, cu aceleași intrări')
+    expect(gazda.querySelector<HTMLSelectElement>('header select')!.value).toBe('GPP')
+    expect(gazda.querySelector<HTMLTextAreaElement>('.intrare.matrice textarea')!.value).toBe('0 1 2\n1 1 1\n2 1 3')
+    expect(gazda.querySelector('.oprire')).toBeNull()
+  })
 })
