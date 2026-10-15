@@ -189,7 +189,8 @@ the one from the image.
   change colour without moving. The legend under the grids names the roles on one row; "what
   they mean" opens the full explanations.
 - The "Check" panel in the drawer stays collapsed, with "at the last step" as its summary, and
-  opens by itself when the algorithm finishes; the step card lists the residuals then as well.
+  opens by itself when the algorithm finishes; the step card lists the residuals then as well,
+  with a link to the panel.
   Residuals below 1e-9 (relative to the
   size of the data) are marked ok. For the iterative solvers it shows the residual against the
   tolerance and, next to it, the error against the Gaussian elimination solution, also after a

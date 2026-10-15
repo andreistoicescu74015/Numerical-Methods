@@ -486,6 +486,35 @@ meniul nativ, care merge pe telefon și cu cititorul de ecran. În banda de proi
 sertarul rămâne vizibil, îngustat, nu ascuns într-o foaie laterală, ca graficul și pasul să se vadă
 deodată.
 
+O a doua recenzie, făcută pe capturi ale fișierului construit la 390, 900, 1100, 1280, 1440 și
+1920 px și pe o listă de constrângeri măsurabile (paleta rolurilor, pragurile testului de culori,
+fonturile, meniul nativ, sertarul vizibil la 900-1199 px), a dat 23 de constatări, 5 preferințe și
+3 experimente. Constatările verificate pe cod și corectate: grila se strângea sub înălțimea
+celulelor în modul prezentare la 1280 × 720 (acum scena derulează, grila rămâne întreagă); formula
+pasului ieșea din card la Jacobi, cu derulare fără bară vizibilă (acum se taie în bucăți care încep
+cu "=", iar o formulă din sertar se rupe doar între relațiile despărțite prin `\quad`, nu în
+mijlocul uneia); o rulare eșuată lăsa pasul vechi, cu butoanele de întoarcere active la 0 / 0;
+rezumatul costului se tăia cu "…" (acum se oprește la prima virgulă); câmpul de răspuns tăia textul
+de îndrumare; litera μ se lipea de un minus în formatul compact; cursorul urmei avea albastrul
+implicit al browserului; linia activă din editor rămânea evidențiată fără focus; ordinea
+variabilelor diferea între editor și card; titlul cardului se rupea în mijlocul unui segment;
+țintele de atins aveau 17-22 px; formulele din sertar aveau înălțimea rezervată a cardului;
+"De la început" era singura etichetă cu majusculă; "n x n" în loc de "n × n"; graficul de cost
+își lua lățimea abia la prima notificare a observatorului de dimensiune.
+
+Adoptate dintre preferințe: starea apăsată a comutatorului Parcurgere | Exercițiu și a butonului
+de prezentare cu fond deschis și o linie dedesubt, ca pasul înainte să rămână singurul buton
+plin; scena veche în tonuri de gri, lizibilă, în loc de estompată sub 4.5:1; un link din
+reziduurile cardului către panoul Verificare, care se deschide sub pliu la 1440 × 900; o umbră la
+marginea de jos a sertarului cât timp mai are panouri sub pliu; pe telefon bara pe două rânduri
+(cursorul cu redarea și viteza, apoi butoanele de parcurgere). Neadoptate: scara tipografică pe
+cinci trepte (circa 40 de înlocuiri pentru trepte care diferă acum cu mai puțin de 1 px, cu risc
+de rupturi noi la 900-1199 px); scurtarea descrierilor și a notelor, care sunt texte didactice;
+derularea sertarului la rândul marcat din "Operații pe matrice"; alinierea pe o grilă a
+coloanelor din rândul operațiilor pasului (în lățimea cardului strivește definițiile);
+cuprinsul sertarului (un component nou care costă 100 px din sertar) și celulele proporționale
+cu n. Fondurile palide din unele capturi erau animația prinsă la jumătate, nu o stare.
+
 ## 13. Surse
 
 Materialele cursului:
