@@ -19,9 +19,12 @@ differs from the source. It also shows what the
 lines of the pseudocode do at the level of matrices, practical notes, the cost formula evaluated
 for the current inputs next to the counted flops, and at the end the identities the algorithm
 promises (LU = A, LLᵀ = A, QR = A, Ax = b) recomputed as residuals. The pseudocode can be exported as a
-NumPy program in the style of the course labs. The interface is in Romanian or English (the
-EN/RO button) and has a light and a dark theme. The research and the architecture decision are
-in `docs/cercetare.md` (in Romanian).
+NumPy program in the style of the course labs. The application fills the window: the pseudocode
+on the left with the inputs under it, the step card and the grids in the middle, a drawer of
+collapsible panels on the right and the playback bar at the bottom. The interface is in Romanian
+or English (the EN/RO button), has a light and a dark theme and a presentation mode (the P key)
+with larger text for a projector. The research and the architecture decision are in
+`docs/cercetare.md` (in Romanian).
 
 Stack: Vite, React, TypeScript. The application runs locally, natively or in Docker, on
 `http://localhost:5173`. `npm run build` additionally produces a single file `dist/index.html`
@@ -56,7 +59,8 @@ the one from the image.
   changed at any time; "Run" (or Ctrl+Enter in the editor) restarts the trace. The current line
   shows the values of its variables at its end (`k = 1, i = 2`), so that `a_ik` in the code ties
   to the cell in the grid.
-- Under the description, "In the course" names the course and the slide of the algorithm and
+- In the "About the algorithm" panel of the drawer, under the description, "In the course" names
+  the course and the slide of the algorithm and
   opens to show what differs from the slide; "In practice" holds the notes for real use (when it
   fails, what the convergence conditions are, which NumPy or SciPy function does the same), and
   the "Prerequisites" tags open the "Fundamentals" panel at the requested explanation.
@@ -90,13 +94,18 @@ the one from the image.
 - For the banded algorithms (Gb, GPPb, UTRISb) the zeros outside the band are hatched: the
   algorithm never reads or writes them. The description adds how many flops the algorithm for
   full matrices (G, GPP, UTRIS) counts on the same inputs.
-- Controls: step forward and back, "next write" (skips loop headers), playback with adjustable
-  speed in which loop headers pass faster than writes, a scrub bar over the trace. The arrow
-  keys, Shift+arrows, Home, End and space do the same when the editor does not have focus.
-- "Hide the result behind ?" is on by default: a step that computes something shows its formula
-  ending in `= ?` and its target cells as `?`; one step forward (or "Show the result") reveals
-  it. Copies and constants have nothing to hide. The checkbox turns this off.
-- Exercise mode: while a result is hidden, "your answer" takes the value (`0.5`, `0,5` or `1/2`;
+- Controls, in the bar at the bottom: step forward (the only filled button) and back, the next
+  and the previous write to an array (skipping loop headers), start and end, playback with
+  adjustable speed in which loop headers pass faster than writes, and a scrub bar over the trace
+  with notches at the writes, at the start of every iteration and, in red, at a stop. The arrow
+  keys, Shift+arrows, Home, End and space do the same when the editor does not have focus;
+  "Keys" in the header lists them.
+- The step card quotes the current line with the values of its variables, then shows the
+  formula. It has two modes, "Walkthrough" and "Exercise" (the E key). Exercise is on by default:
+  a step that computes something shows its formula ending in `= ?` and its target cells as `?`;
+  one step forward (or "Show the result") reveals it. Copies and constants have nothing to hide.
+  Walkthrough shows every result at once.
+- In exercise mode, while a result is hidden, "your answer" takes the value (`0.5`, `0,5` or `1/2`;
   several values separated by spaces, in the order of the cells; `true`/`false` for a
   condition). "Check" accepts answers within 0.5%, shows the result and keeps the count of
   correct answers for the current run.
@@ -119,9 +128,14 @@ the one from the image.
   written, blue with a dashed outline for what is read, green with a marked corner for what is
   final, purple with the letter μ for multipliers. The outlines carry the role without colour;
   the fills stay distinct under simulated protanopia and deuteranopia. On a swap the two values
-  move towards each other. Above 150 cells the animations stop and the steps remain; with
-  "reduce motion" set in the system, cells change colour without moving.
-- The "Check" panel appears when the algorithm finishes: residuals below 1e-9 (relative to the
+  move towards each other. The width of a column is computed from the whole trace, so it does
+  not change from step to step; above 36 cells the grids switch to a compact format. Above 150
+  cells the animations stop and the steps remain; with "reduce motion" set in the system, cells
+  change colour without moving. The legend under the grids names the roles on one row; "what
+  they mean" opens the full explanations.
+- The "Check" panel in the drawer stays collapsed, with "at the last step" as its summary, and
+  opens by itself when the algorithm finishes; the step card lists the residuals then as well.
+  Residuals below 1e-9 (relative to the
   size of the data) are marked ok. For the iterative solvers it shows the residual against the
   tolerance and, next to it, the error against the Gaussian elimination solution, also after a
   stop by `maxiter`. For the power method it also compares |λ| with the largest eigenvalue in
@@ -190,9 +204,11 @@ divisions. `sgn(0)` is 1, as in the course; `np.sign(0)` is 0 and would skip a r
   differences and a full frame every 100 steps, rebuilt with `stareLa`), the formula renderer,
   the algorithm library, the numerical checks, the Python emitter, the per-line analysis and the
   message catalogue (Romanian and English).
-- `src/componente/`, `src/App.tsx`: the editor, the grids, the formula, the controls, the
-  inputs, the matrix operations, the convergence chart, the check, the Python panel and the
-  fundamentals. `src/preferinte.tsx` holds the language and the theme, `src/i18n.ts` the
+- `src/componente/`, `src/App.tsx`: the editor, the grids, the formula, the playback bar, the
+  inputs, the collapsible panel of the drawer, the matrix operations, the convergence chart, the
+  check, the Python panel and the fundamentals. `src/fonturi/` holds the IBM Plex Sans and Mono
+  files (SIL Open Font License) that the single-file build embeds. `src/preferinte.tsx` holds
+  the language and the theme, `src/i18n.ts` the
   interface texts, `src/notiuni.ts` the fundamentals, `src/operatii.ts` the names and definitions
   of the operations between arrays, `src/paleta.ts` the cell colours, `src/natura.ts` the natures
   of the inputs (the random generators and the checks on typed values), `src/exercitiu.ts` the

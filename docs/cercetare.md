@@ -471,7 +471,43 @@ algoritmi schimbau algoritmul; flopii erau numărați diferit de curs (radicali,
 contoare), așa că LU număra 18 flopi unde G numără 13. Toate sunt corectate și acoperite de teste;
 lista e în istoricul sesiunii, nu aici.
 
-## 14. Surse
+## 14. Recenzia UI/UX din 15 octombrie și așezarea nouă
+
+Pe 15 octombrie o a doua opinie de design (Claude Design, pe un prompt cu descrierea aplicației,
+utilizatorii ei, capturile de ecran, ce nu se schimbă și livrabilele cerute) a dat un audit cu 14
+constatări și 16 propuneri. Cele cu impact mare
+coincid cu ce se vedea în capturi: linia de cod, grila și formula erau în trei colțuri ale
+ecranului; coloana din dreapta era o stivă în care graficele cădeau sub pliu; „Rulează” și „Redă”
+erau amândouă butoane principale; bifa „ascunde rezultatul” și câmpul de răspuns nu spuneau că
+sunt un mod; pe telefon pagina depășea lățimea; culorile de sintaxă din editor foloseau nuanțele
+rolurilor (mov pentru cuvintele cheie și pentru μ).
+
+Ce s-a adoptat, în ordinea recenziei: așezarea 1b (aplicația ocupă fereastra: coloana de cod cu
+intrările pliabile sub ea, scena cu cardul pasului deasupra grilelor, sertarul din dreapta cu
+panouri pliabile care își arată rezumatul și închise, bara de parcurgere lipită jos; fiecare
+coloană derulează singură); cardul citează linia curentă cu valorile variabilelor ei și are
+rânduri cu înălțime rezervată; pasul înainte e singurul buton plin, cu pictograme și etichete,
+iar cursorul pe urmă are crestături la scrieri, la iterații și la oprire; comutatorul
+Parcurgere | Exercițiu cu scorul în card, în locul bifei; legenda pe un rând, cu frazele la
+cerere; Verificarea ca rând pliat cu rezumat, deschis singur la final, cu reziduurile și în card;
+catalogul de avertizări (informativ pentru rularea veche, cu scena estompată; eroarea de sintaxă
+cu semnul „!”; intrarea greșită cu câmpul marcat; oprirea cu pătrat roșu); lățimea coloanelor
+grilei calculată din toată urma și formatul compact peste 36 de celule; sintaxa editorului fără
+nuanțe de rol, cu temă proprie în ambele teme; indentarea atârnată a liniilor lungi; IBM Plex Sans
+și Mono înglobate în fișierul unic (subseturile latin și latin-ext, 137 KB woff2); modul
+prezentare pe tasta P (rădăcina la 125 %, coloanele cresc mai puțin decât textul); harta tastelor
+în antet; benzile responsive (1440, 1200, 900, 600 px) cu bara fixă jos pe telefon.
+
+Ce nu s-a adoptat și de ce: paleta propusă pica cinci verificări din `tests/culori.test.ts`
+(măsurate cu formulele testului): țintă și pivot în formulă sub deuteranopie 7.0 față
+de pragul 8, litera μ pe fondul mov 3.6 și 3.1 față de 4.5, conturul comenzilor pe fundal 2.7 față
+de 3, cuvântul cheie One Dark pe linia curentă 4.3; se păstrează fondurile și culorile de rol
+actuale. Lista de examen presupusă de recenzie nu există în aplicație: Andrei vrea ca unealta să
+urmeze doar sursele cursului, fără liste care s-ar schimba de la an la an. Toleranța la exercițiu
+rămâne 0.5 %, cât lasă rotunjirea la trei cifre, nu 0.05 % cum scria recenzia. Selectorul de
+algoritmi rămâne meniul nativ, care merge pe telefon și cu cititorul de ecran. În banda de proiector
+(900-1199 px) sertarul rămâne vizibil, îngustat, nu ascuns într-o foaie laterală, ca graficul și
+pasul să se vadă deodată.
 
 ## 13. Surse
 
