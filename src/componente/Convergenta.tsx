@@ -88,8 +88,7 @@ export function Convergenta({ puncte, vazute, onPas, nota }: Props) {
   const ales = peste !== null && peste < vizibile.length ? vizibile[peste] : null
 
   return (
-    <section className="convergenta">
-      <h2>{t('convergenta')}</h2>
+    <>
       <p className="ajutor">
         <Formula tex={puncte[0].texStanga} inline /> {t('convergentaFata')} <Formula tex={puncte[0].texDreapta} inline />
         {'. '}
@@ -174,6 +173,6 @@ export function Convergenta({ puncte, vazute, onPas, nota }: Props) {
           </tbody>
         </table>
       </details>
-    </section>
+    </>
   )
 }

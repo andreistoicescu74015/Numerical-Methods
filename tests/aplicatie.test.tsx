@@ -3,6 +3,7 @@ import { act } from 'react'
 import { createRoot } from 'react-dom/client'
 import { beforeEach, describe, expect, it } from 'vitest'
 import App from '../src/App'
+import { text, type CheieText } from '../src/i18n'
 
 // jsdom nu masoara text; CodeMirror cere aceste doua metode pe Range la fiecare cadru.
 const dreptunghi = { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0, right: 0, bottom: 0, toJSON: () => ({}) } as DOMRect
@@ -35,12 +36,18 @@ async function apasa(gazda: HTMLElement, text: string, al = 0) {
   })
 }
 
-// Scoate bifa "ascunde rezultatul", ca un pas inainte sa fie un pas al urmei.
-async function faraIntrebari(gazda: HTMLElement) {
-  const bifa = gazda.querySelector<HTMLInputElement>('.comenzi input[type="checkbox"]')!
+// Un buton din bara de parcurgere, dupa eticheta lui accesibila, in oricare dintre limbi.
+async function comanda(gazda: HTMLElement, cheie: CheieText) {
+  const b = [...gazda.querySelectorAll<HTMLButtonElement>('.comenzi button')].find((x) => x.getAttribute('aria-label') === text('ro', cheie) || x.getAttribute('aria-label') === text('en', cheie))
+  if (!b) throw new Error(`nu există comanda „${cheie}”`)
   await act(async () => {
-    bifa.click()
+    b.click()
   })
+}
+
+// Trece pe modul parcurgere, ca un pas inainte sa fie un pas al urmei, fara "?".
+async function faraIntrebari(gazda: HTMLElement) {
+  await apasa(gazda, 'Parcurgere')
 }
 
 const celule = (gazda: HTMLElement, clasa = '') => gazda.querySelectorAll(`.grila .celula${clasa}`)
@@ -66,8 +73,8 @@ describe('aplicația montată', () => {
 
   it('un calcul apare întâi cu "?" în formulă și în celulă, iar pasul următor îl arată', async () => {
     const gazda = await monteaza()
-    await apasa(gazda, '>')
-    await apasa(gazda, '>')
+    await comanda(gazda, 'pasInainte')
+    await comanda(gazda, 'pasInainte')
     expect(gazda.querySelector('.stare')?.textContent).toContain('pasul 3 din 22')
     expect(gazda.querySelector('.stare')?.textContent).toContain('linia 4')
     expect(gazda.querySelector('.katex .rol-pivot')?.textContent).toContain('a')
@@ -76,30 +83,30 @@ describe('aplicația montată', () => {
     expect(celule(gazda, '.rol-scris')[0].textContent).toBe('?')
     expect(celule(gazda, '.rol-scris')[0].getAttribute('aria-label')).toBe('A(2,1) = ?, se scrie acum')
 
-    await apasa(gazda, '>')
+    await comanda(gazda, 'pasInainte')
     expect(gazda.querySelector('.stare')?.textContent).toContain('pasul 3 din 22')
     expect(formula(gazda)).not.toContain('?')
     expect(celule(gazda, '.rol-scris')[0].textContent).toBe('2')
 
     // un pas inapoi ascunde din nou rezultatul, inca unul trece la pasul dinainte
-    await apasa(gazda, '<')
+    await comanda(gazda, 'pasInapoi')
     expect(formula(gazda)).toContain('?')
-    await apasa(gazda, '<')
+    await comanda(gazda, 'pasInapoi')
     expect(gazda.querySelector('.stare')?.textContent).toContain('pasul 2 din 22')
   })
 
   it('butonul "Arată rezultatul" și bifa scot semnul întrebării', async () => {
     const gazda = await monteaza()
-    await apasa(gazda, '>>')
+    await comanda(gazda, 'urmatoareaScriere')
     expect(formula(gazda)).toContain('?')
     await apasa(gazda, 'Arată rezultatul')
     expect(formula(gazda)).not.toContain('?')
-    await apasa(gazda, '>>')
+    await comanda(gazda, 'urmatoareaScriere')
     expect(formula(gazda)).toContain('?')
     await faraIntrebari(gazda)
     expect(formula(gazda)).not.toContain('?')
     expect(localStorage.getItem('mn.intrebari')).toBe('0')
-    await apasa(gazda, '>>')
+    await comanda(gazda, 'urmatoareaScriere')
     expect(formula(gazda)).not.toContain('?')
   })
 
@@ -156,11 +163,11 @@ describe('aplicația montată', () => {
     const gazda = await monteaza()
     await faraIntrebari(gazda)
     expect(gazda.querySelector('.verificare')?.textContent).toContain('apare la ultimul pas')
-    for (let k = 0; k < 3; k++) await apasa(gazda, '>')
+    for (let k = 0; k < 3; k++) await comanda(gazda, 'pasInainte')
     expect(celule(gazda, '.rol-mult')).toHaveLength(1)
-    for (let k = 0; k < 8; k++) await apasa(gazda, '>')
+    for (let k = 0; k < 8; k++) await comanda(gazda, 'pasInainte')
     expect(celule(gazda, '.rol-gata').length).toBeGreaterThan(0)
-    await apasa(gazda, '>|')
+    await comanda(gazda, 'laSfarsit')
     const randuri = [...gazda.querySelectorAll('.verificare tbody tr')]
     expect(randuri.length).toBeGreaterThan(0)
     expect(randuri.every((r) => r.classList.contains('ok'))).toBe(true)
@@ -184,7 +191,7 @@ describe('aplicația montată', () => {
 
   it('butonul „aleator” păstrează dimensiunile și rulează: grila arată valorile noi, de la primul pas', async () => {
     const gazda = await monteaza()
-    await apasa(gazda, '>>')
+    await comanda(gazda, 'urmatoareaScriere')
     await apasa(gazda, 'aleator')
     const text = gazda.querySelector<HTMLTextAreaElement>('.intrare.matrice textarea')!.value
     const linii = text.split('\n')
@@ -207,7 +214,7 @@ describe('aplicația montată', () => {
       const U = gazda.querySelector<HTMLTextAreaElement>('.intrare.matrice textarea')!.value.split('\n').map((l) => l.split(' ').map(Number))
       expect(U).toHaveLength(3)
       U.forEach((l, i) => l.forEach((x, j) => (j < i ? expect(x).toBe(0) : j === i ? expect(x).not.toBe(0) : undefined)))
-      await apasa(gazda, '>|')
+      await comanda(gazda, 'laSfarsit')
       expect(gazda.querySelector('.verificare tbody tr')?.classList.contains('ok')).toBe(true)
     }
   })
@@ -233,14 +240,14 @@ describe('aplicația montată', () => {
 
   it('„>>” sare la următoarea scriere, iar linia curentă are valorile indicilor', async () => {
     const gazda = await monteaza()
-    await apasa(gazda, '>>')
+    await comanda(gazda, 'urmatoareaScriere')
     expect(gazda.querySelector('.stare')?.textContent).toContain('pasul 3 din 22')
     expect(gazda.querySelector('.cm-anotare')?.textContent).toBe('i = 2, k = 1')
-    await apasa(gazda, '>>')
+    await comanda(gazda, 'urmatoareaScriere')
     expect(gazda.querySelector('.stare')?.textContent).toContain('pasul 5 din 22')
-    await apasa(gazda, '<<')
+    await comanda(gazda, 'scriereaAnterioara')
     expect(gazda.querySelector('.stare')?.textContent).toContain('pasul 3 din 22')
-    await apasa(gazda, '>|')
+    await comanda(gazda, 'laSfarsit')
     expect(celule(gazda, '.rol-mult')).toHaveLength(3)
   })
 
@@ -250,7 +257,7 @@ describe('aplicația montată', () => {
     expect(gazda.querySelector('.operatii')?.textContent).toContain('Operații pe matrice')
     expect(etape()).toHaveLength(2)
     expect(etape().some((li) => li.classList.contains('curenta'))).toBe(false)
-    await apasa(gazda, '>>')
+    await comanda(gazda, 'urmatoareaScriere')
     expect(etape()[0].classList.contains('curenta')).toBe(true)
     expect(etape()[0].querySelector('.linii')?.textContent).toBe('liniile 3-4')
     expect(etape()[0].querySelector('.text')?.textContent).toContain('multiplicatorii pasului k')
@@ -265,7 +272,7 @@ describe('aplicația montată', () => {
     expect(gazda.querySelector('header select optgroup[label="Sisteme liniare, metode iterative"]')).not.toBeNull()
     expect(gazda.querySelector('.convergenta')?.textContent).toContain('Convergență')
     expect(gazda.querySelectorAll('.convergenta circle')).toHaveLength(0)
-    await apasa(gazda, '>|')
+    await comanda(gazda, 'laSfarsit')
     // 12 iteratii: conditia buclei se evalueaza de 13 ori
     expect(gazda.querySelectorAll('.convergenta circle')).toHaveLength(13)
     expect(gazda.querySelectorAll('.convergenta tbody tr')).toHaveLength(13)
@@ -285,7 +292,7 @@ describe('aplicația montată', () => {
     await scrieIn(camp('x').querySelector('textarea')!, '0 0')
     await scrieIn(camp('tol').querySelector<HTMLInputElement>('input:not(.nume)')!, '0')
     await apasa(gazda, 'Rulează')
-    await apasa(gazda, '>|')
+    await comanda(gazda, 'laSfarsit')
     expect(gazda.querySelector('.mesaj.gata')).not.toBeNull()
     expect(gazda.querySelector('.verificare tbody tr')?.classList.contains('ok')).toBe(true)
     // zero are treapta lui pe scara logaritmica
@@ -294,7 +301,7 @@ describe('aplicația montată', () => {
 
   it('schimbarea limbii după ce textul din editor s-a schimbat nu lasă un semn de întrebare fără pas', async () => {
     const gazda = await monteaza()
-    await apasa(gazda, '>>')
+    await comanda(gazda, 'urmatoareaScriere')
     expect(formula(gazda)).toContain('?')
     await scrieIn(gazda.querySelector<HTMLTextAreaElement>('.intrare.matrice textarea')!, '5')
     await apasa(gazda, 'EN')
@@ -307,7 +314,7 @@ describe('aplicația montată', () => {
     await scrieIn(gazda.querySelector<HTMLTextAreaElement>('.intrare.matrice textarea')!, '0 1\n1 0')
     expect(gazda.querySelector('.avertisment')?.textContent).toContain('Submatricea lider principală A[1] (colțul din stânga sus, de 1 x 1) este singulară')
     await apasa(gazda, 'Rulează')
-    await apasa(gazda, '>|')
+    await comanda(gazda, 'laSfarsit')
     expect(gazda.querySelector('.mesaj.eroare')?.textContent).toBe('linia 4: împărțire la zero')
     expect(formula(gazda)).toContain('1/0')
   })
@@ -319,26 +326,26 @@ describe('aplicația montată', () => {
     await scrieIn(gazda.querySelector<HTMLTextAreaElement>('.intrare.matrice textarea')!, '1 2\n3 1')
     expect(gazda.querySelector('.avertisment.usor')?.textContent).toContain('A nu este strict diagonal dominantă')
     await apasa(gazda, 'Rulează')
-    await apasa(gazda, '>|')
+    await comanda(gazda, 'laSfarsit')
     expect(gazda.querySelector('.mesaj.stop')?.textContent).toBe('nu a convers în maxiter iterații')
-    expect(gazda.querySelector('.stare')?.textContent).toContain('e = 5.7e+38, k = 100, i = 2')
+    expect(gazda.querySelector('.pas .valori')?.textContent).toBe('e = 5.7e+38, k = 100, i = 2')
   })
 
   it('modul exercițiu: răspunsul scris la un pas ascuns se verifică, iar rezultatul apare cu verdictul și scorul', async () => {
     const gazda = await monteaza()
-    await apasa(gazda, '>>')
+    await comanda(gazda, 'urmatoareaScriere')
     // a_21 ← μ_21 = a_21 / a_11 = 2 / 1 = ?
     expect(formula(gazda)).toContain('?')
     await scrieIn(gazda.querySelector<HTMLInputElement>('.raspuns input')!, '2')
     await apasa(gazda, 'Verifică')
     expect(gazda.querySelector('.verdict')?.textContent).toBe('Corect. Corecte: 1 din 1.')
     expect(formula(gazda)).not.toContain('?')
-    await apasa(gazda, '>>')
+    await comanda(gazda, 'urmatoareaScriere')
     await scrieIn(gazda.querySelector<HTMLInputElement>('.raspuns input')!, '5')
     await apasa(gazda, 'Verifică')
     expect(gazda.querySelector('.verdict.gresit')?.textContent).toContain('Corecte: 1 din 2.')
     // un text care nu e numar nu se numara
-    await apasa(gazda, '>>')
+    await comanda(gazda, 'urmatoareaScriere')
     await scrieIn(gazda.querySelector<HTMLInputElement>('.raspuns input')!, 'doi')
     await apasa(gazda, 'Verifică')
     expect(gazda.querySelector('.raspuns .necitit')?.textContent).toBe('scrie un număr, de exemplu 0.5 sau 1/2')
@@ -348,7 +355,7 @@ describe('aplicația montată', () => {
   it('modul exercițiu pe o condiție: adevărat sau fals', async () => {
     const gazda = await monteaza()
     await scrieIn(gazda.querySelector('header select')!, 'JACOBI')
-    while (!gazda.querySelector('.cm-linie-curenta')?.textContent?.includes('cât timp')) await apasa(gazda, '>')
+    while (!gazda.querySelector('.cm-linie-curenta')?.textContent?.includes('cât timp')) await comanda(gazda, 'pasInainte')
     expect(gazda.querySelector<HTMLInputElement>('.raspuns input')?.placeholder).toBe('adevărat sau fals')
     await scrieIn(gazda.querySelector<HTMLInputElement>('.raspuns input')!, 'da')
     await apasa(gazda, 'Verifică')
@@ -360,13 +367,13 @@ describe('aplicația montată', () => {
     await scrieIn(gazda.querySelector('header select')!, 'S_G')
     const precizie = gazda.querySelector<HTMLSelectElement>('.precizie select')!
     expect(precizie.value).toBe('3')
-    await apasa(gazda, '>|')
+    await comanda(gazda, 'laSfarsit')
     expect(gazda.querySelector('.stare')?.textContent).toContain('cu 3 cifre')
     const x = () => [...gazda.querySelectorAll('.grila')].find((g) => g.querySelector('figcaption')?.textContent?.startsWith('x'))!
     expect([...x().querySelectorAll('.celula')].map((c) => c.textContent)).toEqual(['0', '1'])
     expect(gazda.querySelector('.verificare tbody tr')?.classList.contains('ok')).toBe(false)
     await scrieIn(precizie, '0')
-    await apasa(gazda, '>|')
+    await comanda(gazda, 'laSfarsit')
     expect([...x().querySelectorAll('.celula')].map((c) => c.textContent)).toEqual(['1', '0.9999'])
     expect(gazda.querySelector('.verificare tbody tr')?.classList.contains('ok')).toBe(true)
     // alt algoritm revine la dubla precizie
@@ -384,7 +391,7 @@ describe('aplicația montată', () => {
     // pe tot parcursul, nicio celula hasurata nu e citita sau scrisa
     await faraIntrebari(gazda)
     while (!gazda.querySelector('.mesaj.gata')) {
-      await apasa(gazda, '>')
+      await comanda(gazda, 'pasInainte')
       expect(gazda.querySelectorAll('.celula.zero-stiut.rol-citit, .celula.zero-stiut.rol-scris')).toHaveLength(0)
     }
   }, 30000)
@@ -396,7 +403,7 @@ describe('aplicația montată', () => {
     expect(gazda.querySelector('.geometrie')).not.toBeNull()
     expect(gazda.querySelectorAll('.geometrie svg .dreapta')).toHaveLength(2)
     expect(gazda.querySelector('.geometrie svg .solutie')).not.toBeNull()
-    await apasa(gazda, '>|')
+    await comanda(gazda, 'laSfarsit')
     expect(gazda.querySelectorAll('.geometrie svg .punct').length).toBeGreaterThan(3)
     expect(gazda.querySelector('.geometrie svg')?.getAttribute('aria-label')).toContain('aproximarea curentă este (')
     await scrieIn(gazda.querySelector('header select')!, 'MP')
@@ -458,7 +465,7 @@ describe('aplicația montată', () => {
     await scrieIn(gazda.querySelector('header select')!, 'S_GPP')
     expect(gazda.querySelector<HTMLTextAreaElement>('.intrare.matrice textarea')!.value).toBe('0.0001 1\n1 1')
     expect(gazda.querySelector<HTMLSelectElement>('.precizie select')!.value).toBe('3')
-    await apasa(gazda, '>|')
+    await comanda(gazda, 'laSfarsit')
     const x = [...gazda.querySelectorAll('.grila')].find((g) => g.querySelector('figcaption')?.textContent?.startsWith('x'))!
     expect([...x.querySelectorAll('.celula')].map((c) => c.textContent)).toEqual(['1', '1'])
   })
@@ -467,7 +474,7 @@ describe('aplicația montată', () => {
     const gazda = await monteaza()
     await scrieIn(gazda.querySelector('header select')!, 'S_G')
     await faraIntrebari(gazda)
-    while (!formula(gazda).includes('rotunjit')) await apasa(gazda, '>')
+    while (!formula(gazda).includes('rotunjit')) await comanda(gazda, 'pasInainte')
     expect(formula(gazda)).toContain('−9999')
     expect(formula(gazda)).toContain('rotunjit la 3 cifre')
   })
@@ -475,7 +482,7 @@ describe('aplicația montată', () => {
   it('un zero ratat de rotunjiri apare ca ≈0, cu valoarea exactă în titlul celulei', async () => {
     const gazda = await monteaza()
     await scrieIn(gazda.querySelector('header select')!, 'SQR')
-    await apasa(gazda, '>|')
+    await comanda(gazda, 'laSfarsit')
     const x = [...gazda.querySelectorAll('.grila')].find((g) => g.querySelector('figcaption')?.textContent?.startsWith('x'))!
     const celule = [...x.querySelectorAll<HTMLElement>('.celula')]
     expect(celule[1].textContent).toBe('≈0')
@@ -508,7 +515,7 @@ describe('aplicația montată', () => {
     const gazda = await monteaza()
     await scrieIn(gazda.querySelector('header select')!, 'propriu')
     expect(celule(gazda, '.static')).toHaveLength(169)
-    expect(gazda.querySelector('.dreapta .ajutor')?.textContent).toContain('animațiile sunt oprite')
+    expect(gazda.querySelector('.scena .matrice-mare')?.textContent).toContain('animațiile sunt oprite')
     // un program doar pe elemente nu are operatii intre tablouri de aratat
     expect(gazda.querySelector('.operatii')?.textContent).toContain('lucrează doar pe elemente')
   })

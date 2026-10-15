@@ -30,6 +30,9 @@ interface Props {
   mult?: Set<string>
   // pozitiile care sunt zero stiut dinainte (in afara benzii); algoritmul nu le atinge
   zerouri?: Set<string>
+  // cate caractere are cel mai lung text din fiecare coloana, pe toata urma: latimea coloanei
+  // nu se schimba de la un pas la altul
+  latimi?: number[]
   pasIdx: number
   fel?: FelPas
   // rezultatul pasului e inca ascuns: celulele care se scriu arata "?"
@@ -40,7 +43,7 @@ interface Props {
   animat: boolean
 }
 
-export function Grila({ nume, tablou, celule, gata, mult, zerouri, pasIdx, fel, intrebare, durata, animat }: Props) {
+export function Grila({ nume, tablou, celule, gata, mult, zerouri, latimi, pasIdx, fel, intrebare, durata, animat }: Props) {
   const { tema, t } = usePreferinte()
   const paleta = PALETA[tema]
   const roluri = new Map<string, Rol>()
@@ -51,7 +54,7 @@ export function Grila({ nume, tablou, celule, gata, mult, zerouri, pasIdx, fel, 
   const m = tablou.tip === 'vector' ? tablou.n : tablou.m
   const scara = Math.max(1, ...tablou.d.map((x) => (Number.isFinite(x) ? Math.abs(x) : 0)))
   const n = tablou.tip === 'vector' ? 1 : tablou.n
-  const coloane = `var(--indice) repeat(${n}, var(--cel))`
+  const coloane = `var(--indice) ${Array.from({ length: n }, (_, j) => `max(var(--cel-min), ${Math.max(latimi?.[j] ?? 1, 1)}ch + 1.1rem)`).join(' ')}`
 
   const antet: React.ReactNode[] = [<div key="colt" className="indice" role="presentation" />]
   for (let j = 1; j <= n; j++)

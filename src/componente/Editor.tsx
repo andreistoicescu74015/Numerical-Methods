@@ -1,9 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { EditorView, basicSetup } from 'codemirror'
 import { HighlightStyle, StreamLanguage, syntaxHighlighting } from '@codemirror/language'
-import { Compartment, Prec, StateEffect, StateField } from '@codemirror/state'
-import { oneDark } from '@codemirror/theme-one-dark'
-import { Decoration, WidgetType, keymap, type DecorationSet } from '@codemirror/view'
+import { Compartment, Prec, RangeSetBuilder, StateEffect, StateField } from '@codemirror/state'
+import { Decoration, ViewPlugin, WidgetType, keymap, type DecorationSet, type ViewUpdate } from '@codemirror/view'
 import { tags } from '@lezer/highlight'
 import type { Tema } from '../preferinte'
 
@@ -29,6 +28,67 @@ const pseudocod = StreamLanguage.define({
     return null
   },
 })
+
+// Culorile de sintaxa nu folosesc nicio nuanta de rol (portocaliu, rosu, albastru, verde, mov),
+// ca o culoare sa aiba acelasi sens in editor si in grila: cuvintele cheie au culoarea titlurilor
+// si sunt ingrosate, comentariile sunt cursive si sterse, textele sterse.
+const sintaxa = Prec.highest(
+  syntaxHighlighting(
+    HighlightStyle.define([
+      { tag: tags.keyword, color: 'var(--titlu)', fontWeight: '600' },
+      { tag: tags.atom, color: 'var(--titlu)' },
+      { tag: tags.number, color: 'var(--text)' },
+      { tag: tags.string, color: 'var(--text-sters)' },
+      { tag: tags.comment, color: 'var(--text-sters)', fontStyle: 'italic' },
+      { tag: tags.operator, color: 'var(--text)' },
+    ]),
+  ),
+)
+
+// Fondul, textul, cursorul si selectia editorului vin din variabilele temei, in ambele teme.
+const temaEditor = (tema: Tema) =>
+  EditorView.theme(
+    {
+      '&': { backgroundColor: 'var(--panou)', color: 'var(--text)' },
+      '.cm-content': { caretColor: 'var(--text)' },
+      '.cm-cursor, .cm-dropCursor': { borderLeftColor: 'var(--text)' },
+      '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': {
+        backgroundColor: tema === 'intunecat' ? '#2f4a73' : '#cfe0ff',
+      },
+      '.cm-activeLine': { backgroundColor: tema === 'intunecat' ? 'rgba(255, 255, 255, 0.04)' : 'rgba(0, 0, 0, 0.03)' },
+      '.cm-activeLineGutter': { backgroundColor: 'transparent' },
+      '.cm-gutters': { backgroundColor: 'var(--panou)', color: 'var(--text-slab)', border: 'none' },
+    },
+    { dark: tema === 'intunecat' },
+  )
+
+// O linie lunga se rupe cu indentare atarnata: continuarea incepe la indentarea liniei plus
+// doua caractere, nu la marginea din stanga.
+function indentari(view: EditorView): DecorationSet {
+  const b = new RangeSetBuilder<Decoration>()
+  for (const { from, to } of view.visibleRanges) {
+    for (let pos = from; pos <= to; ) {
+      const linie = view.state.doc.lineAt(pos)
+      const n = (/^\s*/.exec(linie.text)?.[0].length ?? 0) + 2
+      b.add(linie.from, linie.from, Decoration.line({ attributes: { style: `padding-left: calc(6px + ${n}ch); text-indent: -${n}ch` } }))
+      pos = linie.to + 1
+    }
+  }
+  return b.finish()
+}
+
+const indentareAtarnata = ViewPlugin.fromClass(
+  class {
+    decorations: DecorationSet
+    constructor(view: EditorView) {
+      this.decorations = indentari(view)
+    }
+    update(u: ViewUpdate) {
+      if (u.docChanged || u.viewportChanged) this.decorations = indentari(u.view)
+    }
+  },
+  { decorations: (v) => v.decorations },
+)
 
 // Valorile variabilelor de pe linia curenta, la capatul ei: „k = 1, i = 2, j = 3”.
 class Anotare extends WidgetType {
@@ -74,12 +134,6 @@ const campMarcaj = StateField.define<DecorationSet>({
   provide: (f) => EditorView.decorations.from(f),
 })
 
-// Comentariile temei One Dark au contrast 3.9:1 pe fondul ei; culoarea de aici are peste 5:1,
-// si pe linia curenta.
-const comentariiLizibile = Prec.highest(syntaxHighlighting(HighlightStyle.define([{ tag: tags.comment, color: '#9ca6b5' }])))
-
-const temaEditor = (tema: Tema) => (tema === 'intunecat' ? [oneDark, comentariiLizibile] : [])
-
 interface Props {
   text: string
   onChange: (text: string) => void
@@ -117,7 +171,9 @@ export function Editor({ text, onChange, onRun, linie, eroare, anotare, tema }: 
         ),
         basicSetup,
         pseudocod,
+        sintaxa,
         campMarcaj,
+        indentareAtarnata,
         EditorView.lineWrapping,
         compartiment.current.of(temaEditor(tema)),
         EditorView.updateListener.of((u) => {

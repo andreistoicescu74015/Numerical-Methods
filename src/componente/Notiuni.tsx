@@ -1,21 +1,19 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { GRUPURI, NOTIUNI } from '../notiuni'
 import { usePreferinte } from '../preferinte'
 import { Formula } from './Formula'
 
 interface Props {
-  // notiunea cerut din etichetele algoritmului: deschide panoul si deruleaza la ea
+  // notiunea ceruta din etichetele algoritmului: panoul e deja deschis, aici se deruleaza la ea
   tinta: string | null
   cerere: number
 }
 
 export function Notiuni({ tinta, cerere }: Props) {
   const { t, limba } = usePreferinte()
-  const [deschis, setDeschis] = useState(false)
 
   useEffect(() => {
     if (!tinta) return
-    setDeschis(true)
     // fara derulare animata cand sistemul cere miscare redusa
     const lin = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
     const timer = setTimeout(() => document.getElementById(`notiune-${tinta}`)?.scrollIntoView?.({ block: 'start', behavior: lin }), 50)
@@ -23,8 +21,7 @@ export function Notiuni({ tinta, cerere }: Props) {
   }, [tinta, cerere])
 
   return (
-    <details className="notiuni" id="notiuni" open={deschis} onToggle={(e) => setDeschis((e.currentTarget as HTMLDetailsElement).open)}>
-      <summary>{t('notiuni')}</summary>
+    <>
       <p className="ajutor">{t('notiuniAjutor')}</p>
       {GRUPURI.map((g) => (
         <section key={g.id}>
@@ -39,6 +36,6 @@ export function Notiuni({ tinta, cerere }: Props) {
           ))}
         </section>
       ))}
-    </details>
+    </>
   )
 }

@@ -41,13 +41,17 @@ interface Props {
   linie: number | null
 }
 
+// eticheta etapei curente, pentru rezumatul panoului
+export function etapaCurenta(etape: Etapa[], linie: number | null): Etapa | undefined {
+  return linie === null ? undefined : etape.find((e) => linie >= e.de && linie <= e.la)
+}
+
 // Lista operatiilor pe matrice ale programului: pentru algoritmii din biblioteca, etapele
 // scrise in forma matriceala; pentru un program oarecare, liniile care lucreaza intre tablouri.
 export function OperatiiAlgoritm({ forma, etape, linie }: Props) {
   const { t, limba } = usePreferinte()
   return (
-    <section className="operatii">
-      <h2>{t('operatii')}</h2>
+    <>
       <p className="ajutor">{etape.length > 0 ? t('operatiiAjutor') : t('operatiiNiciuna')}</p>
       {forma && <Formula tex={forma} />}
       {etape.length > 0 && (
@@ -83,6 +87,6 @@ export function OperatiiAlgoritm({ forma, etape, linie }: Props) {
         </table>
         <p className="ajutor">{t('operatiiBlocuri')}</p>
       </details>
-    </section>
+    </>
   )
 }

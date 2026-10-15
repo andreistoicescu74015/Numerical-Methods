@@ -5,13 +5,12 @@ import { usePreferinte } from '../preferinte'
 interface Props {
   // valorile pe care le scrie pasul sau rezultatul conditiei
   dorit: number[] | boolean
-  scor: { corecte: number; total: number }
   // dupa un raspuns citit: se numara, iar rezultatul pasului se arata
   onRaspuns: (corect: boolean) => void
 }
 
 // Campul in care studentul scrie rezultatul pasului inainte sa il vada.
-export function Raspuns({ dorit, scor, onRaspuns }: Props) {
+export function Raspuns({ dorit, onRaspuns }: Props) {
   const { t } = usePreferinte()
   const [text, setText] = useState('')
   const [necitit, setNecitit] = useState(false)
@@ -47,7 +46,6 @@ export function Raspuns({ dorit, scor, onRaspuns }: Props) {
           {conditie ? t('raspunsNecititConditie') : (dorit as number[]).length === 1 ? t('raspunsNecititUnul') : t('raspunsNecitit', (dorit as number[]).length)}
         </span>
       )}
-      {scor.total > 0 && <span className="scor">{t('scor', scor.corecte, scor.total)}</span>}
     </form>
   )
 }

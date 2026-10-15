@@ -173,8 +173,7 @@ export function Geometrie({ id, rez, intrari, k, ascuns }: Props) {
   const curentAfara = id !== 'MP' && !!curent && iese(curent)
 
   return (
-    <section className="geometrie">
-      <h2>{t('geometrie')}</h2>
+    <>
       <p className="ajutor">{t(text)}</p>
       <svg viewBox={`0 0 ${L} ${H}`} role="img" aria-label={descriere}>
         {/* axele */}
@@ -276,6 +275,6 @@ export function Geometrie({ id, rez, intrari, k, ascuns }: Props) {
           </>
         )}
       </ul>
-    </section>
+    </>
   )
 }

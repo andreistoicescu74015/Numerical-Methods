@@ -16,6 +16,8 @@ interface Props {
   numpy?: string[]
   // precizia aleasa in vizualizator; Python calculeaza oricum in dubla precizie
   cifre: number
+  // panoul e deschis: codul se genereaza doar atunci
+  deschis: boolean
 }
 
 // valorile curente ale intrarilor, pentru apelul de la sfarsitul fisierului; nimic cat textul lor are greseli
@@ -28,9 +30,8 @@ function valori(definitii: Definitie[]) {
 }
 
 // Codul Python al programului curent, generat cand panoul e deschis.
-export function CodPython({ nume, sursa, definitii, iesiri, patrata, numpy, cifre }: Props) {
+export function CodPython({ nume, sursa, definitii, iesiri, patrata, numpy, cifre, deschis }: Props) {
   const { t, limba } = usePreferinte()
-  const [deschis, setDeschis] = useState(false)
   const [copiat, setCopiat] = useState(false)
 
   const cod = useMemo(() => {
@@ -57,24 +58,20 @@ export function CodPython({ nume, sursa, definitii, iesiri, patrata, numpy, cifr
     URL.revokeObjectURL(url)
   }
 
+  if (!deschis) return null
   return (
-    <details className="python" open={deschis} onToggle={(e) => setDeschis((e.currentTarget as HTMLDetailsElement).open)}>
-      <summary>{t('codPython')}</summary>
-      {deschis && (
-        <>
-          <p className="ajutor">{t('codPythonAjutor')}</p>
-          {cifre > 0 && <p className="ajutor">{t('codPythonCifre', cifre)}</p>}
-          <div className="actiuni">
-            <button type="button" className="mic" onClick={copiaza}>
-              {copiat ? t('copiat') : t('copiaza')}
-            </button>
-            <button type="button" className="mic" onClick={descarca}>
-              {t('descarca')}
-            </button>
-          </div>
-          <pre>{cod}</pre>
-        </>
-      )}
-    </details>
+    <>
+      <p className="ajutor">{t('codPythonAjutor')}</p>
+      {cifre > 0 && <p className="ajutor">{t('codPythonCifre', cifre)}</p>}
+      <div className="actiuni">
+        <button type="button" className="mic" onClick={copiaza}>
+          {copiat ? t('copiat') : t('copiaza')}
+        </button>
+        <button type="button" className="mic" onClick={descarca}>
+          {t('descarca')}
+        </button>
+      </div>
+      <pre>{cod}</pre>
+    </>
   )
 }

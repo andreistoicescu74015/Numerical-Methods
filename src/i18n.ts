@@ -69,10 +69,6 @@ export const TEXTE = {
   legendaPropriuDominant: { ro: 'direcția vectorului propriu dominant', en: 'the direction of the dominant eigenvector' },
   legendaYCurent: { ro: 'y la pasul curent; săgețile mai deschise sunt cele de dinainte', en: 'y at the current step; the lighter arrows are the earlier ones' },
   legendaOglinda: { ro: 'dreapta față de care oglindește reflectorul', en: 'the line the reflector mirrors across' },
-  comenziAjutor: {
-    ro: '> sau săgeata dreapta: pasul următor. >> sau Shift + săgeată: următoarea scriere într-un tablou. Redă sau spațiu: pașii merg singuri.',
-    en: '> or the right arrow: the next step. >> or Shift + arrow: the next write to an array. Play or space: the steps run by themselves.',
-  },
   costEstimat: {
     ro: 'Pentru aceste intrări formula dă ≈ {0}, iar rularea numără {1}; formula păstrează doar termenul dominant, deci cele două se apropie abia când matricea crește.',
     en: 'For these inputs the formula gives ≈ {0}, and this run counts {1}; the formula keeps only the leading term, so the two get close only as the matrix grows.',
@@ -298,7 +294,7 @@ export const TEXTE = {
   },
   verificareOk: { ro: 'ok', en: 'ok' },
   verificareRau: { ro: 'prea mare', en: 'too large' },
-  verificareLaSfarsit: { ro: 'apare la ultimul pas (butonul >| sau tasta End)', en: 'shown at the last step (the >| button or the End key)' },
+  verificareLaSfarsit: { ro: 'apare la ultimul pas (butonul sfârșit sau tasta End).', en: 'shown at the last step (the end button or the End key).' },
   verificareOprit: { ro: 'algoritmul s-a oprit înainte de sfârșit, nu e nimic de verificat', en: 'the algorithm stopped before the end, there is nothing to check' },
   codPython: { ro: 'Cod Python', en: 'Python code' },
   codPythonAjutor: {
@@ -308,6 +304,38 @@ export const TEXTE = {
   copiaza: { ro: 'copiază', en: 'copy' },
   copiat: { ro: 'copiat', en: 'copied' },
   descarca: { ro: 'descarcă', en: 'download' },
+  pseudocod: { ro: 'Pseudocod', en: 'Pseudocode' },
+  despre: { ro: 'Despre algoritm', en: 'About the algorithm' },
+  mod: { ro: 'modul de lucru', en: 'working mode' },
+  parcurgere: { ro: 'Parcurgere', en: 'Walkthrough' },
+  exercitiu: { ro: 'Exercițiu', en: 'Exercise' },
+  parcurgereAjutor: { ro: 'rezultatul fiecărui pas se vede imediat (tasta E schimbă modul)', en: 'the result of every step shows at once (the E key switches the mode)' },
+  pas: { ro: 'pas', en: 'step' },
+  arata: { ro: 'arată', en: 'show' },
+  inceput: { ro: 'început', en: 'start' },
+  sfarsit: { ro: 'sfârșit', en: 'end' },
+  inapoi: { ro: 'înapoi', en: 'back' },
+  scriereInainte: { ro: 'scriere >', en: 'write >' },
+  scriereInapoi: { ro: '< scriere', en: '< write' },
+  urmaLegenda: {
+    ro: 'crestăturile mici: scrieri în tablouri; cele mari: începutul unei iterații; capătul roșu: oprire',
+    en: 'small notches: writes to arrays; large ones: the start of an iteration; the red end: a stop',
+  },
+  taste: { ro: 'Taste', en: 'Keys' },
+  tasteLista: {
+    ro: 'săgeată dreapta, stânga|pasul următor, pasul anterior\nShift + săgeată|următoarea, precedenta scriere într-un tablou\nHome, End|începutul, sfârșitul urmei\nspațiu|redă sau oprește\nE|parcurgere sau exercițiu\nP|modul prezentare, cu text mai mare\nCtrl + Enter|rulează, din editor',
+    en: 'right, left arrow|next step, previous step\nShift + arrow|next, previous write to an array\nHome, End|start, end of the trace\nspace|play or pause\nE|walkthrough or exercise\nP|presentation mode, with larger text\nCtrl + Enter|run, from the editor',
+  },
+  prezentare: { ro: 'Prezentare', en: 'Presentation' },
+  prezentareAjutor: { ro: 'text mai mare, pentru proiector (tasta P)', en: 'larger text, for a projector (the P key)' },
+  ceInseamna: { ro: 'ce înseamnă', en: 'what they mean' },
+  faraUrma: { ro: 'Nu există nicio rulare: corectează pseudocodul sau intrările și apasă Rulează.', en: 'There is no run: fix the pseudocode or the inputs and press Run.' },
+  verificareRezumatLaFinal: { ro: 'la ultimul pas · End', en: 'at the last step · End' },
+  verificareRezumatOprit: { ro: 'nu se aplică: rularea s-a oprit', en: 'not applicable: the run stopped' },
+  sariLaFinal: { ro: 'sari la final', en: 'jump to the end' },
+  dublaScurt: { ro: 'dublă precizie', en: 'double precision' },
+  panouri: { ro: 'panouri', en: 'panels' },
+  cifreScurt: { ro: '{0} cifre', en: '{0} digits' },
 } satisfies Record<string, Record<Limba, string>>
 
 export type CheieText = keyof typeof TEXTE

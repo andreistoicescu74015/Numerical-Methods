@@ -1,19 +1,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { MotionConfig } from 'motion/react'
 import { CodPython } from './componente/CodPython'
-import { Comenzi } from './componente/Comenzi'
-import { Convergenta, type Punct } from './componente/Convergenta'
+import { Comenzi, type Marcaj } from './componente/Comenzi'
+import { Convergenta, fmtNumar, type Punct } from './componente/Convergenta'
 import { Editor } from './componente/Editor'
 import { Formula } from './componente/Formula'
 import { Geometrie, areGeometrie } from './componente/Geometrie'
-import { Grila, fmtCelula } from './componente/Grila'
+import { Grila, TEXT_ROL, fmtCelula } from './componente/Grila'
 import { Intrari } from './componente/Intrari'
 import { Notiuni } from './componente/Notiuni'
-import { OperatiiAlgoritm, OperatiiPas, type Etapa } from './componente/Operatii'
+import { OperatiiAlgoritm, OperatiiPas, etapaCurenta, type Etapa } from './componente/Operatii'
+import { Panou } from './componente/Panou'
 import { Raspuns } from './componente/Raspuns'
-import { Verificare } from './componente/Verificare'
+import { RanduriVerificare, Verificare, randOk } from './componente/Verificare'
 import { asteptat } from './exercitiu'
-import { nrFlopi, text } from './i18n'
+import { nrFlopi, text, type CheieText } from './i18n'
 import { blocaj, definitiiDin, intrariDinDefinitii, type Definitie } from './intrari'
 import { operatiiPeLinii, variabilePeLinie } from './motor/analiza'
 import { EroareSintaxa, type Program } from './motor/ast'
@@ -23,6 +24,7 @@ import type { Limba } from './motor/mesaje'
 import { parseaza } from './motor/parser'
 import { inEngleza } from './motor/traducere'
 import { areVerificare, verifica } from './motor/verificare'
+import type { Tablou } from './motor/valori'
 import { estePatrata } from './natura'
 import { notiune } from './notiuni'
 import { OPERATII } from './operatii'
@@ -47,6 +49,10 @@ function cifreDinAdresa(): number | null {
 }
 // peste atatea celule, grilele se deseneaza fara animatii
 const CELULE_ANIMATE = 150
+// peste atatea celule, grilele trec in formatul compact
+const CELULE_COMPACT = 36
+// peste atatia pasi, cursorul pe urma pastreaza doar crestaturile mari
+const PASI_CU_SCRIERI = 220
 // La redare, un pas cu rezultat ascuns are doua faze: intrebarea, cat aceasta parte din intervalul
 // unui pas, apoi rezultatul, cat un interval intreg.
 const PARTE_INTREBARE = 0.6
@@ -112,6 +118,22 @@ interface Rulare {
 
 const aceleasi = (a: Definitie[], b: Definitie[]) => a.length === b.length && a.every((d, k) => d.nume === b[k].nume && d.tip === b[k].tip && d.text === b[k].text)
 
+// panourile din sertar; Convergenta si Geometria pornesc deschise, restul inchise
+type NumePanou = 'despre' | 'operatii' | 'convergenta' | 'geometrie' | 'verificare' | 'python' | 'notiuni'
+const PANOURI_DESCHISE: Record<NumePanou, boolean> = { despre: false, operatii: true, convergenta: true, geometrie: true, verificare: false, python: false, notiuni: false }
+
+const ROLURI_LEGENDA = ['pivot', 'scris', 'citit', 'gata', 'mult'] as const
+const EXPLICATII: Record<(typeof ROLURI_LEGENDA)[number], CheieText> = { pivot: 'legendaPivot', scris: 'legendaScris', citit: 'legendaCitit', gata: 'legendaGata', mult: 'legendaMult' }
+
+// rezumatul unei intrari pentru antetul sectiunii: „A 3×3”, „b 3”, „tol = 0.001”
+function rezumatDefinitie(d: Definitie): string {
+  const nume = d.nume.trim()
+  if (d.tip === 'scalar') return `${nume} = ${d.text.trim()}`
+  const linii = d.text.split('\n').filter((l) => l.trim() !== '')
+  const coloane = linii[0]?.trim().split(/[\s,;]+/).filter(Boolean).length ?? 0
+  return d.tip === 'vector' ? `${nume} ${coloane}` : `${nume} ${linii.length}×${coloane}`
+}
+
 export default function App() {
   return (
     <Preferinte>
@@ -134,9 +156,15 @@ function Continut() {
   const [k, setK] = useState(0)
   // rezultatul pasului curent e inca ascuns sub "?"
   const [ascuns, setAscuns] = useState(false)
+  // modul exercitiu: rezultatele apar intai cu "?", cu campul de raspuns
   const [intrebari, setIntrebari] = useState(() => localStorage.getItem(CHEIE_INTREBARI) !== '0')
   const [redare, setRedare] = useState(false)
   const [viteza, setViteza] = useState(2)
+  // modul prezentare: textul mai mare, pentru proiector
+  const [prezentare, setPrezentare] = useState(false)
+  const [deschise, setDeschise] = useState(PANOURI_DESCHISE)
+  // intrarile pornesc desfacute pe ecranele late; pe cele inguste raman la rezumat
+  const [intrariDeschise, setIntrariDeschise] = useState(() => !window.matchMedia || window.matchMedia('(min-width: 90em)').matches)
   const [notiuneAleasa, setNotiuneAleasa] = useState<{ id: string; cerere: number } | null>(() => {
     const ceruta = new URLSearchParams(window.location.search).get('notiune')
     return ceruta && notiune(ceruta) ? { id: ceruta, cerere: 1 } : null
@@ -232,6 +260,10 @@ function Continut() {
     if (!intrebari) setAscuns(false)
   }, [intrebari])
 
+  useEffect(() => {
+    document.documentElement.classList.toggle('prezentare', prezentare)
+  }, [prezentare])
+
   const alege = (nou: string) => {
     setId(nou)
     if (nou === PROPRIU) {
@@ -263,6 +295,8 @@ function Continut() {
     setDefinitii(noi)
     ruleaza(sursa, noi)
   }
+
+  const deschide = (p: NumePanou) => (d: boolean) => setDeschise((s) => ({ ...s, [p]: d }))
 
   const rez = rulare?.rez ?? null
   // textul din editor sau intrarile s-au schimbat de la ultima rulare: grilele arata valorile vechi
@@ -327,6 +361,7 @@ function Continut() {
       // pe un meniu, stanga si dreapta merg prin pasi (sus si jos raman ale meniului); in rest, campurile isi pastreaza tastele
       const meniu = tinta.tagName === 'SELECT' && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')
       if (!meniu && tinta.closest('.editor, textarea, input, select')) return
+      if (e.ctrlKey || e.metaKey || e.altKey) return
       // spatiul pe un buton sau pe un titlu de panou il apasa, nu porneste redarea
       if (e.key === ' ' && tinta.closest('button, summary, a, label')) return
       if (e.key === 'ArrowRight') {
@@ -338,6 +373,8 @@ function Continut() {
       } else if (e.key === 'Home') mergi(0, true)
       else if (e.key === 'End') mergi(total - 1)
       else if (e.key === ' ') setRedare((r) => !r)
+      else if (e.key === 'e' || e.key === 'E') setIntrebari((v) => !v)
+      else if (e.key === 'p' || e.key === 'P') setPrezentare((v) => !v)
       else return
       e.preventDefault()
     }
@@ -360,6 +397,28 @@ function Continut() {
       .sort((a, b) => ordine(a) - ordine(b) || a.localeCompare(b))
       .map((n) => [n, stare[n]] as const)
   }, [stare, definitii])
+
+  // cel mai lung text din fiecare coloana a fiecarui tablou, pe toata urma: latimea coloanelor
+  // se stabileste o data si nu sare de la un pas la altul
+  const latimi = useMemo(() => {
+    const m = new Map<string, number[]>()
+    const noteaza = (nume: string, j: number, s: string) => {
+      const l = m.get(nume) ?? []
+      l[j - 1] = Math.max(l[j - 1] ?? 0, s.length)
+      m.set(nume, l)
+    }
+    const tablou = (nume: string, t: Tablou) => {
+      const n = t.tip === 'vector' ? 1 : t.n
+      t.d.forEach((v, idx) => noteaza(nume, (idx % n) + 1, fmtCelula(v)))
+    }
+    if (!rez) return m
+    for (const [nume, t] of Object.entries(stareLa(rez, 0))) tablou(nume, t)
+    for (const p of rez.pasi) {
+      for (const w of p.scrieri) noteaza(w.nume, w.j ?? 1, fmtCelula(w.nou))
+      for (const [nume, x] of Object.entries(p.noi ?? {})) tablou(nume, x.nou)
+    }
+    return m
+  }, [rez])
 
   // ultimul pas care scrie fiecare celula: inainte de el celula e „scris”, dupa el „gata” sau „mult”
   const ultimaScriere = useMemo(() => {
@@ -410,6 +469,22 @@ function Continut() {
   }, [rez])
   const vazute = iteratii.filter((p) => p.pas <= k).length
 
+  // crestaturile de pe urma: iteratiile sau pasii k ai buclei exterioare, scrierile, oprirea
+  const marcaje: Marcaj[] = useMemo(() => {
+    if (!rez) return []
+    const m: Marcaj[] = []
+    const antete = rez.pasi.filter((p) => p.fel === 'antet')
+    const exterioara = antete.length ? Math.min(...antete.map((p) => p.linie)) : -1
+    const cuIteratii = iteratii.length > 0
+    const scurt = rez.pasi.length > PASI_CU_SCRIERI
+    rez.pasi.forEach((p, idx) => {
+      if (cuIteratii ? !!p.iteratie : p.fel === 'antet' && p.linie === exterioara) m.push({ k: idx, fel: 'mare' })
+      else if (!scurt && cuScriere(p) && p.fel !== 'final') m.push({ k: idx, fel: 'mic' })
+    })
+    if (rez.final !== 'gata') m.push({ k: rez.pasi.length - 1, fel: 'capat' })
+    return m
+  }, [rez, iteratii])
+
   const variabile = useMemo(() => (rulare ? variabilePeLinie(rulare.program) : new Map<number, string[]>()), [rulare])
   // langa linia curenta stau valorile cu care se calculeaza: scalarul scris apare cu valoarea veche
   const inainteDePas = (nume: string): number | undefined => (pas?.scalarScris?.nume === nume ? pas.scalarScris.vechi : pas?.scalari[nume])
@@ -423,12 +498,19 @@ function Continut() {
       : ''
 
   const intrariScalare = new Set(definitii.filter((d) => d.tip === 'scalar').map((d) => d.nume.trim()))
-  const scalari = pas ? Object.entries(pas.scalari).filter(([n]) => n !== 'n' && n !== 'm' && !intrariScalare.has(n)) : []
+  const scalari = pas
+    ? Object.entries(pas.scalari)
+        .filter(([n]) => n !== 'n' && n !== 'm' && !intrariScalare.has(n))
+        .map(([nume, v]) => `${nume} = ${ascuns && pas.scalarScris?.nume === nume ? '?' : fmtCelula(v)}`)
+    : []
+  // linia de pseudocod a pasului, citata in card
+  const textLinie = pas && pas.linie > 0 && rulare ? (rulare.sursa.split('\n')[pas.linie - 1] ?? '').trim() : ''
   // prima propozitie spune locul din curs; restul, ce difera aici fata de slide, se deschide la cerere
   const [locCurs, ...restCurs] = alg ? alg.curs[limba].split(/(?<=\.) (?=\p{Lu})/u) : []
   const paleta = PALETA[tema]
   const celuleTotal = tablouri.reduce((s, [, t]) => s + t.d.length, 0)
   const animat = celuleTotal <= CELULE_ANIMATE
+  const compact = celuleTotal > CELULE_COMPACT
   const durata = Math.min(0.35, 0.6 / viteza)
   const linieEroare = eroare?.linie ?? (rez?.final === 'eroare' && k === total - 1 && pas ? pas.linie : null)
   // formula de cost a algoritmului, evaluata pentru intrarile rulate, langa flopii numarati
@@ -461,11 +543,29 @@ function Continut() {
   const n = rulare?.rez.scalari.n
   const nota = alg?.direct && dinBiblioteca && n && iteratii[vazute - 1] ? t('convergentaDirect', nrFlopi(limba, iteratii[vazute - 1].flopi), n, alg.direct.nume[limba], nrFlopi(limba, alg.direct.flopi(n))) : undefined
 
+  // verificarea: inainte de ultimul pas, la ultimul pas, sau dupa o oprire
+  const stareVerificare: 'inainte' | 'gata' | 'oprit' = rulare?.rez.final !== 'gata' ? 'oprit' : k === total - 1 ? 'gata' : 'inainte'
+  const cuVerificare = !!alg && areVerificare(alg.id)
+  // la sfarsit panoul de verificare se deschide singur
+  useEffect(() => {
+    if (cuVerificare && stareVerificare === 'gata') setDeschise((s) => ({ ...s, verificare: true }))
+  }, [cuVerificare, stareVerificare])
+
+  const geometrie = !!alg && dinBiblioteca && !!rulare && areGeometrie(alg.id, rulare.intrari)
+  const etapa = etapaCurenta(etape, pas && pas.linie > 0 ? pas.linie : null)
+  const ultimaIteratie = iteratii[vazute - 1]
+  const rezumatVerificare = stareVerificare === 'inainte' ? t('verificareRezumatLaFinal') : stareVerificare === 'oprit' ? (verificari.length ? '' : t('verificareRezumatOprit')) : verificari.every(randOk) ? t('verificareOk') : t('verificareRau')
+  const rezumatIntrari = [...definitii.map(rezumatDefinitie), cifre > 0 ? t('cifreScurt', cifre) : t('dublaScurt')].join(' · ')
+  const numeFisier = alg ? alg.id : 'program'
+
   return (
     <div className="aplicatie">
       <header>
+        <div className="marca" aria-hidden="true">
+          MN
+        </div>
         <h1>{t('titlu')}</h1>
-        <label>
+        <label className="alegere">
           {t('algoritm')}
           <select value={id} onChange={(e) => alege(e.target.value)}>
             {GRUPURI_ALGORITMI.map((g) => (
@@ -480,58 +580,53 @@ function Continut() {
             <option value={PROPRIU}>{t('propriu')}</option>
           </select>
         </label>
-        <button type="button" className="principal" title={t('ruleazaScurt')} onClick={() => ruleaza(sursa, definitii)}>
-          {t('ruleaza')}
+        <span className="spatiu" />
+        <button type="button" className="icon" aria-pressed={prezentare} title={t('prezentareAjutor')} onClick={() => setPrezentare((v) => !v)}>
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <rect x="1.5" y="2.5" width="13" height="8.5" rx="1" />
+            <path d="M8 11v3M5 14h6" />
+          </svg>
+          <span className="vizual-ascuns">{t('prezentare')}</span>
         </button>
-        <button type="button" className="preferinta" title={t('schimbaTema')} onClick={() => setTema(tema === 'intunecat' ? 'luminos' : 'intunecat')}>
-          {tema === 'intunecat' ? t('temaLuminoasa') : t('temaIntunecata')}
+        <button type="button" className="icon" title={t('schimbaTema')} onClick={() => setTema(tema === 'intunecat' ? 'luminos' : 'intunecat')}>
+          {tema === 'intunecat' ? (
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <circle cx="8" cy="8" r="3" />
+              <path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M13.5 10A6 6 0 0 1 6 2.5a6 6 0 1 0 7.5 7.5z" />
+            </svg>
+          )}
+          <span className="vizual-ascuns">{tema === 'intunecat' ? t('temaLuminoasa') : t('temaIntunecata')}</span>
         </button>
         <button type="button" className="preferinta" title={t('schimbaLimba')} onClick={() => setLimba(limba === 'ro' ? 'en' : 'ro')}>
           {limba === 'ro' ? 'EN' : 'RO'}
         </button>
+        <details className="taste">
+          <summary>{t('taste')}</summary>
+          <ul>
+            {t('tasteLista')
+              .split('\n')
+              .map((r) => r.split('|'))
+              .map(([taste, ce]) => (
+                <li key={taste}>
+                  <kbd>{taste}</kbd>
+                  <span>{ce}</span>
+                </li>
+              ))}
+          </ul>
+        </details>
       </header>
 
-      <section className="stanga">
-        <p className="descriere">
-          {alg ? alg.descriere[limba] : t('propriuAjutor')}
-          {alg && (
-            <span className="cost">
-              {' '}
-              {t('cost')}: {alg.cost[limba]}.
-              {estimat !== null && <> {estimat === rulare!.rez.flopi ? t('costExact', nrFlopi(limba, estimat)) : t('costEstimat', nrFlopi(limba, Math.round(estimat)), nrFlopi(limba, rulare!.rez.flopi))}</>}
-              {plin && <> {t('costPlin', plin.titlu, nrFlopi(limba, plin.flopi))}</>}
-            </span>
-          )}
-        </p>
-        {alg &&
-          (restCurs.length > 0 ? (
-            <details className="in-curs">
-              <summary>
-                <span>{t('inCurs')}</span> {locCurs}
-              </summary>
-              <p>{restCurs.join(' ')}</p>
-            </details>
-          ) : (
-            <p className="in-curs">
-              <span>{t('inCurs')}</span> {locCurs}
-            </p>
-          ))}
-        {alg && (
-          <details className="practic">
-            <summary>{t('inPractica')}</summary>
-            <p>{alg.practic[limba]}</p>
-          </details>
-        )}
-        {alg && alg.notiuni.length > 0 && (
-          <p className="etichete">
-            <span>{t('notiuniNecesare')}</span>
-            {alg.notiuni.map((x) => (
-              <button key={x} type="button" className="chip" onClick={() => setNotiuneAleasa({ id: x, cerere: Date.now() })}>
-                {notiune(x)?.titlu[limba] ?? x}
-              </button>
-            ))}
-          </p>
-        )}
+      <section className="cod" aria-label={t('pseudocod')}>
+        <div className="antet-cod">
+          <h2>{t('pseudocod')}</h2>
+          <button type="button" className={invechit ? 'principal' : ''} title={t('ruleazaScurt')} onClick={() => ruleaza(sursa, definitii)}>
+            {t('ruleaza')}
+          </button>
+        </div>
         <Editor
           text={sursa}
           onChange={setSursa}
@@ -547,54 +642,50 @@ function Continut() {
             {eroare.mesaj}
           </p>
         )}
-        <div className="titlu-intrari">
-          <h2>{t('intrari')}</h2>
-          {alg && (
-            <label className="bifa" title={t('pastreazaAjutor')}>
-              <input type="checkbox" checked={pastreaza} onChange={(e) => setPastreaza(e.target.checked)} />
-              {t('pastreaza')}
+        <details className="intrari-panou" open={intrariDeschise} onToggle={(e) => setIntrariDeschise((e.currentTarget as HTMLDetailsElement).open)}>
+          <summary>
+            <h2>{t('intrari')}</h2>
+            <span className="rezumat">{rezumatIntrari}</span>
+          </summary>
+          <div className="continut">
+            {alg && (
+              <div className="titlu-intrari">
+                <label className="bifa" title={t('pastreazaAjutor')}>
+                  <input type="checkbox" checked={pastreaza} onChange={(e) => setPastreaza(e.target.checked)} />
+                  {t('pastreaza')}
+                </label>
+              </div>
+            )}
+            <Intrari
+              definitii={definitii}
+              cerute={alg?.intrari ?? []}
+              onChange={setDefinitii}
+              onAleator={cuValori}
+              onExemplu={
+                alg
+                  ? () => {
+                      setCifre(alg.cifre ?? 0)
+                      cifreAlese.current = alg.cifre ?? 0
+                      cuValori(definitiiDin(alg))
+                    }
+                  : undefined
+              }
+            />
+            <label className="precizie" title={t('precizieAjutor')}>
+              {t('aritmetica')}
+              <select value={cifre} onChange={(e) => schimbaCifre(Number(e.target.value))}>
+                {PRECIZII.map((c) => (
+                  <option key={c} value={c}>
+                    {c === 0 ? t('dublaPrecizie') : t('cifreSemnificative', c)}
+                  </option>
+                ))}
+              </select>
             </label>
-          )}
-        </div>
-        <Intrari
-          definitii={definitii}
-          cerute={alg?.intrari ?? []}
-          onChange={setDefinitii}
-          onAleator={cuValori}
-          onExemplu={
-            alg
-              ? () => {
-                  setCifre(alg.cifre ?? 0)
-                  cifreAlese.current = alg.cifre ?? 0
-                  cuValori(definitiiDin(alg))
-                }
-              : undefined
-          }
-        />
-        <label className="precizie" title={t('precizieAjutor')}>
-          {t('aritmetica')}
-          <select value={cifre} onChange={(e) => schimbaCifre(Number(e.target.value))}>
-            {PRECIZII.map((c) => (
-              <option key={c} value={c}>
-                {c === 0 ? t('dublaPrecizie') : t('cifreSemnificative', c)}
-              </option>
-            ))}
-          </select>
-        </label>
-        <CodPython
-          nume={alg ? alg.id : 'program'}
-          sursa={sursa}
-          definitii={definitii}
-          // lista de iesiri si forma patrata sunt ale pseudocodului din biblioteca, nu ale unuia editat
-          iesiri={alg && eSursa(alg, sursa) ? alg.iesiri : undefined}
-          patrata={!!alg && eSursa(alg, sursa) && estePatrata(alg.intrari.find((i) => i.tip === 'matrice')?.natura)}
-          numpy={alg && eSursa(alg, sursa) && alg.intrari.every((i) => definitii.some((d) => d.nume.trim() === i.nume && d.tip === i.tip)) ? alg.numpy : undefined}
-          cifre={cifre}
-        />
-        <Notiuni tinta={notiuneAleasa?.id ?? null} cerere={notiuneAleasa?.cerere ?? 0} />
+          </div>
+        </details>
       </section>
 
-      <section className="dreapta">
+      <section className={`scena${invechit ? ' veche' : ''}`} aria-label={t('pasulCurent')}>
         {invechit && (
           <p className="invechit" role="status">
             {t('invechit')}
@@ -611,8 +702,72 @@ function Continut() {
             </button>
           </p>
         )}
+        {!rulare && <p className="ajutor fara-urma">{t('faraUrma')}</p>}
+        {/* in timpul redarii cititorul de ecran nu e intrerupt la fiecare pas */}
+        <div className="pas" aria-live={redare ? 'off' : 'polite'} aria-atomic="true">
+          <div className="stare-rand">
+            <p className="stare">
+              {pas && (
+                <>
+                  <strong>{t('pasul', k + 1, total)}</strong>
+                  {pas.linie > 0 && <> · {t('linia', pas.linie)}</>} · {nrFlopi(limba, pas.flopi)}
+                  {rulare && rulare.cifre > 0 && <> · {t('cuCifre', rulare.cifre)}</>}
+                </>
+              )}
+            </p>
+            <div className="mod" role="group" aria-label={t('mod')}>
+              <span className="segmente">
+                <button type="button" aria-pressed={!intrebari} title={t('parcurgereAjutor')} onClick={() => setIntrebari(false)}>
+                  {t('parcurgere')}
+                </button>
+                <button type="button" aria-pressed={intrebari} title={t('intrebariAjutor')} onClick={() => setIntrebari(true)}>
+                  {t('exercitiu')}
+                </button>
+              </span>
+              {intrebari && scor.total > 0 && <span className="scor">{t('scor', scor.corecte, scor.total)}</span>}
+            </div>
+          </div>
+          {pas && (pas.linie > 0 || scalari.length > 0) && (
+            <p className="linie">
+              {pas.linie > 0 && (
+                <>
+                  <span className="nr">{t('linia', pas.linie)}</span>
+                  <code>{textLinie}</code>
+                </>
+              )}
+              {scalari.length > 0 && <span className="valori">{scalari.join(', ')}</span>}
+            </p>
+          )}
+          <Formula tex={ascuns ? pas?.intrebare : pas?.formula} />
+          {ascuns && (
+            <div className="actiuni-pas">
+              {dorit !== null && (
+                <Raspuns
+                  key={k}
+                  dorit={dorit}
+                  onRaspuns={(corect) => {
+                    setScor((s) => ({ corecte: s.corecte + (corect ? 1 : 0), total: s.total + 1 }))
+                    setVerdict({ k, corect })
+                    setAscuns(false)
+                  }}
+                />
+              )}
+              <button type="button" className="mic arata" onClick={inainte}>
+                {t('arataRezultatul')}
+              </button>
+            </div>
+          )}
+          {verdict?.k === k && !ascuns && (
+            <p className={`verdict ${verdict.corect ? 'corect' : 'gresit'}`} role="status">
+              {verdict.corect ? t('raspunsCorect') : t('raspunsGresit')} {t('scor', scor.corecte, scor.total)}
+            </p>
+          )}
+          {pas?.mesaj && <p className={`mesaj ${pas.final ?? ''}`}>{pas.mesaj}</p>}
+          {pas?.final === 'gata' && cuVerificare && verificari.length > 0 && <RanduriVerificare randuri={verificari} clasa="verificare-scurta" />}
+          <OperatiiPas operatii={pas?.operatii} />
+        </div>
         {!animat && <p className="ajutor matrice-mare">{t('matriceMare', CELULE_ANIMATE)}</p>}
-        <div className="grile">
+        <div className={`grile${compact ? ' compact' : ''}`}>
           {tablouri.map(([nume, tablou]) => (
             <Grila
               key={nume}
@@ -622,6 +777,7 @@ function Continut() {
               gata={finale.gata.get(nume)}
               mult={finale.mult.get(nume)}
               zerouri={zerouri?.tablou === nume ? zerouri.set : undefined}
+              latimi={latimi.get(nume)}
               pasIdx={k}
               fel={pas?.fel}
               intrebare={ascuns}
@@ -630,93 +786,148 @@ function Continut() {
             />
           ))}
         </div>
-        {/* in timpul redarii cititorul de ecran nu e intrerupt la fiecare pas */}
-        <div className="pas" aria-live={redare ? 'off' : 'polite'} aria-atomic="true">
-          {pas && (
-            <p className="stare">
-              {t('pasul', k + 1, total)}
-              {pas.linie > 0 && <> · {t('linia', pas.linie)}</>} · {nrFlopi(limba, pas.flopi)}
-              {rulare && rulare.cifre > 0 && <> · {t('cuCifre', rulare.cifre)}</>}
-              {scalari.length > 0 && (
-                <>
-                  {' · '}
-                  {scalari.map(([nume, v], idx) => (
-                    <span key={nume}>
-                      {idx > 0 && ' '}
-                      <code>
-                        {nume} = {ascuns && pas.scalarScris?.nume === nume ? '?' : fmtCelula(v)}
-                        {idx < scalari.length - 1 && ','}
-                      </code>
-                    </span>
-                  ))}
-                </>
-              )}
-            </p>
-          )}
-          <Formula tex={ascuns ? pas?.intrebare : pas?.formula} />
-          {ascuns && (
-            <button type="button" className="mic arata" onClick={inainte}>
-              {t('arataRezultatul')}
-            </button>
-          )}
-          {dorit !== null && (
-            <Raspuns
-              key={k}
-              dorit={dorit}
-              scor={scor}
-              onRaspuns={(corect) => {
-                setScor((s) => ({ corecte: s.corecte + (corect ? 1 : 0), total: s.total + 1 }))
-                setVerdict({ k, corect })
-                setAscuns(false)
-              }}
-            />
-          )}
-          {verdict?.k === k && !ascuns && (
-            <p className={`verdict ${verdict.corect ? 'corect' : 'gresit'}`} role="status">
-              {verdict.corect ? t('raspunsCorect') : t('raspunsGresit')} {t('scor', scor.corecte, scor.total)}
-            </p>
-          )}
-          {pas?.mesaj && <p className={`mesaj ${pas.final ?? ''}`}>{pas.mesaj}</p>}
-          <OperatiiPas operatii={pas?.operatii} />
+        <div className="legenda-rand">
+          <ul className="legenda" aria-label={t('legenda')}>
+            {ROLURI_LEGENDA.map((rol) => (
+              <li key={rol}>
+                <span className={`celula rol-${rol}`} style={{ backgroundColor: paleta[rol] }} aria-hidden="true" />
+                {t(TEXT_ROL[rol]!)}
+              </li>
+            ))}
+            {zerouri && (
+              <li>
+                <span className="celula rol-neatins zero-stiut" style={{ backgroundColor: paleta.neatins }} aria-hidden="true" />
+                {t('zeroStiut')}
+              </li>
+            )}
+          </ul>
+          <details className="legenda-explicatii">
+            <summary>{t('ceInseamna')}</summary>
+            <ul>
+              {ROLURI_LEGENDA.map((rol) => (
+                <li key={rol}>{t(EXPLICATII[rol])}</li>
+              ))}
+              {zerouri && <li>{t('legendaZero')}</li>}
+            </ul>
+          </details>
         </div>
-        <Comenzi
-          k={k}
-          total={total}
-          poateInapoi={k > 0 || (!ascuns && intrebari && !!pas?.intrebare)}
-          poateInainte={k < total - 1 || ascuns}
-          redare={redare}
-          viteza={viteza}
-          intrebari={intrebari}
-          onK={(x) => mergi(x, x === 0)}
-          onInainte={inainte}
-          onInapoi={inapoi}
-          onScriere={laScriere}
-          onRedare={porneste}
-          onViteza={setViteza}
-          onIntrebari={setIntrebari}
-        />
-        <p className="ajutor comenzi-ajutor">{t('comenziAjutor')}</p>
-        <ul className="legenda" aria-label={t('legenda')}>
-          {(['pivot', 'scris', 'citit', 'gata', 'mult'] as const).map((rol) => (
-            <li key={rol}>
-              <span className={`celula rol-${rol}`} style={{ backgroundColor: paleta[rol] }} aria-hidden="true" />
-              {rol === 'pivot' ? t('legendaPivot') : rol === 'scris' ? t('legendaScris') : rol === 'citit' ? t('legendaCitit') : rol === 'gata' ? t('legendaGata') : t('legendaMult')}
-            </li>
-          ))}
-          {zerouri && (
-            <li>
-              <span className="celula rol-neatins zero-stiut" style={{ backgroundColor: paleta.neatins }} aria-hidden="true" />
-              {t('legendaZero')}
-            </li>
-          )}
-        </ul>
-        <Convergenta puncte={iteratii} vazute={vazute} onPas={(x) => mergi(x)} nota={nota} />
-        {alg && dinBiblioteca && rulare && areGeometrie(alg.id, rulare.intrari) && <Geometrie id={alg.id} rez={rulare.rez} intrari={rulare.intrari} k={k} ascuns={ascuns} />}
-        <OperatiiAlgoritm forma={dinBiblioteca ? alg?.forma : undefined} etape={etape} linie={pas && pas.linie > 0 ? pas.linie : null} />
-        {alg && areVerificare(alg.id) && (
-          <Verificare randuri={verificari} stare={rulare?.rez.final !== 'gata' ? 'oprit' : k === total - 1 ? 'gata' : 'inainte'} cifre={rulare?.cifre ?? 0} />
-        )}
       </section>
+
+      <Comenzi
+        k={k}
+        total={total}
+        poateInapoi={k > 0 || (!ascuns && intrebari && !!pas?.intrebare)}
+        poateInainte={k < total - 1 || ascuns}
+        ascuns={ascuns}
+        redare={redare}
+        viteza={viteza}
+        marcaje={marcaje}
+        onK={(x) => mergi(x, x === 0)}
+        onInainte={inainte}
+        onInapoi={inapoi}
+        onScriere={laScriere}
+        onRedare={porneste}
+        onViteza={setViteza}
+      />
+
+      <aside className="sertar" aria-label={t('panouri')}>
+        <Panou clasa="despre" titlu={t('despre')} rezumat={alg ? alg.cost[limba] : undefined} deschis={deschise.despre} onToggle={deschide('despre')}>
+          <p className="descriere">
+            {alg ? alg.descriere[limba] : t('propriuAjutor')}
+            {alg && (
+              <span className="cost">
+                {' '}
+                {t('cost')}: {alg.cost[limba]}.
+                {estimat !== null && <> {estimat === rulare!.rez.flopi ? t('costExact', nrFlopi(limba, estimat)) : t('costEstimat', nrFlopi(limba, Math.round(estimat)), nrFlopi(limba, rulare!.rez.flopi))}</>}
+                {plin && <> {t('costPlin', plin.titlu, nrFlopi(limba, plin.flopi))}</>}
+              </span>
+            )}
+          </p>
+          {alg &&
+            (restCurs.length > 0 ? (
+              <details className="in-curs">
+                <summary>
+                  <span>{t('inCurs')}</span> {locCurs}
+                </summary>
+                <p>{restCurs.join(' ')}</p>
+              </details>
+            ) : (
+              <p className="in-curs">
+                <span>{t('inCurs')}</span> {locCurs}
+              </p>
+            ))}
+          {alg && (
+            <details className="practic">
+              <summary>{t('inPractica')}</summary>
+              <p>{alg.practic[limba]}</p>
+            </details>
+          )}
+          {alg && alg.notiuni.length > 0 && (
+            <p className="etichete">
+              <span>{t('notiuniNecesare')}</span>
+              {alg.notiuni.map((x) => (
+                <button
+                  key={x}
+                  type="button"
+                  className="chip"
+                  onClick={() => {
+                    setNotiuneAleasa({ id: x, cerere: Date.now() })
+                    setDeschise((s) => ({ ...s, notiuni: true }))
+                  }}
+                >
+                  {notiune(x)?.titlu[limba] ?? x}
+                </button>
+              ))}
+            </p>
+          )}
+        </Panou>
+        <Panou
+          clasa="operatii"
+          titlu={t('operatii')}
+          rezumat={etapa ? (etapa.de === etapa.la ? t('linia', etapa.de) : t('liniile', etapa.de, etapa.la)) : undefined}
+          deschis={deschise.operatii}
+          onToggle={deschide('operatii')}
+        >
+          <OperatiiAlgoritm forma={dinBiblioteca ? alg?.forma : undefined} etape={etape} linie={pas && pas.linie > 0 ? pas.linie : null} />
+        </Panou>
+        {iteratii.length >= 2 && (
+          <Panou
+            clasa="convergenta"
+            titlu={t('convergenta')}
+            rezumat={ultimaIteratie ? `${fmtNumar(ultimaIteratie.stanga)} ${ultimaIteratie.op} ${fmtNumar(ultimaIteratie.dreapta)}` : undefined}
+            deschis={deschise.convergenta}
+            onToggle={deschide('convergenta')}
+          >
+            <Convergenta puncte={iteratii} vazute={vazute} onPas={(x) => mergi(x)} nota={nota} />
+          </Panou>
+        )}
+        {geometrie && (
+          <Panou clasa="geometrie" titlu={t('geometrie')} deschis={deschise.geometrie} onToggle={deschide('geometrie')}>
+            <Geometrie id={alg!.id} rez={rulare!.rez} intrari={rulare!.intrari} k={k} ascuns={ascuns} />
+          </Panou>
+        )}
+        {cuVerificare && (
+          <Panou clasa="verificare" titlu={t('verificare')} rezumat={rezumatVerificare} deschis={deschise.verificare} onToggle={deschide('verificare')}>
+            <Verificare randuri={verificari} stare={stareVerificare} cifre={rulare?.cifre ?? 0} onFinal={() => mergi(total - 1)} />
+          </Panou>
+        )}
+        <Panou clasa="python" titlu={t('codPython')} rezumat={`${numeFisier}.py`} deschis={deschise.python} onToggle={deschide('python')}>
+          <CodPython
+            nume={numeFisier}
+            sursa={sursa}
+            definitii={definitii}
+            // lista de iesiri si forma patrata sunt ale pseudocodului din biblioteca, nu ale unuia editat
+            iesiri={alg && eSursa(alg, sursa) ? alg.iesiri : undefined}
+            patrata={!!alg && eSursa(alg, sursa) && estePatrata(alg.intrari.find((i) => i.tip === 'matrice')?.natura)}
+            numpy={alg && eSursa(alg, sursa) && alg.intrari.every((i) => definitii.some((d) => d.nume.trim() === i.nume && d.tip === i.tip)) ? alg.numpy : undefined}
+            cifre={cifre}
+            deschis={deschise.python}
+          />
+        </Panou>
+        <Panou clasa="notiuni" titlu={t('notiuni')} deschis={deschise.notiuni} onToggle={deschide('notiuni')}>
+          <Notiuni tinta={notiuneAleasa?.id ?? null} cerere={notiuneAleasa?.cerere ?? 0} />
+        </Panou>
+      </aside>
     </div>
   )
 }

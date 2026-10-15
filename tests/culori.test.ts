@@ -53,12 +53,9 @@ function variabile(tema: Tema): Record<string, string> {
   return tema === 'luminos' ? bloc(':root {') : { ...bloc(':root {'), ...bloc("[data-tema='intunecat'] {") }
 }
 
-// culorile de sintaxa ale editorului: evidentierea implicita CodeMirror pe tema luminoasa, One Dark
-// pe cea intunecata (cu comentariile inlocuite in src/componente/Editor.tsx)
-const SINTAXA: Record<Tema, Record<string, string>> = {
-  luminos: { 'cuvânt cheie': '#770088', funcție: '#221199', număr: '#116644', text: '#aa1111', comentariu: '#994400' },
-  intunecat: { 'text obișnuit': '#abb2bf', 'cuvânt cheie': '#c678dd', număr: '#d19a66', text: '#98c379', operator: '#56b6c2', comentariu: '#9ca6b5' },
-}
+// culorile de sintaxa ale editorului (src/componente/Editor.tsx): cuvintele cheie si functiile au
+// culoarea titlurilor, textele si comentariile pe cea stearsa, numerele si operatorii pe cea a textului
+const sintaxa = (v: Record<string, string>): Record<string, string> => ({ 'cuvânt cheie': v['--titlu'], funcție: v['--titlu'], număr: v['--text'], text: v['--text-sters'], comentariu: v['--text-sters'] })
 
 const ROLURI: RolGrila[] = ['pivot', 'scris', 'citit', 'gata', 'mult', 'neatins']
 const TEXT = 4.5
@@ -107,7 +104,7 @@ for (const tema of ['luminos', 'intunecat'] as const) {
     })
 
     it('pseudocodul se citește pe linia curentă și pe linia cu eroare din editor', () => {
-      for (const [ce, culoare] of Object.entries(SINTAXA[tema]))
+      for (const [ce, culoare] of Object.entries(sintaxa(v)))
         for (const linie of ['--f-linie', '--f-eroare']) expect(contrast(culoare, v[linie]), `${ce} pe ${linie}`).toBeGreaterThanOrEqual(TEXT)
     })
   })

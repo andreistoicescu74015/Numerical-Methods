@@ -55,7 +55,7 @@ export function Intrari({ definitii, cerute, onChange, onAleator, onExemplu }: P
         const gresit = abatereDimensiune(definitii, k, cerute) ?? abatere(definitii, k, cerute)
         const nota = gresit ? null : faraGarantie(definitii, k, cerute)
         return (
-          <div key={k} className={`intrare ${d.tip}`}>
+          <div key={k} className={`intrare ${d.tip}${gresit ? ' gresita' : ''}`}>
             <div className="antet">
               <input className="nume" value={d.nume} aria-label={t('nume')} onChange={(e) => schimba(k, { nume: e.target.value })} />
               <select value={d.tip} aria-label={t('matrice')} onChange={(e) => schimba(k, { tip: e.target.value as TipIntrare })}>
@@ -63,13 +63,15 @@ export function Intrari({ definitii, cerute, onChange, onAleator, onExemplu }: P
                 <option value="vector">{t('vector')}</option>
                 <option value="scalar">{t('scalar')}</option>
               </select>
+              <span className="actiuni">
+                <button type="button" className="mic" title={t(titlu)} onClick={() => onAleator(aleatoare(definitii, k, cerute))}>
+                  {t('aleator')}
+                </button>
+                <button type="button" className="mic sterge" title={t('sterge')} aria-label={`${t('sterge')} ${d.nume}`} onClick={() => onChange(definitii.filter((_, i) => i !== k))}>
+                  ×
+                </button>
+              </span>
               {ceruta && <span className="descriere-intrare">{ceruta.descriere[limba]}</span>}
-              <button type="button" className="mic" title={t(titlu)} onClick={() => onAleator(aleatoare(definitii, k, cerute))}>
-                {t('aleator')}
-              </button>
-              <button type="button" className="mic sterge" title={t('sterge')} onClick={() => onChange(definitii.filter((_, i) => i !== k))}>
-                ×
-              </button>
             </div>
             {d.tip === 'scalar' ? (
               <input value={d.text} aria-label={d.nume} onChange={(e) => schimba(k, { text: e.target.value })} />
