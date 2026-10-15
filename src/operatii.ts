@@ -75,6 +75,6 @@ export const SCRIERI: { scriere: string; fel: FelOperatie }[] = [
   { scriere: 'x + y,  A + B', fel: 'adunare' },
   { scriere: 'x - y,  A - B', fel: 'scadere' },
   { scriere: '‖x‖,  norm(x)', fel: 'norma' },
-  { scriere: '‖A‖,  norm(A)', fel: 'frobenius' },
+  { scriere: '‖A‖_F', fel: 'frobenius' },
   { scriere: 'A^T', fel: 'transpusa' },
 ]

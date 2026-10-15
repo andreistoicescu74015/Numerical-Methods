@@ -414,7 +414,14 @@ class Cursor {
       const e = this.add()
       this.bare.pop()
       this.asteapta(t.s)
-      return t.s === '|' ? { tip: 'abs', a: e } : { tip: 'norma', a: e }
+      if (t.s === '|') return { tip: 'abs', a: e }
+      // ‖A‖_F: norma Frobenius, scrisa ca in curs
+      if (this.esteOp('_') && this.peek(1).t === 'id' && this.peek(1).s === 'F') {
+        this.ia()
+        this.ia()
+        return { tip: 'norma', a: e, F: true }
+      }
+      return { tip: 'norma', a: e }
     }
     if (this.esteNume(t)) return this.nume()
     throw this.eroare(mesaj('seAsteptaExpresie'))

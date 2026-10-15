@@ -43,10 +43,11 @@ function reziduu(text: Record<Limba, string>, obtinut: Matrice | Vector, astepta
   return { text, fel: 'reziduu', valoare: normaMax(diferenta(obtinut, asteptat)) / scara(asteptat.d) }
 }
 
+// reziduul relativ, ca eroarea lui x sa fie cel mult κ(A) ori el (teorema de conditionare din curs)
 const sistem = (A: Matrice, x: Vector, b: Vector): Verificare => ({
-  text: { ro: '‖Ax - b‖∞ / max(1, ‖b‖∞)', en: '‖Ax - b‖∞ / max(1, ‖b‖∞)' },
+  text: { ro: '‖b - Ax‖∞ / ‖b‖∞', en: '‖b - Ax‖∞ / ‖b‖∞' },
   fel: 'reziduu',
-  valoare: normaMax(diferenta(matvec(A, x), b)) / scara(b.d),
+  valoare: normaMax(diferenta(b, matvec(A, x))) / (normaMax(b.d) || 1),
 })
 
 const VERIFICATORI: Record<string, Verificator> = {
@@ -231,7 +232,8 @@ export function areVerificare(id: string): boolean {
 }
 
 // Pragul reziduurilor cand rularea rotunjeste fiecare operatie la t cifre semnificative: 10^(2-t),
-// cu doua ordine de marime peste precizia aritmeticii, cat lasa rotunjirile unui algoritm stabil.
+// de zece ori precizia masinii, care pe slide-ul "Reprezentarea numerelor" este de ordinul 10^(1-t).
+// Pragul este o alegere a aplicatiei, nu vine din curs.
 export const pragCifre = (cifre: number): number => Math.max(PRAG, 10 ** (2 - cifre))
 
 // Verificarile algoritmului `id`; [] daca nu are, sau daca starea nu mai are formele asteptate

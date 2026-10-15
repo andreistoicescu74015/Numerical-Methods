@@ -365,6 +365,36 @@ describe('metode iterative', () => {
       [2, 3, 5],
     )
   })
+
+  it('Kaczmarz: un pas scade pătratul erorii cu (a_iᵀe)²/‖a_i‖², deci un pas pe o linie perpendiculară pe eroare nu o schimbă', () => {
+    const eroare2 = (x: number[], xs: number[]) => x.reduce((s, v, j) => s + (v - xs[j]) ** 2, 0)
+    pentruFiecare(
+      (n, rnd, unde) => {
+        const A = [...dominanta(n, rnd), ...aleatoare(2, n, rnd)]
+        const xs = vector(n, rnd)
+        const rez = ruleaza('KACZMARZ', { A, b: peVector(A, xs), x: xs.map(() => 0), tol: 1e-9, maxiter: 50 })
+        let inainte = xs.map(() => 0)
+        rez.pasi.forEach((p, idx) => {
+          if (p.linie !== 6 || idx > 400) return
+          const a = A[p.scalari.i - 1]
+          const e = inainte.map((v, j) => v - xs[j])
+          const dupa = stareLa(rez, idx).x.d
+          const scadere = a.reduce((s, v, j) => s + v * e[j], 0) ** 2 / a.reduce((s, v) => s + v * v, 0)
+          expect(Math.abs(eroare2(dupa, xs) - (eroare2(inainte, xs) - scadere)), `${unde}, pasul ${idx}`).toBeLessThan(TOL)
+          inainte = [...dupa]
+        })
+      },
+      [2, 3, 5],
+    )
+    // eroarea de pornire (0, 0, 1) este perpendiculara pe primele doua linii: primii doi pasi nu o schimba
+    const A = [[1, 0, 0], [0, 1, 0], [1, 1, 1]]
+    const xs = [1, 2, 3]
+    const rez = ruleaza('KACZMARZ', { A, b: peVector(A, xs), x: [1, 2, 4], tol: 1e-12, maxiter: 3 })
+    const pasi = rez.pasi.map((p, idx) => [p, idx] as const).filter(([p]) => p.linie === 6)
+    expect(eroare2(stareLa(rez, pasi[0][1]).x.d, xs)).toBeCloseTo(1, 12)
+    expect(eroare2(stareLa(rez, pasi[1][1]).x.d, xs)).toBeCloseTo(1, 12)
+    expect(eroare2(stareLa(rez, pasi[2][1]).x.d, xs)).toBeCloseTo(2 / 3, 12)
+  })
 })
 
 describe('metoda puterii', () => {
@@ -475,6 +505,10 @@ describe('aritmetică cu t cifre', () => {
       expect(x[0]).toBeCloseTo(1.00010001, 7)
       expect(x[1]).toBeCloseTo(0.99989999, 7)
     }
+  })
+
+  it('cu 4 cifre, cât ar da formula preciziei de pe slide pentru 10⁻³, G fără pivotare dă x₁ = 1', () => {
+    expect(rulat('S_G', exemplu, 4).stare.x.d).toEqual([1, 0.9999])
   })
 
   it('fiecare operație și fiecare intrare se rotunjesc la t cifre semnificative', () => {

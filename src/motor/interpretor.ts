@@ -775,6 +775,8 @@ class Interpretor implements InfoLatex {
       case 'norma': {
         const a = this.ev(e.a)
         if (a.tip === 'scalar') return scalar(Math.abs(a.v))
+        // in curs ‖A‖ fara indice este norma spectrala; aici se calculeaza doar ‖A‖_F
+        if (a.tip === 'matrice' && a.m > 1 && a.n > 1 && !e.F) throw this.eroare(mesaj('normaMatrice'))
         let s = 0
         for (const x of a.d) s = this.fl(s + this.fl(x * x))
         const flopi = this.flopi

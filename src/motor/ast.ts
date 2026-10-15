@@ -17,7 +17,8 @@ export type Expr =
   | { tip: 'bin'; op: '+' | '-' | '*' | '/' | '^'; a: Expr; b: Expr; juxta?: boolean }
   | { tip: 'neg'; a: Expr }
   | { tip: 'abs'; a: Expr }
-  | { tip: 'norma'; a: Expr }
+  // F: norma Frobenius, ‖A‖_F; fara F, norma 2 a unui vector
+  | { tip: 'norma'; a: Expr; F?: boolean }
   | { tip: 'transp'; a: Expr }
   | { tip: 'apel'; nume: string; args: Expr[] }
   | { tip: 'suma'; var: string; de: Expr; la: Expr; corp: Expr }

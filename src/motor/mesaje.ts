@@ -40,6 +40,10 @@ const CATALOG = {
   seAsteptaTinta: { ro: 'se aștepta o variabilă sau un element de tablou', en: 'expected a variable or an array element' },
   tintaInvalida: { ro: 'ținta atribuirii trebuie să fie o variabilă sau un element de tablou', en: 'the assignment target must be a variable or an array element' },
   normaUnArgument: { ro: 'norma are un singur argument', en: 'norm takes a single argument' },
+  normaMatrice: {
+    ro: 'pentru o matrice, cursul notează cu ‖A‖ norma spectrală, care nu se calculează aici; norma Frobenius se scrie ‖A‖_F',
+    en: 'for a matrix, the course writes ‖A‖ for the spectral norm, which is not computed here; the Frobenius norm is written ‖A‖_F',
+  },
   indiceLipsa: { ro: 'indice lipsă după "_"', en: 'missing index after "_"' },
   seAsteptaExpresie: { ro: 'se aștepta o expresie', en: 'expected an expression' },
   liniiDiferite: { ro: 'liniile matricei au lungimi diferite', en: 'the matrix rows have different lengths' },

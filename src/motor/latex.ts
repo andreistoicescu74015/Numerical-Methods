@@ -181,7 +181,7 @@ export function latex(e: Expr, info: InfoLatex, mod: Mod): string {
     case 'abs':
       return `\\left|${latex(e.a, info, mod)}\\right|`
     case 'norma':
-      return `\\left\\|${latex(e.a, info, mod)}\\right\\|`
+      return `\\left\\|${latex(e.a, info, mod)}\\right\\|${e.F ? '_F' : ''}`
     case 'transp':
       return `${copil(e.a, 5, info, mod)}^{T}`
     case 'apel': {

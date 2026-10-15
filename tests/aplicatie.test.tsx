@@ -128,7 +128,7 @@ describe('aplicația montată', () => {
     await scrieIn(gazda.querySelector('header select')!, 'propriu')
     expect(gazda.querySelector('.descriere')?.textContent).toContain('pseudocodul')
     expect(gazda.querySelector('.stare')?.textContent).toContain('pasul 1 din')
-    expect(gazda.querySelector('.cm-editor')?.textContent).toContain('r ← A x - b')
+    expect(gazda.querySelector('.cm-editor')?.textContent).toContain('r ← b - A x')
     // primul pas: produs matrice-vector si scadere, cu matricele scrise intregi in formula
     expect(gazda.querySelectorAll('.pas .formula .mtable').length).toBeGreaterThanOrEqual(3)
     expect(gazda.querySelector('.operatii-pas')?.textContent).toContain('produs matrice-vector')

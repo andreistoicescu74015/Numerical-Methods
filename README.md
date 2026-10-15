@@ -12,8 +12,8 @@ with and without pivoting (G, GPP, S_GPP, and S_G for the course example where t
 pivoting gives a false solution), LU (Crout), Cholesky, the variants of G, GPP and UTRIS for
 banded matrices, the iterative solvers of the course (Jacobi, Gauss-Seidel, Kaczmarz), the
 Householder reflector for a vector, orthogonal triangularization (algorithm QR), least squares
-(algorithm SQR) and the power method. The theory comes only from the course folder of this year:
-the slides and the book of the course (Dumitrescu, Popeea, Jora). For each algorithm the
+(algorithm SQR) and the power method. The theory comes only from the course: the slides and the
+book of the course (Dumitrescu, Popeea, Jora). For each algorithm the
 application says which course and slide (or which section of the book) it comes from and what
 differs from the source. It also shows what the
 lines of the pseudocode do at the level of matrices, practical notes, the cost formula evaluated
@@ -124,9 +124,9 @@ the one from the image.
   moves one coordinate at a time, Kaczmarz projects perpendicularly onto one line per step); for
   the power method with a 2 x 2 matrix, y turns on the unit circle towards the dominant
   eigenvector; for RFG with a vector of length 2, x is mirrored onto the first axis.
-- Cells: red with a double outline for the pivot, orange with a thick outline for what is
-  written, blue with a dashed outline for what is read, green with a marked corner for what is
-  final, purple with the letter μ for multipliers. The outlines carry the role without colour;
+- Cells: red with a double outline for the divisor (the pivot in elimination), orange with a
+  thick outline for what is written, blue with a dashed outline for what is read, green with a
+  marked corner for what is final, purple with the letter μ for multipliers. The outlines carry the role without colour;
   the fills stay distinct under simulated protanopia and deuteranopia. On a swap the two values
   move towards each other. The width of a column is computed from the whole trace, so it does
   not change from step to step; above 36 cells the grids switch to a compact format. Above 150
@@ -196,7 +196,8 @@ the interpreter. Sums become accumulation loops (`suma = 0`, then `suma = suma +
 becomes `np.argmax` on a slice, `A y` and `z^T y` become `A @ y` and `z @ y`, Greek names are
 spelled out (`sigma`, `beta`), and `stop` raises `RuntimeError`. Inputs are copied as float
 arrays, so the caller's data is left unchanged and an integer matrix does not truncate the
-divisions. `sgn(0)` is 1, as in the course; `np.sign(0)` is 0 and would skip a reflector.
+divisions. `sgn(0)` is 1, as in the book of the course; with `np.sign(0)`, which is 0, σ would
+become 0 and the division by σ would fail.
 
 ## Layout of the repository
 
@@ -295,8 +296,10 @@ Expressions: `+ - * /`, multiplication by juxtaposition (`a_ij x_j`), `^2`, `√
 `|x|`, `sgn`, `min`, `max`, `linii(A)`/`rows(A)`, `coloane(A)`/`cols(A)`, `lungime(x)`/`len(x)`,
 `Σ_{j=1}^{k-1} l_ij l_kj`, `argmax_{i=k:n} |a_ik|`. Between arrays: `A x` (matrix times vector),
 `A B` (matrix times matrix), `x^T y` (dot product), `x y^T` (outer product), `x^T A`, `A^T`,
-`c x`, `x / c`, `x + y`, `x - y`, `‖v‖` or `norm(v)` (the 2-norm of a vector, the Frobenius norm
-of a matrix). A vector is a column; `A(i, :)` is a row, so `A(i, :) x` is a dot product.
+`c x`, `x / c`, `x + y`, `x - y`, `‖v‖` or `norm(v)` (the 2-norm of a vector), `‖A‖_F` (the
+Frobenius norm of a matrix; the course writes `‖A‖` for the spectral norm, which the interpreter
+does not compute, so `‖A‖` on a matrix is an error). A vector is a column; `A(i, :)` is a row, so
+`A(i, :) x` is a dot product.
 Elements are written `a_ij`, `x_i`, `a_{i,j-1}` or `A(i,j)`; a lowercase name (`a`, `l`, `u`)
 looks up the matrix with the uppercase letter. Comparisons: `<`, `>`, `≤` or `<=`, `≥` or `>=`,
 `=`, `≠` or `!=`. ASCII alternatives: `<-` for `←`, `<->` for `↔`.

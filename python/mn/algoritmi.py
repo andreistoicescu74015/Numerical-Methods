@@ -1,4 +1,5 @@
-"""Traducerea literala a pseudocodului din curs in Python, rand cu rand.
+"""Traducerea literala in Python, rand cu rand, a pseudocodului din biblioteca vizualizatorului,
+care urmeaza slide-urile cursului; liniile care nu sunt pe slide sunt marcate acolo cu %.
 
 Indicii sunt de la 1, ca in pseudocod: tablourile primite au o linie si o coloana in plus,
 nefolosite (vezi `pad`). Functiile sunt oracolul numeric pentru interpretorul TypeScript:

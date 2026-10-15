@@ -73,7 +73,10 @@ const COMENTARII = {
   pozitii: { ro: '{0}: pozitii numarate de la 0', en: '{0}: positions counted from 0' },
   copie: { ro: 'copii de lucru in virgula mobila: intrarile raman neschimbate', en: 'floating point working copies: the inputs are left unchanged' },
   peste: { ro: '{0} peste {1}: se citesc si se scriu in {1}', en: '{0} over {1}: read from and written to {1}' },
-  sgn: { ro: 'sgn(0) = 1, ca in curs; np.sign(0) da 0 si ar sari peste reflector', en: 'sgn(0) = 1, as in the course; np.sign(0) gives 0 and would skip the reflector' },
+  sgn: {
+    ro: 'sgn(0) = 1 (cartea cursului); np.sign(0) = 0 ar da impartire la 0',
+    en: 'sgn(0) = 1 (course book); np.sign(0) = 0 would divide by zero',
+  },
   dinPseudocod: { ro: '{0} se da ca in pseudocod, numarat de la 1', en: '{0} is given as in the pseudocode, counted from 1' },
   intreg: { ro: '{0} este un indice numarat de la 1, ca in pseudocod; in NumPy: {0} - 1', en: '{0} is an index counted from 1, as in the pseudocode; in NumPy: {0} - 1' },
   exemplu: { ro: 'exemplul din vizualizator', en: 'the example from the visualizer' },
@@ -684,7 +687,8 @@ class Emitator {
       case 'abs':
         return `abs(${this.expr(e.a)})`
       case 'norma':
-        return this.tip(e.a) === 'scalar' ? `abs(${this.expr(e.a)})` : `np.linalg.norm(${this.expr(e.a)})`
+        if (this.tip(e.a) === 'scalar') return `abs(${this.expr(e.a)})`
+        return e.F ? `np.linalg.norm(${this.expr(e.a)}, 'fro')` : `np.linalg.norm(${this.expr(e.a)})`
       case 'transp':
         // un vector NumPy are o singura axa: z^T y se scrie z @ y
         return this.tip(e.a) === 'matrice' ? `${this.copil(e.a, 5)}.T` : this.expr(e.a)

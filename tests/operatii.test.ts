@@ -21,7 +21,7 @@ describe('operațiile dintre tablouri', () => {
   })
 
   it('produs de matrice, produs exterior, transpusă și norme', () => {
-    const rez = ruleaza('C ← A B\nP ← x y^T\nT ← A^T\ns ← x^T y\nf ← ‖A‖\ng ← ‖x‖', { A: [[1, 2], [3, 4]], B: [[0, 1], [1, 0]], x: [1, 2], y: [3, 4] })
+    const rez = ruleaza('C ← A B\nP ← x y^T\nT ← A^T\ns ← x^T y\nf ← ‖A‖_F\ng ← ‖x‖', { A: [[1, 2], [3, 4]], B: [[0, 1], [1, 0]], x: [1, 2], y: [3, 4] })
     expect(rez.final).toBe('gata')
     expect(rez.stare.C.d).toEqual([2, 1, 4, 3])
     expect(rez.stare.P.d).toEqual([3, 4, 6, 8])
@@ -31,6 +31,18 @@ describe('operațiile dintre tablouri', () => {
     expect(rez.pasi.map((p) => p.operatii?.map((o) => o.fel))).toEqual([['matmul'], ['exterior'], ['transpusa'], ['dot'], ['frobenius'], ['norma'], undefined])
     // 2 x 2 ori 2 x 2: patru elemente, fiecare cu doua inmultiri si o adunare
     expect(rez.pasi[0].operatii![0].flopi).toBe(12)
+  })
+
+  it('‖A‖ pe o matrice este norma spectrală din curs, deci se cere ‖A‖_F', () => {
+    const A = [[1, 2], [3, 4]]
+    const fara = ruleaza('f ← ‖A‖', { A })
+    expect(fara.final).toBe('eroare')
+    expect(fara.eroare).toContain('‖A‖_F')
+    expect(ruleaza('f ← norm(A)', { A }).final).toBe('eroare')
+    // o linie a matricei ramane un vector: ‖A(i, :)‖ din Kaczmarz merge
+    const linie = ruleaza('f ← ‖A(2, :)‖', { A })
+    expect(linie.final).toBe('gata')
+    expect(linie.scalari.f).toBeCloseTo(5, 12)
   })
 
   it('doi vectori coloană nu se înmulțesc: mesajul spune ce să scrii', () => {

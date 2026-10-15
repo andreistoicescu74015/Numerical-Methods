@@ -1,5 +1,7 @@
 """Compara algoritmii din mn/algoritmi.py cu functiile standard din NumPy, pe matrice aleatoare:
-eroarea maxima fata de NumPy, flopii dupa formulele din curs si timpul de calcul.
+eroarea maxima fata de NumPy, flopii si timpul de calcul. Flopii metodelor directe sunt
+formulele din curs si din cartea cursului; la metodele iterative sunt numarati pe pseudocodul din
+biblioteca vizualizatorului, al carui test de oprire nu este pe slide-uri.
 
 Tabelul iese in Markdown, pentru raportul de colocviu. Rulare: python python/compara.py [n ...]
 """
@@ -72,7 +74,7 @@ def cazuri(n):
 
     x_np, t_np = cronometru(lambda: np.linalg.lstsq(Ar, bm, rcond=None)[0])
     x, t = cronometru(lambda: alg.sqr(alg.pad(Ar), alg.pad(bm), m, n)[0][1:])
-    yield "SQR", "numpy.linalg.lstsq", eroare(x, x_np), 2 * (m * n * n - n**3 // 3) + 2 * m * n + n * n, t, t_np
+    yield "SQR", "numpy.linalg.lstsq", eroare(x, x_np), 2 * (m * n * n - n**3 // 3) + 4 * m * n - n * n, t, t_np
 
     w, t_np = cronometru(lambda: np.linalg.eigvalsh(Sy))
     (ym, it), t = cronometru(lambda: alg.mp(Sy, y0, 1e-10, 10000))
@@ -96,7 +98,7 @@ def main(argv):
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
     marimi = [int(a) for a in argv] or [5, 10, 20, 40]
-    print("| algoritm | n | față de | eroare maximă | flopi (formula din curs) | timp (ms) | timp NumPy (ms) |")
+    print("| algoritm | n | față de | eroare maximă | flopi | timp (ms) | timp NumPy (ms) |")
     print("|---|---|---|---|---|---|---|")
     for n in marimi:
         for nume, ref, err, flopi, t, t_np in cazuri(n):
