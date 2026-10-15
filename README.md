@@ -28,7 +28,9 @@ with larger text for a projector. The research and the architecture decision are
 
 Stack: Vite, React, TypeScript. The application runs locally, natively or in Docker, on
 `http://localhost:5173`. `npm run build` additionally produces a single file `dist/index.html`
-that opens from `file://` without a server.
+that opens from `file://` without a server. A comment at its top holds the licences of the
+libraries bundled into it (all MIT) and of the IBM Plex fonts (SIL Open Font License), which
+have to accompany every copy of the file.
 
 ## Running natively
 
