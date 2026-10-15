@@ -77,7 +77,9 @@ the one from the image.
   inputs the algorithm starts with.
 - Under each matrix, "type" picks the kind of matrix that "random" generates, with the
   definitions of the course: general, symmetric, symmetric positive definite, diagonal, lower or
-  upper triangular, tridiagonal, upper Hessenberg, strictly diagonally dominant, orthogonal,
+  upper triangular, lower or upper bidiagonal, tridiagonal, upper Hessenberg (the last two with a
+  dominant diagonal, so that elimination without pivoting runs), strictly diagonally dominant,
+  orthogonal,
   nonsingular, with nonsingular leading submatrices, or singular as a counterexample. The default
   is the nature the algorithm asks for; another type is allowed and gets its warning. The buttons
   next to it change the number of rows and columns (one "order" when the matrix has to be
@@ -108,6 +110,29 @@ the one from the image.
   side how each run finishes, the counted flops, the iterations, the result and the largest
   difference between the two solution vectors. A button switches to the other algorithm with the
   same inputs.
+- "What stays true" shows, for the eliminations, the factorizations, QR and the substitutions,
+  the property the proof or the derivation of the algorithm in the course relies on, as it
+  stands at the start of the current step of the outer loop: A_(k+1) = M_k ⋯ M_1 A with zeros
+  below the diagonal in the first k columns, the first k columns of L done in A = LLᵀ, the
+  equations already solved. It is checked on the values in the grid, relative to the size of
+  the values involved, so a wrong change to the pseudocode shows up as a large deviation. In an
+  adaptation exercise it is the invariant of the starting algorithm.
+- "Conditioning", for the direct solvers of Ax = b, changes b by a relative ε in the direction
+  that A⁻¹ enlarges most, runs the algorithm again and puts the relative change of x next to the
+  bound κ(A) ‖Δb‖/‖b‖ of the course, with the ∞-norm. Buttons load the examples of the book of
+  the course: D = 0.1 I with n = 4 (κ = 1 with a tiny determinant), the triangular T
+  (κ∞ = n 2ⁿ⁻¹ = 80 for n = 5) and the Hilbert matrix H₃ (κ∞ ≈ 748), with b chosen so that the
+  bound is reached. For LTRIS and UTRIS only the triangle the algorithm reads counts.
+- "Cost as a function of n" runs a direct algorithm on random inputs with the required nature for
+  n from 2 to 8 and plots the counted flops next to the cost formula of the algorithm, with a
+  table.
+- "Adaptation exercises", at the end of the algorithm list, start from a library algorithm and
+  ask to adapt it to a structured matrix, as in the problems of the book: LTRIS for a lower
+  bidiagonal matrix and UTRIS for an upper bidiagonal one (P 1.24), G for a tridiagonal matrix
+  (P 2.29 a and section 2.9) and for an upper Hessenberg one (the triangularization part of
+  P 2.13 a). After each run the panel checks that the result equals the unchanged algorithm on four structured inputs, that the flops stay
+  within the target (3n − 2, 3(n − 1), n² − 1) and that no zero known in advance is read or
+  written; a hint and the solution open on request.
 - In English the library pseudocode is shown with the English keywords the parser accepts
   (`for`, `if`, `while`, `over`, `let`), with the same lines as in Romanian.
 - "Arithmetic" under the inputs rounds every input and the result of every operation to t
@@ -238,7 +263,9 @@ become 0 and the division by σ would fail.
   of the operations between arrays, `src/paleta.ts` the cell colours, `src/natura.ts` the natures
   of the inputs (the random generators, the matrix types, the properties shown under a matrix and
   the checks on typed values), `src/contraexemple.ts` the counterexamples from the course,
-  `src/comparatie.ts` the comparison with another algorithm, `src/exercitiu.ts` the expected
+  `src/comparatie.ts` the comparison with another algorithm, `src/invarianti.ts` what stays true
+  after each step, `src/conditionare.ts` the conditioning experiment, `src/costuri.ts` the cost
+  as a function of n, `src/adaptari.ts` the adaptation exercises, `src/exercitiu.ts` the expected
   answer of a step and the reading of a typed answer.
 - `python/mn/algoritmi.py`: the same algorithms translated literally into Python, with indices
   from 1, used as the numerical oracle. `python/genereaza_fixturi.py` writes
@@ -286,6 +313,14 @@ Identifiers in the code are Romanian, after the course and the notation of the s
 - `tests/comparatie.test.ts`: which algorithms can be compared, and on the course examples the
   comparison shows what the slides say (S_G against S_GPP with 3 digits, Cholesky and QR against
   G).
+- `tests/invarianti.test.ts`: the invariant of each algorithm holds at every boundary between
+  steps on random inputs, and a deliberately broken line in G, CHOL, QR or LTRIS breaks it.
+- `tests/conditionare.test.ts`: κ∞ of the book examples (1, 80, 748), the change of x never above
+  the bound, and the bound reached on the book examples.
+- `tests/costuri.test.ts`: a point for every n, exact formulas on the points, and the relative
+  difference of 2n³/3 shrinking with n.
+- `tests/adaptari.test.ts`: the solution of each exercise passes all the checks with exactly the
+  target flops, the unchanged algorithm fails them, and a wrong solution is caught.
 - `tests/culori.test.ts`: WCAG contrast of the texts and separation of the cell roles under
   simulated colour blindness, read from `src/index.css` and `src/paleta.ts`.
 

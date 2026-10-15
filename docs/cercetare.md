@@ -230,6 +230,25 @@ ipoteză și spun unde e ipoteza în curs; fiecare are un rezultat așteptat, ve
 Panoul de comparație rulează aceleași intrări cu alt algoritm (G și GPP, S_G și S_GPP pe 3 cifre,
 Cholesky sau QR și G, metodele iterative între ele), comparațiile pe care le face cursul.
 
+Patru funcții leagă algoritmul de teoria din curs:
+
+- "Ce rămâne adevărat" (`src/invarianti.ts`) verifică, la începutul fiecărui pas al buclei
+  exterioare, proprietatea pe care se sprijină demonstrația: A_(k+1) = M_k ⋯ M_1 A superior
+  triunghiulară în primele k coloane (slide-urile 107-108 și 132; cu pivotare, slide-ul 121),
+  coloanele lui L din A = LU și A = LLᵀ (135-136, 158), A_(k+1) = U_k A_k la QR (207-208),
+  ecuațiile deja rezolvate la substituții (83-85). Verificarea reconstruiește, din valorile din
+  grilă, ce spune cursul și măsoară abaterea.
+- Experimentul de condiționare (`src/conditionare.ts`) folosește teorema de pe slide-ul 152 cu Δb
+  singur, unde marginea ‖Δx‖/‖x‖ ≤ κ(A)‖Δb‖/‖b‖ decurge direct din definiția normei induse, și
+  norma ∞, pe care cartea o alege pentru κ (paginile 98-99). Exemplele D, T și H₃ sunt cele din
+  carte (pagina 99). La LTRIS și UTRIS se ia doar triunghiul pe care îl citește algoritmul.
+- Costul în funcție de n (`src/costuri.ts`) rulează algoritmul pentru n de la 2 la 8 și pune
+  flopii numărați lângă formula de cost a algoritmului.
+- Exercițiile de adaptare (`src/adaptari.ts`) sunt problemele din carte: P 1.24 a și c (pagina
+  68), P 2.29 a (pagina 122) cu secțiunea 2.9 și partea de triangularizare din P 2.13 a (pagina
+  120). Țintele de flopi (3n − 2, 3(n − 1), n² − 1) sunt numărate pe soluții, iar testele verifică
+  că soluțiile le ating exact.
+
 Testele interpretorului rulează algoritmii pe fixture-urile produse de oracolul Python: aceeași
 matrice de intrare, aceeași matrice de ieșire, toleranță 1e-12. Aritmetica e în dublă precizie în
 ambele părți, deci rezultatele coincid.
