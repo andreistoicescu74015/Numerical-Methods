@@ -18,6 +18,17 @@ describe('exercițiile de adaptare la structură', () => {
     }
   })
 
+  it('flopii și ținta se numără pe exemplul de pe ecran, nu pe cel al exercițiului', () => {
+    for (const a of ADAPTARI) {
+      const mare = a.aleatoare(7, () => 0.5)
+      const v = verificaAdaptare(a, a.solutie, mare)
+      const n = (mare[a.matrice] as number[][]).length
+      expect(n, a.id).toBe(7)
+      expect(v.tinta, a.id).toBe(a.tinta(7))
+      expect(v.flopi, a.id).toBe(a.tinta(7))
+    }
+  })
+
   it('algoritmul de pornire, nemodificat, dă rezultatul corect, dar atinge zerourile și face mai mulți flopi', () => {
     for (const a of ADAPTARI) {
       const v = verificaAdaptare(a, algoritm(a.pornire)!.sursa)

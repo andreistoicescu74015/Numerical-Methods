@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { EditorView } from '@codemirror/view'
 import { act } from 'react'
 import { createRoot } from 'react-dom/client'
 import { beforeEach, describe, expect, it } from 'vitest'
@@ -717,5 +718,93 @@ describe('aplicația montată', () => {
     expect(gazda.querySelector<HTMLSelectElement>('header select')!.value).toBe('GPP')
     expect(gazda.querySelector<HTMLTextAreaElement>('.intrare.matrice textarea')!.value).toBe('0 1 2\n1 1 1\n2 1 3')
     expect(gazda.querySelector('.oprire')).toBeNull()
+  })
+
+  it('precizia din adresă: doar valorile din meniu, iar dubla precizie aleasă la S_G rămâne în adresă', async () => {
+    const precizie = (gazda: HTMLElement) => gazda.querySelector<HTMLSelectElement>('.precizie select')!
+    window.history.pushState({}, '', '/?algoritm=G&cifre=7')
+    try {
+      const gazda = await monteaza()
+      expect(precizie(gazda).value).toBe('0')
+      expect(gazda.querySelector('.stare')?.textContent).not.toContain('7 cifre')
+      await scrieIn(gazda.querySelector('header select')!, 'S_G')
+      expect(precizie(gazda).value).toBe('3')
+      await scrieIn(precizie(gazda), '0')
+      expect(new URLSearchParams(window.location.search).get('cifre')).toBe('0')
+    } finally {
+      window.history.pushState({}, '', '/')
+    }
+    window.history.pushState({}, '', '/?algoritm=S_G&cifre=0')
+    try {
+      expect(precizie(await monteaza()).value).toBe('0')
+    } finally {
+      window.history.pushState({}, '', '/')
+    }
+  })
+
+  it('?notiune=pivot deschide panoul de noțiuni la acea noțiune', async () => {
+    window.history.pushState({}, '', '/?notiune=pivot')
+    try {
+      const gazda = await monteaza()
+      expect(gazda.querySelector<HTMLDetailsElement>('details.panou.notiuni')!.open).toBe(true)
+      expect(gazda.querySelector('#notiune-pivot')?.className).toBe('aleasa')
+    } finally {
+      window.history.pushState({}, '', '/')
+    }
+  })
+
+  it('scorul exercițiului: un pas se numără o singură dată, iar schimbarea limbii nu îl șterge', async () => {
+    const gazda = await monteaza()
+    const raspunde = async (valoare: string) => {
+      await scrieIn(gazda.querySelector<HTMLInputElement>('.raspuns input')!, valoare)
+      await apasa(gazda, 'Verifică')
+    }
+    await comanda(gazda, 'urmatoareaScriere')
+    await raspunde('2')
+    expect(gazda.querySelector('.verdict')?.textContent).toBe('Corect. Corecte: 1 din 1.')
+    // un pas înapoi ascunde din nou rezultatul aceluiași pas; al doilea răspuns nu se mai numără
+    await comanda(gazda, 'pasInapoi')
+    expect(gazda.querySelector('.raspuns input')).not.toBeNull()
+    await raspunde('2')
+    expect(gazda.querySelector('.verdict')?.textContent).toBe('Corect. Corecte: 1 din 1.')
+    await apasa(gazda, 'EN')
+    expect(gazda.querySelector('.verdict')?.textContent).toBe('Correct. Correct: 1 of 1.')
+  })
+
+  it('pseudocodul propriu: șablonul urmează limba, iar precizia pornește dublă și după S_G', async () => {
+    const gazda = await monteaza()
+    await scrieIn(gazda.querySelector('header select')!, 'S_G')
+    await scrieIn(gazda.querySelector('header select')!, 'propriu')
+    expect(gazda.querySelector<HTMLSelectElement>('.precizie select')!.value).toBe('0')
+    expect(gazda.querySelector('.cm-content')?.textContent).toContain('Scrie aici pseudocodul')
+    await apasa(gazda, 'EN')
+    expect(gazda.querySelector('.cm-content')?.textContent).toContain('Write your pseudocode here')
+  })
+
+  it('pasul din adresă se folosește o dată, chiar dacă prima rulare nu reușește', async () => {
+    localStorage.setItem('mn.propriu', JSON.stringify({ sursa: 'pentru i = 1 : n\nx ← 1', definitii: [] }))
+    window.history.pushState({}, '', '/?algoritm=propriu&pas=6')
+    try {
+      const gazda = await monteaza()
+      expect(gazda.querySelector('.eroare')).not.toBeNull()
+      await scrieIn(gazda.querySelector('header select')!, 'G')
+      expect(gazda.querySelector('.stare')?.textContent).toContain('pasul 1 din')
+    } finally {
+      window.history.pushState({}, '', '/')
+    }
+  })
+
+  it('în exercițiul de adaptare, mesajul unei erori de rulare urmează limba', async () => {
+    const gazda = await monteaza()
+    await scrieIn(gazda.querySelector<HTMLSelectElement>('header select')!, 'adaptare:G-tridiagonala')
+    const editor = EditorView.findFromDOM(gazda.querySelector<HTMLElement>('.cm-editor')!)!
+    await act(async () => {
+      editor.dispatch({ changes: { from: 0, to: editor.state.doc.length, insert: 'x ← 1 / 0' } })
+    })
+    await apasa(gazda, 'Rulează')
+    const panou = () => gazda.querySelector('.panou.adaptare')!.textContent
+    expect(panou()).toContain('împărțire la zero')
+    await apasa(gazda, 'EN')
+    expect(panou()).toContain('division by zero')
   })
 })

@@ -186,12 +186,16 @@ export interface VerdictAdaptare {
 
 const iesire = (rez: Rezultat, nume: string): number[] => rez.stare[nume]?.d ?? []
 
-export function verificaAdaptare(a: Adaptare, sursa: string): VerdictAdaptare {
-  const n = (a.exemplu[a.matrice] as M).length
+// `peEcran`: intrarile de pe ecran (exemplul, sau cel marit cu butoanele de dimensiune); flopii si
+// zerourile atinse se numara pe ele
+export function verificaAdaptare(a: Adaptare, sursa: string, peEcran?: Intrari): VerdictAdaptare {
+  // fara matricea exercitiului pe ecran (intrare redenumita), se ia exemplul exercitiului
+  const afisat = peEcran && Array.isArray(peEcran[a.matrice]) && Array.isArray((peEcran[a.matrice] as M)[0]) ? peEcran : a.exemplu
+  const n = (afisat[a.matrice] as M).length
   const referinta = parseaza(algoritm(a.pornire)!.sursa)
   // intrari deterministe: aceleasi la fiecare verificare
-  const toate: Intrari[] = [a.exemplu, ...[4, 6, 7].map((m, k) => a.aleatoare(m, rndDeterminist(k + 11)))]
-  const pornire = urma(referinta, a.exemplu)
+  const toate: Intrari[] = [afisat, ...[4, 6, 7].map((m, k) => a.aleatoare(m, rndDeterminist(k + 11)))]
+  const pornire = urma(referinta, afisat)
   const gol = { corecte: 0, intrari: toate.length, flopi: 0, tinta: a.tinta(n), flopiPornire: pornire.flopi, zerouriAtinse: 0, reusit: false }
   let program
   try {

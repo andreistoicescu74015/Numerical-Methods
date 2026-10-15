@@ -50,7 +50,8 @@ function numere(linie: string, nume: string): number[] {
   const parti = virgulaZecimala(linie).split(/[\s,;]+/).filter(Boolean)
   return parti.map((p) => {
     const x = Number(p)
-    if (Number.isNaN(x)) throw new EroareIntrare(mesaj('nuEsteNumar', nume, p))
+    // Infinity si 1e400 nu sunt numere cu care sa se poata calcula sau desena
+    if (!Number.isFinite(x)) throw new EroareIntrare(mesaj('nuEsteNumar', nume, p))
     return x
   })
 }

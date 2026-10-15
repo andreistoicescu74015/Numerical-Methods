@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { verificaAdaptare, type Adaptare } from '../adaptari'
 import { algoritm } from '../motor/biblioteca'
+import type { Intrari } from '../motor/interpretor'
 import { inEngleza } from '../motor/traducere'
 import { usePreferinte } from '../preferinte'
 
@@ -8,13 +9,16 @@ interface Props {
   ex: Adaptare
   // pseudocodul ultimei rulari; verificarea se face pe el
   sursaRulata: string | null
+  // intrarile ultimei rulari: flopii si zerourile atinse se numara pe exemplul afisat
+  intrariRulate?: Intrari
   onSolutie: (sursa: string) => void
 }
 
 // Enuntul exercitiului, cerintele cu starea lor dupa ultima rulare, indiciul si solutia.
-export function ExercitiuAdaptare({ ex, sursaRulata, onSolutie }: Props) {
+export function ExercitiuAdaptare({ ex, sursaRulata, intrariRulate, onSolutie }: Props) {
   const { t, limba } = usePreferinte()
-  const v = useMemo(() => (sursaRulata ? verificaAdaptare(ex, sursaRulata) : null), [ex, sursaRulata])
+  // limba intra in dependente: mesajul unei erori de rulare vine din motor, in limba curenta
+  const v = useMemo(() => (sursaRulata ? verificaAdaptare(ex, sursaRulata, intrariRulate) : null), [ex, sursaRulata, intrariRulate, limba])
   const pornire = algoritm(ex.pornire)!.titlu[limba].split(', ')[0]
   const solutie = limba === 'en' ? inEngleza(ex.solutie) : ex.solutie
   const stare = (ok: boolean) => (ok ? 'ok' : 'rau')

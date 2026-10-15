@@ -74,8 +74,8 @@ export const TEXTE = {
   legendaYCurent: { ro: 'y la pasul curent; săgețile mai deschise sunt cele de dinainte', en: 'y at the current step; the lighter arrows are the earlier ones' },
   legendaOglinda: { ro: 'dreapta față de care oglindește reflectorul', en: 'the line the reflector mirrors across' },
   costEstimat: {
-    ro: 'Pentru aceste intrări formula dă ≈ {0}, iar rularea numără {1}; formula păstrează doar termenul dominant, deci cele două se apropie abia când matricea crește.',
-    en: 'For these inputs the formula gives ≈ {0}, and this run counts {1}; the formula keeps only the leading term, so the two get close only as the matrix grows.',
+    ro: 'Pentru aceste intrări formula dă ≈ {0}, iar rularea numără {1}; formula lasă deoparte termenii cu puteri mai mici ale lui n, deci cele două se apropie abia când matricea crește.',
+    en: 'For these inputs the formula gives ≈ {0}, and this run counts {1}; the formula leaves out the terms with lower powers of n, so the two get close only as the matrix grows.',
   },
   costExact: { ro: 'Pentru aceste intrări: {0}, cât numără și rularea.', en: 'For these inputs: {0}, exactly what this run counts.' },
   pasul: { ro: 'pasul {0} din {1}', en: 'step {0} of {1}' },
@@ -108,7 +108,6 @@ export const TEXTE = {
   rolGata: { ro: 'gata', en: 'final' },
   rolMult: { ro: 'multiplicator', en: 'multiplier' },
   comenzi: { ro: 'comenzile urmei', en: 'trace controls' },
-  intrebari: { ro: 'ascunde rezultatul sub "?"', en: 'hide the result behind "?"' },
   intrebariAjutor: {
     ro: 'fiecare calcul apare întâi cu "?" în locul rezultatului, ca să-l poți face singur; un pas înainte îl arată',
     en: 'every computation first shows "?" in place of the result, so that you can work it out yourself; one step forward reveals it',
@@ -213,12 +212,12 @@ export const TEXTE = {
   adaptarePune: { ro: 'pune soluția în editor și rulează', en: 'put the solution in the editor and run' },
   costN: { ro: 'Cost în funcție de n', en: 'Cost as a function of n' },
   costNAjutor: {
-    ro: 'Algoritmul rulează pe intrări aleatoare cu natura cerută, pentru n de la 2 la 8. Punctele sunt flopii numărați, linia întreruptă este formula de cost a algoritmului (din curs sau din carte, ori numărată pe pseudocod, cum spune descrierea lui). O formulă exactă cade pe puncte; una cu ≈ păstrează doar termenul cu cea mai mare putere a lui n, deci diferența relativă scade când n crește.',
-    en: 'The algorithm runs on random inputs with the required nature, for n from 2 to 8. The dots are the counted flops, the dashed line is the cost formula of the algorithm (from the course or the book, or counted on the pseudocode, as its description says). An exact formula falls on the dots; one with ≈ keeps only the term with the highest power of n, so the relative difference shrinks as n grows.',
+    ro: 'Algoritmul rulează pe intrări aleatoare cu natura cerută, pentru n de la 2 la 8. Punctele sunt flopii numărați, linia întreruptă este formula de cost a algoritmului (din curs sau din carte, ori numărată pe pseudocod, cum spune descrierea lui). O formulă exactă cade pe puncte; una cu ≈ lasă deoparte termenii cu puteri mai mici ale lui n, deci diferența relativă scade când n crește.',
+    en: 'The algorithm runs on random inputs with the required nature, for n from 2 to 8. The dots are the counted flops, the dashed line is the cost formula of the algorithm (from the course or the book, or counted on the pseudocode, as its description says). An exact formula falls on the dots; one with ≈ leaves out the terms with lower powers of n, so the relative difference shrinks as n grows.',
   },
   costNAjutorM: {
-    ro: 'Algoritmul rulează pe intrări aleatoare cu natura cerută, pentru n de la 2 la 8 și m = n + 1 linii. Punctele sunt flopii numărați, linia întreruptă este formula de cost a algoritmului, care păstrează doar termenii cu cele mai mari puteri.',
-    en: 'The algorithm runs on random inputs with the required nature, for n from 2 to 8 and m = n + 1 rows. The dots are the counted flops, the dashed line is the cost formula of the algorithm, which keeps only the terms with the highest powers.',
+    ro: 'Algoritmul rulează pe intrări aleatoare cu natura cerută, pentru n de la 2 la 8 și m = n + 1 linii. Punctele sunt flopii numărați, linia întreruptă este formula de cost a algoritmului, care lasă deoparte termenii cu puteri mai mici.',
+    en: 'The algorithm runs on random inputs with the required nature, for n from 2 to 8 and m = n + 1 rows. The dots are the counted flops, the dashed line is the cost formula of the algorithm, which leaves out the terms with lower powers.',
   },
   costNNumarati: { ro: 'flopi numărați', en: 'counted flops' },
   costNFormula: { ro: 'formula: {0}', en: 'formula: {0}' },

@@ -3,7 +3,7 @@ import { variabilePeLinie } from '../src/motor/analiza'
 import { BIBLIOTECA, algoritm, type Algoritm } from '../src/motor/biblioteca'
 import { CADRU, stareLa, urma } from '../src/motor/interpretor'
 import { parseaza } from '../src/motor/parser'
-import { virgulaZecimala } from '../src/intrari'
+import { valoareDinText, virgulaZecimala } from '../src/intrari'
 
 function intrariExemplu(alg: Algoritm) {
   return Object.fromEntries(alg.intrari.map((i) => [i.nume, i.exemplu]))
@@ -93,5 +93,11 @@ describe('virgula zecimală în intrări', () => {
     expect(virgulaZecimala('1,2,3')).toBe('1,2,3')
     expect(virgulaZecimala('1, 2, 3')).toBe('1, 2, 3')
     expect(virgulaZecimala('1 2 3')).toBe('1 2 3')
+  })
+
+  it('Infinity și numerele prea mari pentru virgula mobilă nu sunt valori de intrare', () => {
+    expect(() => valoareDinText('matrice', 'A', 'Infinity 1\n1 1')).toThrow('"Infinity" nu este număr')
+    expect(() => valoareDinText('vector', 'x', '1e400 1')).toThrow('"1e400" nu este număr')
+    expect(valoareDinText('vector', 'x', '1e300 1')).toEqual([1e300, 1])
   })
 })

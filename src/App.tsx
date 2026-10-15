@@ -52,10 +52,11 @@ const sursaIn = (a: Algoritm, limba: Limba) => (limba === 'en' ? inEngleza(a.sur
 // textul este pseudocodul algoritmului, in oricare dintre limbi
 const eSursa = (a: Algoritm, text: string) => text === a.sursa || text === inEngleza(a.sursa)
 
-// ?cifre=3 porneste cu aritmetica pe 3 cifre semnificative
+// ?cifre=3 porneste cu aritmetica pe 3 cifre semnificative, ?cifre=0 cu dubla precizie; se primesc
+// doar preciziile din meniu, ca meniul sa arate aritmetica folosita
 function cifreDinAdresa(): number | null {
-  const c = Number(new URLSearchParams(window.location.search).get('cifre'))
-  return Number.isInteger(c) && c >= 2 && c <= 16 ? c : null
+  const s = new URLSearchParams(window.location.search).get('cifre')
+  return s && PRECIZII.includes(Number(s)) ? Number(s) : null
 }
 // peste atatea celule, grilele se deseneaza fara animatii
 const CELULE_ANIMATE = 150
@@ -186,7 +187,11 @@ function Continut() {
   const [viteza, setViteza] = useState(2)
   // modul prezentare: textul mai mare, pentru proiector
   const [prezentare, setPrezentare] = useState(false)
-  const [deschise, setDeschise] = useState(PANOURI_DESCHISE)
+  // ?notiune=pivot deschide panoul "Notiuni de baza" la acea notiune
+  const [deschise, setDeschise] = useState(() => {
+    const ceruta = new URLSearchParams(window.location.search).get('notiune')
+    return { ...PANOURI_DESCHISE, notiuni: !!ceruta && !!notiune(ceruta) }
+  })
   // intrarile pornesc desfacute pe ecranele late; pe cele inguste raman la rezumat
   const [intrariDeschise, setIntrariDeschise] = useState(() => !window.matchMedia || window.matchMedia('(min-width: 90em)').matches)
   const [notiuneAleasa, setNotiuneAleasa] = useState<{ id: string; cerere: number } | null>(() => {
@@ -211,9 +216,15 @@ function Continut() {
   // modul exercitiu: raspunsurile date in rularea curenta si verdictul pasului la care s-a raspuns
   const [scor, setScor] = useState({ corecte: 0, total: 0 })
   const [verdict, setVerdict] = useState<{ k: number; corect: boolean } | null>(null)
+  // pasii la care s-a raspuns deja: un pas se numara o singura data, oricate raspunsuri ar primi
+  const raspunse = useRef(new Set<number>())
 
-  const ruleaza = useCallback((textSursa: string, defs: Definitie[], pasDorit?: number) => {
+  // `pastreazaScor`: aceeasi rulare, reluata doar pentru alta limba
+  const ruleaza = useCallback((textSursa: string, defs: Definitie[], pasDorit?: number, pastreazaScor = false) => {
     setRedare(false)
+    // pasul din adresa se foloseste o singura data, la prima rulare, chiar daca ea nu reuseste
+    const cerut = pasCerut.current
+    pasCerut.current = 0
     // un algoritm din biblioteca nu ruleaza pe intrari de forma gresita: ar rezolva alta problema
     const a = algCurent.current
     const b = a && eSursa(a, textSursa) ? blocaj(defs, a.intrari) : null
@@ -230,16 +241,17 @@ function Continut() {
       const rez = urma(program, intrari, { culori: true, cifre: cifreAlese.current || undefined })
       setRulare({ rez, intrari, program, sursa: textSursa, definitii: defs, cifre: cifreAlese.current })
       setEroare(null)
-      setScor({ corecte: 0, total: 0 })
-      setVerdict(null)
-      // pasul din adresa se foloseste o singura data, la prima rulare
-      const nou = Math.min(pasDorit ?? pasCerut.current, rez.pasi.length - 1)
+      if (!pastreazaScor) {
+        setScor({ corecte: 0, total: 0 })
+        setVerdict(null)
+        raspunse.current.clear()
+      }
+      const nou = Math.min(pasDorit ?? cerut, rez.pasi.length - 1)
       setK(nou)
       // o rulare noua porneste cu intrebarea primului pas; un pas cerut anume se arata intreg
       if (pasDorit === undefined) setAscuns(nou === 0 && cuIntrebari.current && !!rez.pasi[0].intrebare)
       // la schimbarea limbii textul din editor poate fi altul decat cel rulat: semnul ramane doar unde are ce ascunde
       else setAscuns((a) => a && !!rez.pasi[nou].intrebare)
-      pasCerut.current = 0
     } catch (e) {
       setRulare(null)
       setAscuns(false)
@@ -251,11 +263,12 @@ function Continut() {
   useEffect(() => {
     const acelasi = idAnterior.current === id
     idAnterior.current = id
-    // pseudocodul din biblioteca, needitat, trece in limba noua
+    // pseudocodul din biblioteca, needitat, trece in limba noua; la fel sablonul pseudocodului propriu
     const baza = alg ?? (ex ? algoritm(ex.pornire)! : null)
-    const s = baza && eSursa(baza, sursa) ? sursaIn(baza, limba) : sursa
+    const sablonVechi = text(limba === 'en' ? 'ro' : 'en', 'propriuSablon')
+    const s = baza && eSursa(baza, sursa) ? sursaIn(baza, limba) : id === PROPRIU && sursa === sablonVechi ? text(limba, 'propriuSablon') : sursa
     if (s !== sursa) setSursa(s)
-    ruleaza(s, definitii, acelasi ? k : undefined)
+    ruleaza(s, definitii, acelasi ? k : undefined, acelasi)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, limba, ruleaza])
 
@@ -265,7 +278,8 @@ function Continut() {
     p.set('algoritm', id)
     p.set('limba', limba)
     p.set('tema', tema === 'intunecat' ? 'dark' : 'light')
-    if (cifre > 0) p.set('cifre', String(cifre))
+    // precizia se scrie cand difera de cea cu care porneste algoritmul: dubla precizie la S_G e cifre=0
+    if (cifre !== (algoritm(id)?.cifre ?? 0)) p.set('cifre', String(cifre))
     else p.delete('cifre')
     // pasul din adresa s-a folosit la prima rulare
     p.delete('pas')
@@ -296,6 +310,9 @@ function Continut() {
       const s = incarcaPropriu(limba)
       setSursa(s.sursa)
       setDefinitii(s.definitii)
+      // pseudocodul propriu porneste in dubla precizie, ca exercitiile; nu ia cele 3 cifre de la S_G
+      setCifre(0)
+      cifreAlese.current = 0
       return
     }
     const e = adaptareDin(nou)
@@ -846,7 +863,11 @@ function Continut() {
                   key={k}
                   dorit={dorit}
                   onRaspuns={(corect) => {
-                    setScor((s) => ({ corecte: s.corecte + (corect ? 1 : 0), total: s.total + 1 }))
+                    // dupa un pas inapoi, pasul se poate rezolva din nou, dar se numara o singura data
+                    if (!raspunse.current.has(k)) {
+                      raspunse.current.add(k)
+                      setScor((s) => ({ corecte: s.corecte + (corect ? 1 : 0), total: s.total + 1 }))
+                    }
                     setVerdict({ k, corect })
                     setAscuns(false)
                   }}
@@ -936,6 +957,7 @@ function Continut() {
             <ExercitiuAdaptare
               ex={ex}
               sursaRulata={rulare?.sursa ?? null}
+              intrariRulate={rulare?.intrari}
               onSolutie={(s) => {
                 setSursa(s)
                 ruleaza(s, definitii)
