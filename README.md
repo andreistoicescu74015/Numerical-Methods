@@ -32,7 +32,8 @@ that opens from `file://` without a server.
 
 ## Running natively
 
-Requires Node 24 (or 22.12 and newer).
+Requires Node 24 (or Node 22 from 22.13, or Node 26 and newer; the test runner does not support
+Node 23 and 25).
 
 ```
 npm install
@@ -88,13 +89,15 @@ the one from the image.
   zero pivot, the step where Cholesky would stop and, for Jacobi and Gauss-Seidel, the spectral
   radius of the iteration matrix.
 - "Counterexamples from the course", under the inputs, loads inputs that break a hypothesis of
-  the algorithm or reach an edge case and runs them: a zero pivot for G and LU, a singular matrix
-  for GPP and S_GPP, a symmetric matrix that is not positive definite for Cholesky, Jacobi and
-  Gauss-Seidel with ρ > 1 and on a positive definite matrix where only Gauss-Seidel converges,
-  Kaczmarz on a system without a solution and with steps that do not reduce the error, the power
-  method without a dominant eigenvalue or with γ₁ = 0, sgn(0) = 1 and β = 0 for RFG, dependent
-  columns for SQR, a zero pivot in a banded matrix for Gb and GPPb. Each one says what it shows
-  and where the hypothesis is in the course.
+  the algorithm or reach an edge case and runs them: a zero diagonal entry for LTRIS, UTRIS and
+  UTRISb, a zero pivot for G, S_G and LU, the matrix that stops G for GPP, a singular matrix for
+  GPP and S_GPP, a symmetric matrix that is not positive definite for Cholesky, Jacobi and
+  Gauss-Seidel with ρ > 1, Jacobi converging on a matrix that is not diagonally dominant, a
+  positive definite matrix where only Gauss-Seidel converges, Kaczmarz on a system without a
+  solution and with steps that do not reduce the error, the power method without a dominant
+  eigenvalue or with γ₁ = 0, sgn(0) = 1 and β = 0 for RFG, dependent columns for SQR, a zero pivot
+  in a banded matrix for Gb and the matrix that stops Gb for GPPb. Each one says what it shows and
+  where the hypothesis is in the course.
 - Editing the pseudocode or an input does not run anything; a notice above the grids says they
   still show the previous run, until "Run".
 - A library algorithm does not run on inputs of the wrong shape (a non-square matrix where a
@@ -211,6 +214,9 @@ The export follows the labs of the course: `import numpy as np`, indices from 0,
 range(...)` loops over elements, `return` with the results.
 
 ```python
+# Generat din pseudocod de vizualizatorul de Metode numerice.
+# Indicii pornesc de la 0, ca in NumPy: bucla "k = 1 : n-1" devine
+# range(n - 1), iar a_ij ramane A[i, j].
 import numpy as np
 
 
@@ -231,8 +237,14 @@ def G(A):
 if __name__ == "__main__":
     # exemplul din vizualizator
     A = np.array([[1, 2, 1], [2, 1, 2], [1, 1, 2]])
-    A = G(A)
-    print("A =", A, sep="\n")
+    A_rez = G(A)
+    print("A_rez =", A_rez, sep="\n")
+
+    # comparatia cu NumPy
+    # NumPy nu are LU fara pivotare: se verifica A = LU cu L, U luate din rezultat
+    L = np.tril(A_rez, -1) + np.eye(len(A))
+    U = np.triu(A_rez)
+    print("diferenta maxima fata de NumPy:", np.max(np.abs(L @ U - A)))
 ```
 
 The file ends with the call on the inputs currently in the visualizer, so running it prints what
@@ -272,8 +284,11 @@ become 0 and the division by σ would fail.
   from 1, used as the numerical oracle. `python/genereaza_fixturi.py` writes
   `tests/fixtures/algoritmi.json` (regenerate with `npm run fixturi`), and
   `python/verifica_export.py` runs the generated NumPy code against the interpreter and the
-  oracle. `python/compara.py` writes the comparison table against the NumPy functions (error,
-  flops, time) for the report. All of these need Python 3 with NumPy.
+  oracle (it reads the cases that `npm test` writes to `python/generat/`, so run `npm test`
+  first). `python/compara.py` writes the comparison table against the NumPy functions (error,
+  flops, time) for the report. The time is that of one call: after a warm-up call, the fastest of
+  five groups of calls lasting at least 20 ms each, with BLAS on a single thread and, on Windows,
+  with the process exempted from power throttling. All of these need Python 3 with NumPy.
 - `tests/`: see below.
 
 Identifiers in the code are Romanian, after the course and the notation of the slides.
@@ -299,8 +314,8 @@ Identifiers in the code are Romanian, after the course and the notation of the s
   called with the inputs, and the whole file as a script with its example (needs Python with
   NumPy; skipped otherwise).
 - `tests/algebra.test.ts` also checks that Gb, GPPb and UTRISb give exactly the results of G, GPP
-  and UTRIS on banded matrices, with fewer flops, and that with 3 significant digits the course
-  example gives x = (0, 1) without pivoting and x = (1, 1) with it.
+  and UTRIS on banded matrices (Gb and UTRISb with fewer flops), and that with 3 significant
+  digits the course example gives x = (0, 1) without pivoting and x = (1, 1) with it.
 - `tests/exercitiu.test.ts`: the reading of typed answers and the expected answer of a step.
 - `tests/natura.test.ts`: for every library algorithm, at several sizes, the values produced by
   "random" have the nature the algorithm asks for, the run finishes within the step limit of the
@@ -361,7 +376,8 @@ Statements:
 - `L, U peste A`: the elements `l_ij` and `u_ij` are read from and written to `A`, the way the
   course says the factors are stored over the input matrix.
 - `fie U[m,p], β[p]`: new arrays, filled with zeros.
-- Several statements on one line are separated by `;`. Comments start with `%`.
+- Several statements on one line are separated by `;`; the declarations `fie` and `peste` stand on
+  a line of their own. Comments start with `%`.
 
 Expressions: `+ - * /`, multiplication by juxtaposition (`a_ij x_j`), `^2`, `√x` or `sqrt(x)`,
 `|x|`, `sgn`, `min`, `max`, `linii(A)`/`rows(A)`, `coloane(A)`/`cols(A)`, `lungime(x)`/`len(x)`,

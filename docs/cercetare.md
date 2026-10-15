@@ -77,11 +77,11 @@ spectrală și cu ‖A‖_F norma Frobenius (slide-ul 12); limbajul acceptă ‖
 este o eroare, pentru că norma spectrală nu se calculează aici.
 
 Fiecare rol al unei celule are o culoare și un contur fix: roșu pentru pivot sau împărțitor,
-portocaliu pentru ce se scrie acum, galben pentru al doilea scris din același pas, albastru pentru
-ce se citește, verde pentru ce e gata, mov pentru multiplicatori și vectori Householder, gri
-pentru zero. `python/mn/algoritmi.py` traduce pseudocodul din bibliotecă literal în Python, cu
-indici de la 1, și este oracolul numeric al testelor: `python/genereaza_fixturi.py` scrie
-intrările și ieșirile lui în `tests/fixtures`.
+portocaliu pentru ce se scrie acum, albastru pentru ce se citește, verde pentru ce e gata, mov
+pentru multiplicatorii μ; zerourile știute dinainte ale unei matrice bandă sunt hașurate.
+`python/mn/algoritmi.py` traduce pseudocodul din bibliotecă literal în Python, cu indici de la 1,
+și este oracolul numeric al testelor: `python/genereaza_fixturi.py` scrie intrările și ieșirile
+lui în `tests/fixtures`.
 
 ## 3. Natura proiectului
 
@@ -250,7 +250,7 @@ Patru funcții leagă algoritmul de teoria din curs:
   că soluțiile le ating exact.
 
 Testele interpretorului rulează algoritmii pe fixture-urile produse de oracolul Python: aceeași
-matrice de intrare, aceeași matrice de ieșire, toleranță 1e-12. Aritmetica e în dublă precizie în
+matrice de intrare, aceeași matrice de ieșire, toleranță 1e-9. Aritmetica e în dublă precizie în
 ambele părți, deci rezultatele coincid.
 
 ## 6. Întrebări deschise
@@ -370,9 +370,9 @@ Compararea linie cu linie a pseudocodului din bibliotecă cu slide-urile și cu 
 
 Algoritmi din curs care nu sunt în bibliotecă, în ordinea în care ar merita adăugați:
 
-1. Variantele adaptate la structură (G, Crout și QR pe matrice Hessenberg, sisteme bidiagonale
-   și tridiagonale). Se pot scrie de pe acum în modul "pseudocod propriu", schimbând capetele
-   buclelor.
+1. Crout și QR pe matrice Hessenberg. G pe matrice Hessenberg și tridiagonale și substituțiile
+   pe matrice bidiagonale sunt exercițiile de adaptare; acestea două se pot scrie în modul
+   "pseudocod propriu", schimbând capetele buclelor.
 2. DVS pentru o matrice de rang 1 și un pas de deflație spre forma Schur; se pot scrie cu
    reflectori și bucle pe elemente, dar sunt lungi. Slide-ul 493 spune că la examen se cer cel
    mult două transformări Householder.
