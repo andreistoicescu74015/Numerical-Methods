@@ -107,9 +107,9 @@ the one from the image.
 - The "Comparison" panel of the drawer runs the same inputs, with the same arithmetic, through
   another library algorithm that takes them (the pairs the course compares come first: G and
   GPP, S_G and S_GPP, Cholesky or QR and G, Jacobi, Gauss-Seidel and Kaczmarz) and shows side by
-  side how each run finishes, the counted flops, the iterations, the result and the largest
-  difference between the two solution vectors. A button switches to the other algorithm with the
-  same inputs.
+  side how each run finishes, the counted flops, the iterations, the result (a result matrix of at
+  most 4 x 4 in full) and the largest difference between the two solution vectors. A button
+  switches to the other algorithm with the same inputs.
 - "What stays true" shows, for the eliminations, the factorizations, QR and the substitutions,
   the property the proof or the derivation of the algorithm in the course relies on, as it
   stands at the start of the current step of the outer loop: A_(k+1) = M_k ⋯ M_1 A with zeros
@@ -175,7 +175,8 @@ the one from the image.
   eigenvector; for RFG with a vector of length 2, x is mirrored onto the first axis.
 - Cells: red with a double outline for the divisor (the pivot in elimination), orange with a
   thick outline for what is written, blue with a dashed outline for what is read, green with a
-  marked corner for what is final, purple with the letter μ for multipliers. The outlines carry the role without colour;
+  marked corner for what is final (also an entry the algorithm uses but never writes in an array it
+  changes, such as the first row of U in G), purple with the letter μ for multipliers. The outlines carry the role without colour;
   the fills stay distinct under simulated protanopia and deuteranopia. On a swap the two values
   move towards each other. The width of a column is computed from the whole trace, so it does
   not change from step to step; above 36 cells the grids switch to a compact format. Above 150
