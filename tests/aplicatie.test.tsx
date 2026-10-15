@@ -574,4 +574,13 @@ describe('aplicația montată', () => {
     expect(A()[0][3]).toBe(0)
     expect(gazda.querySelectorAll('.grila')[0].querySelectorAll('.celula').length).toBe(16)
   })
+
+  it('un contraexemplu din curs încarcă valorile lui și rulează: G se oprește la pivotul nul', async () => {
+    const gazda = await monteaza()
+    expect(gazda.querySelector('.contraexemple summary')?.textContent).toBe('Contraexemple din curs (1)')
+    await apasa(gazda, 'pivot nul, deși A este nesingulară')
+    expect(gazda.querySelector<HTMLTextAreaElement>('.intrare.matrice textarea')!.value).toBe('0 1 2\n1 1 1\n2 1 3')
+    // rularea se opreste la impartirea la pivotul nul, iar scena anunta oprirea
+    expect(gazda.querySelector('.oprire')?.textContent).toContain('împărțire la zero')
+  })
 })

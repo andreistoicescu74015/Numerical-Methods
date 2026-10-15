@@ -13,9 +13,10 @@ import { OperatiiAlgoritm, OperatiiPas, etapaCurenta, type Etapa } from './compo
 import { Panou } from './componente/Panou'
 import { Raspuns } from './componente/Raspuns'
 import { RanduriVerificare, Verificare, randOk } from './componente/Verificare'
+import { CONTRAEXEMPLE, type Contraexemplu } from './contraexemple'
 import { asteptat } from './exercitiu'
 import { nrFlopi, text, type CheieText } from './i18n'
-import { blocaj, definitiiDin, intrariDinDefinitii, type Definitie } from './intrari'
+import { blocaj, definitiiDin, intrariDinDefinitii, textDinValoare, type Definitie } from './intrari'
 import { operatiiPeLinii, variabilePeLinie } from './motor/analiza'
 import { EroareSintaxa, type Program } from './motor/ast'
 import { BIBLIOTECA, GRUPURI_ALGORITMI, algoritm, marimiDin, type Algoritm } from './motor/biblioteca'
@@ -294,6 +295,14 @@ function Continut() {
   const cuValori = (noi: Definitie[]) => {
     setDefinitii(noi)
     ruleaza(sursa, noi)
+  }
+
+  // un contraexemplu din curs: valorile lui, in dubla precizie, si rularea
+  const incarcaContraexemplu = (c: Contraexemplu) => {
+    if (!alg) return
+    setCifre(0)
+    cifreAlese.current = 0
+    cuValori(alg.intrari.map((i) => ({ nume: i.nume, tip: i.tip, text: textDinValoare(c.valori[i.nume]) })))
   }
 
   const deschide = (p: NumePanou) => (d: boolean) => setDeschise((s) => ({ ...s, [p]: d }))
@@ -671,6 +680,21 @@ function Continut() {
                   : undefined
               }
             />
+            {alg && CONTRAEXEMPLE[alg.id] && (
+              <details className="contraexemple">
+                <summary title={t('contraexempleAjutor')}>{t('contraexemple', CONTRAEXEMPLE[alg.id].length)}</summary>
+                <ul>
+                  {CONTRAEXEMPLE[alg.id].map((c) => (
+                    <li key={c.titlu.ro}>
+                      <button type="button" className="mic" onClick={() => incarcaContraexemplu(c)}>
+                        {c.titlu[limba]}
+                      </button>
+                      <p>{c.explicatie[limba]}</p>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
             <label className="precizie" title={t('precizieAjutor')}>
               {t('aritmetica')}
               <select value={cifre} onChange={(e) => schimbaCifre(Number(e.target.value))}>

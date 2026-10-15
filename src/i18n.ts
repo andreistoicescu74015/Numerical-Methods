@@ -195,6 +195,11 @@ export const TEXTE = {
   aleatorToleranta: { ro: 'aleator: 0.01, 0.001, 0.0001 sau 0.000001', en: 'random: 0.01, 0.001, 0.0001 or 0.000001' },
   aleatorIteratii: { ro: 'aleator: 20, 50 sau 100', en: 'random: 20, 50 or 100' },
   aleatorIndice: { ro: 'aleator: un indice sub lungimea vectorului, ca reflectorul să aibă ce anula', en: 'random: an index below the length of the vector, so that the reflector has something to annihilate' },
+  contraexemple: { ro: 'Contraexemple din curs ({0})', en: 'Counterexamples from the course ({0})' },
+  contraexempleAjutor: {
+    ro: 'Intrări care încalcă o ipoteză a algoritmului sau ating un caz limită; butonul le încarcă în dublă precizie și rulează.',
+    en: 'Inputs that break a hypothesis of the algorithm or reach an edge case; the button loads them in double precision and runs.',
+  },
   // meniul de tip si dimensiunile de langa o matrice
   tipMatrice: { ro: 'tip', en: 'type' },
   tipAjutor: {

@@ -719,6 +719,32 @@ button.mic {
   color: var(--text);
 }
 
+/* contraexemplele din curs, sub intrari */
+.contraexemple {
+  font-size: 0.8rem;
+}
+
+.contraexemple summary {
+  cursor: pointer;
+  color: var(--text);
+}
+
+.contraexemple ul {
+  list-style: none;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.contraexemple p {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--text-sters);
+}
+
 /* proprietatile din curs ale matricei scrise */
 .intrare .proprietati {
   margin: 0;
