@@ -202,8 +202,13 @@ Trei straturi; fiecare depinde doar de cel de sub el:
 
 1. Limbajul: parser de mână (coborâre recursivă) pentru pseudocodul din secțiunea 2, cu blocuri
    date de indentare. Arborele sintactic păstrează pentru fiecare instrucțiune linia din editor
-   și, pentru atribuiri, eticheta din mijloc (`μ_ik` din `a_ik ← μ_ik = ...`). Limbajul nu are
-   apeluri între algoritmi: S_GPP, S_G și SQR au pașii algoritmilor apelați scriși desfășurat.
+   și, pentru atribuiri, eticheta din mijloc (`μ_ik` din `a_ik ← μ_ik = ...`). Limbajul are
+   apeluri către algoritmii din bibliotecă (`x ← UTRIS(U, d)`, `[U, p] ← GPP(A)`, cum scriu
+   slide-urile S_GPP din GPP și UTRIS), executate ca un singur pas al urmei: algoritmul apelat
+   rulează pe copii ale argumentelor, cu aceeași aritmetică, flopii lui se adună, ieșirile ajung
+   în ținte, iar intrările rămân în pas, ca algoritmul să poată fi deschis cu ele dintr-un buton
+   al cardului; codul Python generat pune funcțiile apelate înaintea programului. S_GPP, S_G, MPI
+   și SQR din bibliotecă rămân scrise desfășurat, ca pașii lor să se vadă celulă cu celulă.
 2. Interpretorul: un generator care parcurge arborele și emite evenimente: linia curentă, celulele
    citite, celulele scrise cu valoarea veche, cea nouă și formula, schimburile de elemente,
    pivotul, mesajele și oprirea. Formula cu valorile substituite se construiește din același

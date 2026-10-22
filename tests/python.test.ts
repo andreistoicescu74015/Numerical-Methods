@@ -10,6 +10,7 @@ import { emitePython, type OptiuniPython } from '../src/motor/python'
 import { linii } from '../src/motor/valori'
 import { estePatrata } from '../src/natura'
 import { generator } from './ajutor'
+import { SURSA as SURSA_CU_APELURI } from './apel.test'
 import fixturi from './fixtures/algoritmi.json'
 
 const RADACINA = join(__dirname, '..')
@@ -34,6 +35,12 @@ function emite(id: string): string {
 // blocuri, argmax oarecare, pozitii pastrate in scalari si in tablouri, sume in conditii, bucle
 // cu pas, produse intre tablouri.
 const PROPRII: { nume: string; sursa: string; intrari: Intrari; iesiri?: string[] }[] = [
+  {
+    nume: 'rezolvare_cu_apeluri',
+    sursa: SURSA_CU_APELURI,
+    intrari: { A: [[1, 2, 1], [2, 1, 2], [1, 1, 2]], b: [4, 5, 4] },
+    iesiri: ['x'],
+  },
   {
     nume: 'eliminare_pe_linii',
     sursa: `pentru k = 1 : n-1

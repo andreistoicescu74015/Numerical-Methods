@@ -10,8 +10,11 @@
 //
 // Tipurile numelor (matrice, vector, scalar) se deduc static, ca sa stim cand `A y` e produs
 // matrice-vector si `z^T y` produs scalar.
+import { estePatrata } from '../natura'
 import type { Expr, Instr, Interval, Program, Tinta } from './ast'
+import { algoritm } from './biblioteca'
 import type { Limba } from './mesaje'
+import { parseaza } from './parser'
 
 export type TipNume = 'matrice' | 'vector' | 'rand' | 'scalar'
 
@@ -33,8 +36,13 @@ export interface OptiuniPython {
 
 export interface CodPython {
   cod: string
+  // liniile functiei singure (def, corp, return), ca sa poata fi pusa intr-un alt fisier
+  functie: string[]
+  folosesteSgn: boolean
   // numele din pseudocod intoarse de functie, in ordine
   iesiri: string[]
+  // tipurile lor, in aceeasi ordine
+  tipuriIesiri: TipNume[]
   // dintre ele, cele care tin pozitii numarate de la 0
   indici: string[]
   // numele lor in codul Python (β devine beta)
@@ -154,7 +162,12 @@ interface Inventar {
   cititeInAfara: Set<string>
   // tablou -> capetele buclelor "v = 1 : L" care ii scriu direct fiecare element x_v
   acoperite: Map<string, string[]>
+  // algoritmii din biblioteca apelati
+  apeluri: Set<string>
 }
+
+// numele Python al unei functii: al algoritmului din biblioteca sau al programului
+const functiePython = (nume: string): string => nume.replace(/[^\p{L}\p{N}_]/gu, '_')
 
 class Emitator {
   tipuri = new Map<string, TipNume>()
@@ -187,12 +200,16 @@ class Emitator {
   cititAltfel = new Set<string>()
   scalarLaInceput = new Set<string>()
   intrariIntregi = new Set<string>()
+  // functiile algoritmilor apelati, emise o data, puse in fisier inaintea functiei programului
+  apeluri = new Map<string, CodPython>()
 
   constructor(
     private opt: OptiuniPython,
     private stare: Stare,
     private inv: Inventar,
   ) {
+    // numele functiilor apelate raman ale lor: o variabila cu acelasi nume primeste alt nume Python
+    for (const id of inv.apeluri) this.luate.add(functiePython(id))
     for (const i of opt.intrari) {
       this.tipuri.set(i.nume, i.tip)
       this.nume(i.nume)
@@ -827,6 +844,31 @@ class Emitator {
       case 'tipareste':
         this.linie(nivel, `print(${JSON.stringify(s.mesaj)})`)
         return
+      case 'apel': {
+        const alg = algoritm(s.nume)
+        if (!alg) return
+        let cod = this.apeluri.get(s.nume)
+        if (!cod) {
+          cod = emitePython(parseaza(alg.sursa), { nume: alg.id, intrari: alg.intrari.map((i) => ({ nume: i.nume, tip: i.tip })), iesiri: alg.iesiri, patrata: estePatrata(alg.intrari.find((i) => i.tip === 'matrice')?.natura), limba: this.opt.limba })
+          this.apeluri.set(s.nume, cod)
+        }
+        for (const a of s.args) this.scoateSume(a, nivel)
+        s.tinte.forEach((t, k) => {
+          const tip = cod.tipuriIesiri[k] ?? 'scalar'
+          this.tipuri.set(t, tip === 'rand' ? 'vector' : tip)
+          this.noteazaScris(t)
+          // iesirea tine pozitii numarate de la 0 doar daca functia apelata o intoarce asa (p din GPP)
+          if (cod.indici.includes(alg.iesiri[k])) this.sursaSigura.add(t)
+          else this.nonPoz.add(t)
+          if (tip === 'scalar') {
+            this.nonIntreg.add(t)
+            this.nonDimensiune.add(t)
+            this.scalarLaInceput.add(t)
+          }
+        })
+        this.linie(nivel, `${s.tinte.map((t) => this.nume(t)).join(', ')} = ${functiePython(alg.id)}(${s.args.map((a) => this.expr(a)).join(', ')})`)
+        return
+      }
     }
   }
 
@@ -1011,6 +1053,7 @@ function inventar(program: Program): Inventar {
   const atribuite = new Set<string>()
   const cititeLiber = new Set<string>()
   const acoperite = new Map<string, string[]>()
+  const apeluri = new Set<string>()
   const legate: string[] = []
   const acopera = (tablou: string, la: Expr) => acoperite.set(tablou, [...(acoperite.get(tablou) ?? []), JSON.stringify(la)])
   const dinExpr = (e: Expr): void => {
@@ -1122,12 +1165,21 @@ function inventar(program: Program): Inventar {
           d.dims.forEach(dinExpr)
         }
         return
+      case 'apel':
+        s.args.forEach(dinExpr)
+        for (const t of s.tinte) {
+          nume.add(t)
+          atribuite.add(t)
+          if (sus) scriseSus.add(t)
+        }
+        apeluri.add(s.nume)
+        return
       default:
         return
     }
   }
   program.instr.forEach((s) => dinInstr(s, true))
-  return { nume, bucle, citite, atribuite, cititeInAfara: new Set([...cititeLiber].filter((n) => bucle.has(n))), acoperite }
+  return { nume, bucle, citite, atribuite, cititeInAfara: new Set([...cititeLiber].filter((n) => bucle.has(n))), acoperite, apeluri }
 }
 
 const aceeasi = (a: Set<string>, b: Set<string>) => a.size === b.size && [...a].every((x) => b.has(x))
@@ -1165,7 +1217,7 @@ export function emitePython(program: Program, opt: OptiuniPython): CodPython {
     stare = urm
   }
 
-  const functie = opt.nume.replace(/[^\p{L}\p{N}_]/gu, '_')
+  const functie = functiePython(opt.nume)
   const prolog: string[] = [`def ${functie}(${opt.intrari.map((i) => em.nume(i.nume)).join(', ')}):`]
   // comentariul sta la capatul liniei cat incape in 79 de coloane; altfel, pe linia de deasupra
   const cuNota = (cod: string, nota: string) => (cod.length + nota.length + 4 <= 79 ? [`${cod}  # ${nota}`] : [`    # ${nota}`, cod])
@@ -1201,7 +1253,11 @@ export function emitePython(program: Program, opt: OptiuniPython): CodPython {
   const limba = opt.limba ?? 'ro'
   const antet = COMENTARII.antet[limba].map((l) => `# ${l}`)
   if (indici.length > 0) antet.push(`# ${COMENTARII.pozitii[limba].replace('{0}', indici.map((n) => em.nume(n)).join(', '))}`)
-  const sgn = em.folosesteSgn ? ['def sgn(x):', `    # ${COMENTARII.sgn[limba]}`, '    return 1.0 if x >= 0 else -1.0', '', ''] : []
+  // functiile algoritmilor apelati stau inaintea functiei programului; sgn o singura data
+  const apelate = [...em.apeluri.values()]
+  const folosesteSgn = em.folosesteSgn || apelate.some((c) => c.folosesteSgn)
+  const sgn = folosesteSgn ? ['def sgn(x):', `    # ${COMENTARII.sgn[limba]}`, '    return 1.0 if x >= 0 else -1.0', '', ''] : []
+  const functiiApelate = apelate.flatMap((c) => [...(c.indici.length > 0 ? [`# ${c.functie[0].slice(4, c.functie[0].indexOf('('))}: ${COMENTARII.pozitii[limba].replace('{0}', c.indici.map((n) => c.iesiriPython[c.iesiri.indexOf(n)]).join(', '))}`] : []), ...c.functie, '', ''])
   // Apelul cu valorile din vizualizator, ca in laborator: datele, apelul, apoi print pe fiecare rezultat.
   const exemplu: string[] = []
   const valori = opt.exemplu
@@ -1223,6 +1279,7 @@ export function emitePython(program: Program, opt: OptiuniPython): CodPython {
       exemplu.push('', `    # ${COMENTARII.comparatie[limba]}`, ...opt.numpy.map((l) => `    ${inloc(l)}`))
     }
   }
-  const cod = [...antet, 'import numpy as np', '', '', ...sgn, ...prolog, ...em.linii, ...(iesiri.length > 0 ? [`    return ${iesiri.map((n) => em.nume(n)).join(', ')}`] : []), ...exemplu, ''].join('\n')
-  return { cod, iesiri, indici, iesiriPython: iesiri.map((n) => em.nume(n)), rezultateExemplu: rezultate }
+  const corp = [...prolog, ...em.linii, ...(iesiri.length > 0 ? [`    return ${iesiri.map((n) => em.nume(n)).join(', ')}`] : [])]
+  const cod = [...antet, 'import numpy as np', '', '', ...sgn, ...functiiApelate, ...corp, ...exemplu, ''].join('\n')
+  return { cod, functie: corp, folosesteSgn, iesiri, tipuriIesiri: iesiri.map((n) => em.tipuri.get(n) ?? 'scalar'), indici, iesiriPython: iesiri.map((n) => em.nume(n)), rezultateExemplu: rezultate }
 }

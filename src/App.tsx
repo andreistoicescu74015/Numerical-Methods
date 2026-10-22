@@ -122,7 +122,7 @@ function pasInitial(): number {
 
 // cat dureaza un pas la redare, fata de intervalul de baza: anteturile de bucla trec repede
 const RITM: Partial<Record<Pas['fel'], number>> = { antet: 0.35, gol: 0.7, conditie: 0.7, fie: 0.7, mesaj: 0.7 }
-const cuScriere = (p: Pas) => p.fel === 'atrib' || p.fel === 'schimb' || p.fel === 'fie' || p.fel === 'final'
+const cuScriere = (p: Pas) => p.fel === 'atrib' || p.fel === 'schimb' || p.fel === 'fie' || p.fel === 'apel' || p.fel === 'final'
 
 interface Eroare {
   linie: number | null
@@ -355,6 +355,15 @@ function Continut() {
     // precizia exemplului, sau dubla precizie
     setCifre(a.cifre ?? 0)
     cifreAlese.current = a.cifre ?? 0
+  }
+
+  // algoritmul apelat la pasul curent, deschis cu intrarile apelului, cu aceeasi precizie
+  const deschideApel = (a: { id: string; intrari: IntrariMotor }) => {
+    const nou = algoritm(a.id)
+    if (!nou) return
+    setId(a.id)
+    setSursa(sursaIn(nou, limba))
+    setDefinitii(nou.intrari.map((i) => ({ nume: i.nume, tip: i.tip, text: textDinValoare(a.intrari[i.nume]) })))
   }
 
   // alta precizie: se ruleaza din nou, cu aceleasi intrari
@@ -936,6 +945,14 @@ function Continut() {
                 </>
               )}
               {scalari.length > 0 && <span className="valori">{scalari.join(', ')}</span>}
+            </p>
+          )}
+          {pas?.apel && (
+            <p className="apel-card">
+              <span>{t('apelRezumat', pas.apel.id, nrPasi(limba, pas.apel.pasi), nrFlopi(limba, pas.apel.flopi))}</span>
+              <button type="button" className="mic" onClick={() => deschideApel(pas.apel!)}>
+                {t('apelDeschide', pas.apel.id)}
+              </button>
             </p>
           )}
           {ecuatieCurenta && linieEc !== null && (

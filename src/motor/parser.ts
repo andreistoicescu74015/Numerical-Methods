@@ -2,8 +2,12 @@
 // indentare; numerotarea pasilor din slide-uri ("1. Pentru k = ...") se ignora.
 // Cuvintele cheie merg in romana (cu sau fara diacritice) si in engleza.
 import { EroareSintaxa, type Expr, type Instr, type Interval, type Program, type Tinta } from './ast'
+import { BIBLIOTECA } from './biblioteca'
 import { lexeaza, type Tok } from './lexer'
 import { mesaj } from './mesaje'
+
+// numele algoritmilor din biblioteca: intr-o atribuire, urmate de "(", sunt apeluri
+const APELABILE = new Set(BIBLIOTECA.map((a) => a.id))
 
 const CUVINTE: Record<string, string> = {
   pentru: 'pentru',
@@ -132,6 +136,21 @@ class Parser {
       if (c.peek().t !== 'str') throw c.eroare(mesaj('seAsteptaText'))
       return { tip: 'tipareste', linie: nr, mesaj: c.ia().s }
     }
+    // [U, p] ← GPP(A): tintele primesc iesirile algoritmului apelat, in ordinea lor
+    if (c.esteOp('[')) {
+      c.ia()
+      const tinte = [c.id()]
+      while (c.esteOp(',')) {
+        c.ia()
+        tinte.push(c.id())
+      }
+      c.asteapta(']')
+      if (!c.esteOp('←') && !c.esteOp('=')) throw c.eroare(mesaj('seAsteptaAtribuire'))
+      c.ia()
+      const ap = c.apelabil()
+      if (!ap) throw c.eroare(mesaj('apelAsteptat'))
+      return this.apel(c, nr, tinte, ap)
+    }
     const tinta = c.tinta()
     if (c.esteOp('↔')) {
       c.ia()
@@ -139,6 +158,11 @@ class Parser {
     }
     if (!c.esteOp('←') && !c.esteOp('=')) throw c.eroare(mesaj('seAsteptaAtribuire'))
     c.ia()
+    const ap = c.apelabil()
+    if (ap) {
+      if (tinta.tip !== 'var') throw c.eroare(mesaj('apelTinta'))
+      return this.apel(c, nr, [tinta.nume], ap)
+    }
     let expr = c.add()
     let eticheta: Tinta | undefined
     if (c.esteOp('=')) {
@@ -157,6 +181,23 @@ class Parser {
       bucla = { var: v, de, la: c.add() }
     }
     return { tip: 'atrib', linie: nr, tinta, eticheta, expr, bucla }
+  }
+
+  // x ← UTRIS(U, d) sau [U, p] ← GPP(A): apelul unui algoritm din biblioteca, cu argumentele
+  // ca expresii
+  private apel(c: Cursor, nr: number, tinte: string[], ap: { nume: string; toks: number }): Instr {
+    for (let k = 0; k < ap.toks; k++) c.ia()
+    c.asteapta('(')
+    const args: Expr[] = []
+    if (!c.esteOp(')')) {
+      args.push(c.add())
+      while (c.esteOp(',')) {
+        c.ia()
+        args.push(c.add())
+      }
+    }
+    c.asteapta(')')
+    return { tip: 'apel', linie: nr, tinte, nume: ap.nume, args }
   }
 
   private pentru(c: Cursor, l: Linie): Instr {
@@ -283,6 +324,17 @@ class Cursor {
 
   esteCuvant(s: string): boolean {
     return cuvant(this.peek()) === s
+  }
+
+  // Numele unui algoritm din biblioteca urmat de "(", cu numarul de token-uri pe care le ocupa:
+  // S_GPP se lexeaza ca S, _, GPP.
+  apelabil(): { nume: string; toks: number } | null {
+    const a = this.peek()
+    if (a.t !== 'id') return null
+    if (APELABILE.has(a.s) && this.esteOp('(', 1)) return { nume: a.s, toks: 1 }
+    const b = this.peek(2)
+    if (this.esteOp('_', 1) && b.t === 'id' && APELABILE.has(`${a.s}_${b.s}`) && this.esteOp('(', 3)) return { nume: `${a.s}_${b.s}`, toks: 3 }
+    return null
   }
 
   asteapta(s: string): Tok {

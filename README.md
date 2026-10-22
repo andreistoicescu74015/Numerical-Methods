@@ -234,6 +234,15 @@ the one from the image.
   `?limba=en`, `?tema=dark`, `?cifre=3`. The address keeps the algorithm, the language, the theme
   and the precision as they change, so a reload keeps them.
 - In "your own pseudocode" mode the text and the inputs stay in localStorage between sessions.
+- Your own pseudocode can call a library algorithm by its id, with its inputs in the order of
+  the library: `x ← S_GPP(A, b)`, `[U, p] ← GPP(A)`, as the slides write S_GPP from GPP and
+  UTRIS. The call is one step of the trace: the called algorithm runs on copies of the
+  arguments with the same arithmetic, its flops are added, its outputs land in the targets in
+  the order of its outputs, and the step card says how many steps and flops it took, with a
+  button that opens the called algorithm with these inputs. A `stop` or an error inside the call
+  stops the caller with the name of the algorithm. The generated Python puts the functions of
+  the called algorithms before the function of the program. The template of this mode ends with
+  such a call.
 
 ## The generated Python
 
@@ -403,6 +412,9 @@ Statements:
 - `L, U peste A`: the elements `l_ij` and `u_ij` are read from and written to `A`, the way the
   course says the factors are stored over the input matrix.
 - `fie U[m,p], β[p]`: new arrays, filled with zeros.
+- `x ← UTRIS(U, d)`, `[U, p] ← GPP(A)`: a call to a library algorithm, with its inputs in the
+  order of the library and its outputs assigned in order. In an assignment, the id of a library
+  algorithm followed by `(` is a call; elsewhere `G(i, j)` is still an element of a matrix `G`.
 - Several statements on one line are separated by `;`; the declarations `fie` and `peste` stand on
   a line of their own. Comments start with `%`.
 

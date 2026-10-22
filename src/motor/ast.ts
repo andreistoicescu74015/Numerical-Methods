@@ -40,6 +40,9 @@ export type Instr =
   | { tip: 'peste'; linie: number; nume: string[]; tinta: string }
   // "fie U[m,p], beta[p]": tablouri noi, pline cu zero
   | { tip: 'fie'; linie: number; decl: { nume: string; dims: Expr[] }[] }
+  // "x ← UTRIS(U, d)", "[U, p] ← GPP(A)": apelul unui algoritm din biblioteca, cu intrarile lui in
+  // ordine; tintele primesc iesirile lui, in ordinea lor
+  | { tip: 'apel'; linie: number; tinte: string[]; nume: string; args: Expr[] }
 
 export interface Program {
   instr: Instr[]

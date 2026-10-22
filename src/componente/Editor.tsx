@@ -4,12 +4,14 @@ import { HighlightStyle, StreamLanguage, syntaxHighlighting } from '@codemirror/
 import { Compartment, Prec, RangeSetBuilder, StateEffect, StateField } from '@codemirror/state'
 import { Decoration, ViewPlugin, WidgetType, keymap, type DecorationSet, type ViewUpdate } from '@codemirror/view'
 import { tags } from '@lezer/highlight'
+import { BIBLIOTECA } from '../motor/biblioteca'
 import type { Tema } from '../preferinte'
 
 // Evidentiere sintactica pentru pseudocod: cuvinte cheie (romana si engleza), functii,
 // numere, texte, comentarii si operatori.
 const CUVINTE = new Set(['pentru', 'for', 'daca', 'if', 'atunci', 'then', 'altfel', 'else', 'cat', 'timp', 'while', 'stop', 'tipareste', 'print', 'peste', 'over', 'fie', 'let'])
 const FUNCTII = new Set(['sqrt', 'sgn', 'min', 'max', 'abs', 'norm', 'norma', 'linii', 'rows', 'coloane', 'cols', 'lungime', 'len', 'argmax', 'argmin'])
+const APELABILE = new Set(BIBLIOTECA.map((a) => a.id))
 const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
 
 const pseudocod = StreamLanguage.define({
@@ -17,7 +19,9 @@ const pseudocod = StreamLanguage.define({
     if (stream.match(/^%.*/)) return 'comment'
     if (stream.match(/^('[^']*'?|"[^"]*"?)/)) return 'string'
     if (stream.match(/^\d+(\.\d+)?([eE][+-]?\d+)?/)) return 'number'
-    if (stream.match(/^[\p{L}][\p{L}\p{N}]*/u)) {
+    if (stream.match(/^[\p{L}][\p{L}\p{N}_]*/u)) {
+      // numele unui algoritm din biblioteca (S_GPP cu tot cu "_") se coloreaza ca o functie
+      if (APELABILE.has(stream.current())) return 'atom'
       const cuvant = norm(stream.current())
       if (CUVINTE.has(cuvant)) return 'keyword'
       if (FUNCTII.has(cuvant)) return 'atom'

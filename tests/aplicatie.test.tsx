@@ -931,4 +931,23 @@ describe('aplicația montată', () => {
     await scrieIn(gazda.querySelector('header select')!, 'QR')
     expect(gazda.querySelector('.faza')).toBeNull()
   })
+
+  it('pseudocodul propriu apelează un algoritm din bibliotecă ca un pas, iar cardul îl deschide cu aceste intrări', async () => {
+    const gazda = await monteaza()
+    await scrieIn(gazda.querySelector('header select')!, 'propriu')
+    await faraIntrebari(gazda)
+    await comanda(gazda, 'laSfarsit')
+    // sablonul se incheie cu y ← S_GPP(A, b): pasul dinaintea celui final este apelul
+    await comanda(gazda, 'pasInapoi')
+    expect(gazda.querySelector('.stare')?.textContent).toContain('linia 8')
+    expect(gazda.querySelector('.apel-card')?.textContent).toContain('apel S_GPP:')
+    expect(gazda.querySelector('.pas .formula annotation')?.textContent).toBe('y \\leftarrow \\mathrm{S\\_GPP}(A, b)')
+    expect(celule(gazda, '.rol-scris')).toHaveLength(3)
+    expect(celule(gazda, '.rol-citit')).toHaveLength(12)
+    await apasa(gazda, 'deschide S_GPP cu aceste intrări')
+    expect(gazda.querySelector<HTMLSelectElement>('header select')!.value).toBe('S_GPP')
+    expect([...gazda.querySelectorAll<HTMLInputElement>('.intrare .nume')].map((x) => x.value)).toEqual(['A', 'b'])
+    expect(gazda.querySelector<HTMLTextAreaElement>('.intrare.matrice textarea')!.value).toBe('4 1 0\n1 3 1\n0 1 2')
+    expect(gazda.querySelector('.stare')?.textContent).toContain('pasul 1 din')
+  })
 })

@@ -108,6 +108,22 @@ const CATALOG = {
   liniiLungimi: { ro: '{0}: liniile au lungimi diferite', en: '{0}: the rows have different lengths' },
   numeInvalid: { ro: 'numele "{0}" nu este valid: litere și cifre, prima literă', en: 'the name "{0}" is not valid: letters and digits, starting with a letter' },
   numeDublat: { ro: 'numele {0} apare de două ori', en: 'the name {0} appears twice' },
+
+  apelTinta: {
+    ro: 'un apel se atribuie unui nume, ca în "x ← UTRIS(U, b)" sau "[U, p] ← GPP(A)"',
+    en: 'a call is assigned to a name, as in "x ← UTRIS(U, b)" or "[U, p] ← GPP(A)"',
+  },
+  apelAsteptat: { ro: 'după "[a, b] ←" trebuie să urmeze un algoritm din bibliotecă, ca GPP(A)', en: 'after "[a, b] ←" a library algorithm must follow, as in GPP(A)' },
+  apelNecunoscut: { ro: '{0} nu este un algoritm din bibliotecă', en: '{0} is not a library algorithm' },
+  apelArgumente: { ro: '{0} cere {1} intrări ({2}), a primit {3}', en: '{0} takes {1} inputs ({2}), got {3}' },
+  apelIesiri: { ro: '{0} are {1} ieșiri ({2}), dar sunt {3} ținte', en: '{0} has {1} outputs ({2}), but there are {3} targets' },
+  apelTip: { ro: 'intrarea {1} a lui {0} trebuie să fie {2}, nu {3}', en: 'input {1} of {0} must be {2}, not {3}' },
+  tipMatrice: { ro: 'o matrice', en: 'a matrix' },
+  tipVector: { ro: 'un vector', en: 'a vector' },
+  tipNumar: { ro: 'un număr', en: 'a number' },
+  apelEroare: { ro: '{0} s-a oprit cu eroare: {1}', en: '{0} stopped with an error: {1}' },
+  apelOprit: { ro: '{0}: {1}', en: '{0}: {1}' },
+  apelFaraIesire: { ro: '{0} nu a calculat {1}', en: '{0} did not compute {1}' },
 } satisfies Record<string, { ro: string; en: string }>
 
 export type Cheie = keyof typeof CATALOG

@@ -1416,6 +1416,17 @@ button.mic {
   background: transparent;
 }
 
+/* apelul unui algoritm din biblioteca: cati pasi si flopi a facut, cu butonul care il deschide */
+.apel-card {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-sters);
+}
+
 /* ecuatia i scrisa in card cu numerele curente, apoi cu valorile curente ale necunoscutei */
 .ecuatie-card,
 .faza {

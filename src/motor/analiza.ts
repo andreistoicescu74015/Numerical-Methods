@@ -89,10 +89,19 @@ function dinInstr(s: Instr, rez: Map<number, string[]>): void {
     case 'fie':
       s.decl.forEach((d) => d.dims.forEach((x) => dinExpr(x, lista, legate)))
       break
+    case 'apel':
+      s.args.forEach((x) => dinExpr(x, lista, legate))
+      break
     default:
       break
   }
   if (lista.length) rez.set(s.linie, lista)
+}
+
+// "[U, p] \leftarrow \mathrm{GPP}(A)": apelul in LaTeX
+export function apelLatex(s: Extract<Instr, { tip: 'apel' }>): string {
+  const tinte = s.tinte.map(numeLatex)
+  return `${tinte.length === 1 ? tinte[0] : `[${tinte.join(', ')}]`} \\leftarrow \\mathrm{${s.nume.replace(/_/g, '\\_')}}(${s.args.map(latexScris).join(', ')})`
 }
 
 export function variabilePeLinie(program: Program): Map<number, string[]> {
@@ -127,6 +136,9 @@ function texInstr(s: Instr, rez: Map<number, string[]>): void {
     case 'cattimp':
       pune(latexScris(s.cond))
       s.corp.forEach((x) => texInstr(x, rez))
+      break
+    case 'apel':
+      pune(apelLatex(s))
       break
     default:
       break

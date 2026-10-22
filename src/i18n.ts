@@ -493,13 +493,15 @@ export const TEXTE = {
   scalar: { ro: 'scalar', en: 'scalar' },
   valoriAjutor: { ro: 'o linie pe rând, numerele despărțite prin spații', en: 'one row per line, numbers separated by spaces' },
   propriuAjutor: {
-    ro: 'Scrie pseudocodul în notația cursului și definește intrările de mai jos; m și n sunt dimensiunile primei matrice (fără matrice, n este lungimea primului vector). Poți scrie pe elemente (a_ij) sau direct între tablouri (A x - b, x^T y, ‖r‖); operațiile dintre tablouri apar, cu matricele scrise întregi, în formula pasului și în panoul "Operații pe matrice".',
-    en: 'Write the pseudocode in the course notation and define the inputs below; m and n are the sizes of the first matrix (with no matrix, n is the length of the first vector). You can write on elements (a_ij) or directly between arrays (A x - b, x^T y, ‖r‖); the operations between arrays appear, with the matrices written out, in the step formula and in the "Matrix operations" panel.',
+    ro: 'Scrie pseudocodul în notația cursului și definește intrările de mai jos; m și n sunt dimensiunile primei matrice (fără matrice, n este lungimea primului vector). Poți scrie pe elemente (a_ij) sau direct între tablouri (A x - b, x^T y, ‖r‖); operațiile dintre tablouri apar, cu matricele scrise întregi, în formula pasului și în panoul "Operații pe matrice". Poți apela algoritmii din bibliotecă, cu intrările în ordinea lor: x ← S_GPP(A, b), [U, p] ← GPP(A); apelul este un pas al urmei, cu flopii algoritmului apelat, iar cardul îl deschide cu aceste intrări.',
+    en: 'Write the pseudocode in the course notation and define the inputs below; m and n are the sizes of the first matrix (with no matrix, n is the length of the first vector). You can write on elements (a_ij) or directly between arrays (A x - b, x^T y, ‖r‖); the operations between arrays appear, with the matrices written out, in the step formula and in the "Matrix operations" panel. You can call the library algorithms, with their inputs in their order: x ← S_GPP(A, b), [U, p] ← GPP(A); the call is one step of the trace, with the flops of the called algorithm, and the step card opens it with these inputs.',
   },
+  apelRezumat: { ro: 'apel {0}: {1}, {2}', en: 'call {0}: {1}, {2}' },
+  apelDeschide: { ro: 'deschide {0} cu aceste intrări', en: 'open {0} with these inputs' },
   faraIntrari: { ro: 'nicio intrare: adaugă o matrice, un vector sau un scalar', en: 'no inputs: add a matrix, a vector or a scalar' },
   propriuSablon: {
-    ro: '% Scrie aici pseudocodul, în notația cursului.\n% Exemplu: reziduul lui Ax = b, mărimea lui și urma lui A\nr ← b - A x\ne ← ‖r‖ / ‖b‖\ns ← 0\npentru i = 1 : n\n    s ← s + a_ii',
-    en: '% Write your pseudocode here.\n% Example: the residual of Ax = b, its size and the trace of A\nr ← b - A x\ne ← ‖r‖ / ‖b‖\ns ← 0\nfor i = 1 : n\n    s ← s + a_ii',
+    ro: '% Scrie aici pseudocodul, în notația cursului.\n% Exemplu: reziduul lui Ax = b, mărimea lui, urma lui A și soluția cu S_GPP\nr ← b - A x\ne ← ‖r‖ / ‖b‖\ns ← 0\npentru i = 1 : n\n    s ← s + a_ii\ny ← S_GPP(A, b)',
+    en: '% Write your pseudocode here.\n% Example: the residual of Ax = b, its size, the trace of A and the solution with S_GPP\nr ← b - A x\ne ← ‖r‖ / ‖b‖\ns ← 0\nfor i = 1 : n\n    s ← s + a_ii\ny ← S_GPP(A, b)',
   },
   verificare: { ro: 'Verificare', en: 'Check' },
   verificareAjutor: {

@@ -5,12 +5,14 @@
 // indexare.
 import type { Expr, Instr, Program, Tinta } from './ast'
 import { MAX_DESFASURAT, ROL, colorat, contine, fmt, fmtCifre, latex, numeLatex, valoareLatex, type InfoLatex } from './latex'
+import { algoritm } from './biblioteca'
 import { mesaj, numeFunctie } from './mesaje'
-import { norm } from './parser'
+import { norm, parseaza } from './parser'
 import {
   citeste,
   cloneaza,
   esteTablou,
+  linii,
   matriceDin,
   matriceNoua,
   scalar,
@@ -45,7 +47,7 @@ export interface Scriere {
   nou: number
 }
 
-export type FelPas = 'antet' | 'gol' | 'conditie' | 'atrib' | 'schimb' | 'fie' | 'mesaj' | 'final'
+export type FelPas = 'antet' | 'gol' | 'conditie' | 'atrib' | 'schimb' | 'fie' | 'mesaj' | 'apel' | 'final'
 
 export type FelOperatie =
   | 'matvec'
@@ -103,6 +105,8 @@ export interface Pas {
   iteratie?: Iteratie
   // rezultatul conditiei, la un pas de tip 'conditie'
   adevarat?: boolean
+  // algoritmul din biblioteca apelat la acest pas, cu intrarile lui, cati pasi a facut si cati flopi
+  apel?: { id: string; intrari: Intrari; pasi: number; flopi: number }
   mesaj?: string
   flopi: number
   scalari: Record<string, number>
@@ -419,6 +423,9 @@ class Interpretor implements InfoLatex {
       case 'atrib':
         yield* this.atrib(s)
         return
+      case 'apel':
+        yield* this.apelAlgoritm(s)
+        return
       case 'schimb': {
         const a = this.celula(s.a)
         const b = this.celula(s.b)
@@ -495,6 +502,50 @@ class Interpretor implements InfoLatex {
       extra.iteratie = { linie: this.linie, iter, stanga: a.v, dreapta: b.v, texStanga, texDreapta, op: e.op, flopi: this.flopi }
     }
     return { adevarat, pas: this.pas('conditie', this.linie, this.citite, extra) }
+  }
+
+  // x ← UTRIS(U, d): algoritmul din biblioteca ruleaza pe copii ale argumentelor, cu aceeasi
+  // aritmetica, ca un singur pas al urmei: flopii lui se aduna, iesirile lui ajung in tinte, iar
+  // intrarile si marimea rularii raman in pas, ca algoritmul sa poata fi deschis cu ele.
+  private *apelAlgoritm(s: Extract<Instr, { tip: 'apel' }>): Generator<Pas, void, undefined> {
+    const alg = algoritm(s.nume)
+    if (!alg) throw this.eroare(mesaj('apelNecunoscut', s.nume))
+    if (s.args.length !== alg.intrari.length) throw this.eroare(mesaj('apelArgumente', s.nume, alg.intrari.length, alg.intrari.map((i) => i.nume).join(', '), s.args.length))
+    if (s.tinte.length > alg.iesiri.length) throw this.eroare(mesaj('apelIesiri', s.nume, alg.iesiri.length, alg.iesiri.join(', '), s.tinte.length))
+    this.citite = []
+    this.uita()
+    const flopiInainte = this.flopi
+    const intrari: Intrari = {}
+    alg.intrari.forEach((i, k) => {
+      const v = this.ev(s.args[k])
+      const tip = v.tip === 'rand' ? 'vector' : v.tip
+      if (tip !== i.tip) throw this.eroare(mesaj('apelTip', s.nume, i.nume, mesaj(i.tip === 'matrice' ? 'tipMatrice' : i.tip === 'vector' ? 'tipVector' : 'tipNumar'), descrie(v)))
+      intrari[i.nume] = v.tip === 'scalar' ? v.v : v.tip === 'matrice' ? linii(v) : [...v.d]
+    })
+    // evaluarea argumentelor nu e un calcul al apelantului: flopii sunt ai algoritmului apelat
+    this.flopi = flopiInainte
+    const rez = urma(parseaza(alg.sursa), intrari, { cifre: this.cifre })
+    if (rez.final === 'eroare') throw this.eroare(mesaj('apelEroare', s.nume, rez.eroare ?? ''))
+    if (rez.final === 'stop') throw new Oprire(mesaj('apelOprit', s.nume, rez.pasi.at(-1)?.mesaj ?? ''))
+    this.flopi += rez.flopi
+    const scrise: Celula[] = []
+    s.tinte.forEach((t, k) => {
+      const iesire = alg.iesiri[k]
+      const tablou = rez.stare[iesire]
+      if (tablou) {
+        this.punTablou(t, cloneaza(tablou))
+        scrise.push(...toateCelulele(t, tablou, 'scris'))
+        return
+      }
+      const v = rez.scalari[iesire]
+      if (v === undefined) throw this.eroare(mesaj('apelFaraIesire', s.nume, iesire))
+      this.punScalar(t, scalar(v))
+      if (Number.isInteger(v)) this.date.delete(t)
+      else this.date.add(t)
+    })
+    const tinte = s.tinte.map(numeLatex)
+    const f = `${tinte.length === 1 ? tinte[0] : `[${tinte.join(', ')}]`} \\leftarrow \\mathrm{${s.nume.replace(/_/g, '\\_')}}(${s.args.map((a) => latex(a, this, 'simbolic')).join(', ')})`
+    yield this.pas('apel', s.linie, [...this.citite, ...scrise], { formula: f, apel: { id: alg.id, intrari, pasi: rez.pasi.length, flopi: rez.flopi } })
   }
 
   private *atrib(s: Extract<Instr, { tip: 'atrib' }>): Generator<Pas, void, undefined> {
