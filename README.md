@@ -112,9 +112,15 @@ the one from the image.
   Gauss-Seidel), so the two can be compared on the same data.
 - The "Comparison" panel of the drawer runs the same inputs, with the same arithmetic, through
   another library algorithm that takes them (the pairs the course compares come first: G and
-  GPP, S_G and S_GPP, Cholesky or QR and G, Jacobi, Gauss-Seidel and Kaczmarz) and shows side by
+  GPP, S_G and S_GPP, Cholesky or QR and G, Jacobi, Gauss-Seidel and Kaczmarz, the power method
+  and the inverse power method) and shows side by
   side how each run finishes, the counted flops, the iterations, the result (a result matrix of at
-  most 4 x 4 in full) and the largest difference between the two solution vectors. A button
+  most 5 x 5 in full) and the largest difference between the two solution vectors. When both runs
+  have a stopping condition, their curves are drawn on the same axes, as the slide "Exemple
+  numerice MP/MPI" draws the power method next to the inverse power method: the quantity of the
+  condition at every iteration, on a logarithmic scale when the values span several orders of
+  magnitude, with the common threshold, against the iterations or against the flops counted up
+  to each evaluation, with a table of both. A button
   switches to the other algorithm with the same inputs.
 - "What stays true" shows, for the eliminations, the factorizations, QR and the substitutions,
   the property the proof or the derivation of the algorithm in the course relies on, as it
@@ -131,7 +137,10 @@ the one from the image.
   bound is reached. For LTRIS and UTRIS only the triangle the algorithm reads counts.
 - "Cost as a function of n" runs a direct algorithm on random inputs with the required nature for
   n from 2 to 8 and plots the counted flops next to the cost formula of the algorithm, with a
-  table.
+  table. For the pairs the course and the book compare (Gb and G, GPPb and GPP, UTRISb and
+  UTRIS, Cholesky and G, QR and G) a second series shows the flops the other algorithm counts at
+  the same n, the table has the ratio of the two, and a note says what the course states about
+  it.
 - "Adaptation exercises", at the end of the algorithm list, start from a library algorithm and
   ask to adapt it to a structured matrix, as in the problems of the book: LTRIS for a lower
   bidiagonal matrix and UTRIS for an upper bidiagonal one (P 1.24), G for a tridiagonal matrix

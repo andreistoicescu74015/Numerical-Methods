@@ -243,6 +243,24 @@ export const TEXTE = {
   costNRaport: { ro: 'numărați / formulă', en: 'counted / formula' },
   costNIndiciu: { ro: '{0} numărați, {1} după formulă', en: '{0} counted, {1} by the formula' },
   costNDescriere: { ro: 'Flopii numărați și formula de cost pentru n de la {0} la {1}; la n = {1}: {2} numărați, {3} după formulă.', en: 'The counted flops and the cost formula for n from {0} to {1}; at n = {1}: {2} counted, {3} by the formula.' },
+  costNPereche: { ro: 'flopi numărați de {0}, la același n', en: 'flops counted by {0}, at the same n' },
+  costNIndiciuPereche: { ro: '{0}: {1}', en: '{0}: {1}' },
+  costNNotaCHOL: {
+    ro: 'A doua serie: {1} pe o matrice de același n. Cursul dă pentru Cholesky ≈ n³/3 flopi, jumătate din cei ≈ 2n³/3 ai eliminării gaussiene; raportul din tabel se apropie de 1/2 când n crește.',
+    en: 'The second series: {1} on a matrix of the same n. The course gives ≈ n³/3 flops for Cholesky, half of the ≈ 2n³/3 of Gaussian elimination; the ratio in the table approaches 1/2 as n grows.',
+  },
+  costNNotaQR: {
+    ro: 'A doua serie: {1} pe o matrice n × n. Cursul: pe o matrice pătrată QR costă ≈ 4n³/3 flopi, dublul eliminării gaussiene. Aici QR rulează cu m = n + 1 linii, deci raportul formulelor este 2 + 3/n, iar cel numărat, din tabel, se apropie de el când n crește.',
+    en: 'The second series: {1} on an n × n matrix. The course: on a square matrix QR costs ≈ 4n³/3 flops, double Gaussian elimination. Here QR runs with m = n + 1 rows, so the ratio of the formulas is 2 + 3/n, and the counted one, in the table, approaches it as n grows.',
+  },
+  costNNotaBanda: {
+    ro: 'A doua serie: {1} pe o matrice plină de același n. Cartea cursului (paginile 107-108): este destul ca r sau q să fie mult mai mic decât n pentru ca varianta bandă să coste mult sub 2n³/3. Raportul din tabel este costul numărat al lui {0} împărțit la cel al lui {1}, cu lățimile curente.',
+    en: 'The second series: {1} on a full matrix of the same n. The book of the course (pages 107-108): it is enough for r or q to be much smaller than n for the banded variant to cost far below 2n³/3. The ratio in the table is the counted cost of {0} divided by that of {1}, with the current widths.',
+  },
+  costNNotaUTRISb: {
+    ro: 'A doua serie: {1} pe o matrice de același n. Cartea cursului (secțiunea 2.9): substituția adaptată la bandă face Σ (2 min(q, n − i) + 1) ≈ n(2q + 1) flopi, față de n². Raportul din tabel este costul numărat al lui {0} împărțit la cel al lui {1}, cu q curent.',
+    en: 'The second series: {1} on a matrix of the same n. The book of the course (section 2.9): the substitution adapted to the band takes Σ (2 min(q, n − i) + 1) ≈ n(2q + 1) flops, against n². The ratio in the table is the counted cost of {0} divided by that of {1}, with the current q.',
+  },
   conditionare: { ro: 'Condiționare', en: 'Conditioning' },
   conditionareAjutor: {
     ro: 'Teorema de pe slide-ul "Conditionarea sistemelor liniare", cu A neschimbată (ΔA = 0) și x ≠ 0: dacă b se schimbă cu Δb, soluția se schimbă cu ‖Δx‖/‖x‖ ≤ κ(A) ‖Δb‖/‖b‖, unde κ(A) = ‖A⁻¹‖ ‖A‖, iar doar matricea A determină condiționarea. Aici b se schimbă cu ε ‖b‖ în direcția pe care A⁻¹ o mărește cel mai mult, algoritmul rulează din nou în dublă precizie, iar normele sunt norma ∞ (cea mai mare sumă a modulelor pe o linie), pe care cartea cursului o alege pentru că se calculează ușor. La LTRIS și UTRIS contează doar triunghiul pe care îl citește algoritmul, iar la UTRISb doar banda lui.',
@@ -301,6 +319,17 @@ export const TEXTE = {
   comparatieVector: { ro: 'vector de {0}', en: 'vector of {0}' },
   comparatieDiferenta: { ro: 'Cea mai mare diferență dintre cele două rezultate {0}: {1}.', en: 'The largest difference between the two results {0}: {1}.' },
   comparatieTreci: { ro: 'Treci la {0}, cu aceleași intrări', en: 'Switch to {0}, with the same inputs' },
+  comparatieCurbe: {
+    ro: 'Mărimea din condiția de oprire la fiecare iterație, pentru ambele rulări, pe aceleași axe, cum arată slide-ul "Exemple numerice MP/MPI" metoda puterii lângă metoda puterii inverse. Pe axa flopilor fiecare punct stă la numărul de flopi numărați până la acea evaluare, deci se vede și cât costă o iterație a fiecărui algoritm.',
+    en: 'The quantity of the stopping condition at every iteration, for both runs, on the same axes, as the slide "Exemple numerice MP/MPI" shows the power method next to the inverse power method. On the flops axis each point sits at the number of flops counted up to that evaluation, so the cost of one iteration of each algorithm shows as well.',
+  },
+  comparatieAxa: { ro: 'pe axă', en: 'on the axis' },
+  comparatieAxaIteratii: { ro: 'iterații', en: 'iterations' },
+  comparatieAxaFlopi: { ro: 'flopi numărați', en: 'counted flops' },
+  comparatiePrag: { ro: 'pragul, {0}', en: 'the threshold, {0}' },
+  comparatieCurbeLog: { ro: 'Scară logaritmică.', en: 'Logarithmic scale.' },
+  comparatieCurbeLiniar: { ro: 'Scară liniară.', en: 'Linear scale.' },
+  comparatieCurbeDescriere: { ro: 'curbele de convergență: {0} cu {1|iterație|iterații}, {2} cu {3|iterație|iterații}', en: 'the convergence curves: {0} with {1|iteration|iterations}, {2} with {3|iteration|iterations}' },
   contraexempleAjutor: {
     ro: 'Intrări care încalcă o ipoteză a algoritmului sau ating un caz limită; butonul le încarcă în dublă precizie și rulează.',
     en: 'Inputs that break a hypothesis of the algorithm or reach an edge case; the button loads them in double precision and runs.',

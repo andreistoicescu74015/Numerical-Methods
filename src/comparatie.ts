@@ -1,6 +1,7 @@
 // Comparatia cu alt algoritm din biblioteca pe aceleasi intrari si cu aceeasi aritmetica: cum se
 // termina, cati flopi numara, cate iteratii face si ce rezultat da.
 import { blocaj, type Definitie } from './intrari'
+import { evaluari, type Evaluare } from './motor/analiza'
 import { BIBLIOTECA, algoritm, type Algoritm } from './motor/biblioteca'
 import { urma, type Intrari, type Rezultat } from './motor/interpretor'
 import { parseaza } from './motor/parser'
@@ -28,6 +29,9 @@ const PERECHI: Record<string, string[]> = {
   UTRIS: ['UTRISb'],
 }
 
+// "GPP" din "GPP, eliminare gaussiana cu pivotare partiala"
+export const numeScurt = (a: Algoritm, limba: 'ro' | 'en'): string => a.titlu[limba].split(', ')[0]
+
 // Algoritmii care pot rula pe definitiile date: fiecare intrare a lor exista, cu acelasi nume si
 // tip, si are forma ceruta (patrata, cu dimensiunile potrivite). Perechile din curs vin primele.
 export function compatibili(curent: string, definitii: Definitie[]): Algoritm[] {
@@ -50,13 +54,24 @@ export interface Rulat {
   alg: Algoritm
   rez: Rezultat
   iteratii: number
+  // evaluarile conditiei de oprire, pentru curbele suprapuse ale celor doua rulari
+  puncte: Evaluare[]
 }
+
+export const rulat = (alg: Algoritm, rez: Rezultat): Rulat => ({ alg, rez, iteratii: nrIteratii(rez), puncte: evaluari(rez.pasi) })
 
 // Ruleaza algoritmul `a` pe intrarile lui luate din `intrari`, cu aceeasi precizie.
 export function ruleazaPe(a: Algoritm, intrari: Intrari, cifre: number): Rulat {
   const ale = Object.fromEntries(a.intrari.map((i) => [i.nume, intrari[i.nume]]))
-  const rez = urma(parseaza(a.sursa), ale, { cifre: cifre || undefined })
-  return { alg: a, rez, iteratii: nrIteratii(rez) }
+  return rulat(a, urma(parseaza(a.sursa), ale, { cifre: cifre || undefined }))
+}
+
+// Pragul comun al celor doua rulari: partea dreapta a conditiei, cand este aceeasi la fiecare
+// evaluare a amandurora (aceeasi toleranta); altfel curbele se arata fara prag.
+export function pragComun(a: Rulat, b: Rulat): number | undefined {
+  const toate = [...a.puncte, ...b.puncte]
+  const prag = toate[0]?.dreapta
+  return prag !== undefined && toate.every((p) => p.dreapta === prag) ? prag : undefined
 }
 
 // Tabloul rezultat comun celor doua rulari (x, y, A), daca amandoua l-au calculat cu aceeasi forma:

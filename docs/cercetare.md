@@ -228,7 +228,12 @@ eliminarea ar da pivot nul, pasul la care Cholesky s-ar opri, raza spectrală a 
 iterație). Contraexemplele din curs (`src/contraexemple.ts`) încarcă intrări care încalcă o
 ipoteză și spun unde e ipoteza în curs; fiecare are un rezultat așteptat, verificat în teste.
 Panoul de comparație rulează aceleași intrări cu alt algoritm (G și GPP, S_G și S_GPP pe 3 cifre,
-Cholesky sau QR și G, metodele iterative între ele), comparațiile pe care le face cursul.
+Cholesky sau QR și G, metodele iterative între ele, MP și MPI), comparațiile pe care le face
+cursul. Când ambele rulări au o condiție de oprire, curbele lor stau pe aceleași axe, ca pe
+slide-ul "Exemple numerice MP/MPI" (eroarea e_k pe scară logaritmică, pe iterații), cu pragul
+comun și, la alegere, cu flopii numărați până la fiecare evaluare pe axa orizontală, ca să se
+vadă și cât costă o iterație a fiecăruia (`src/componente/CurbeComparate.tsx`, cu evaluările
+condiției extrase de `evaluari` din `src/motor/analiza.ts`).
 
 Patru funcții leagă algoritmul de teoria din curs:
 
@@ -243,7 +248,13 @@ Patru funcții leagă algoritmul de teoria din curs:
   norma ∞, pe care cartea o alege pentru κ (paginile 98-99). Exemplele D, T și H₃ sunt cele din
   carte (pagina 99). La LTRIS și UTRIS se ia doar triunghiul pe care îl citește algoritmul.
 - Costul în funcție de n (`src/costuri.ts`) rulează algoritmul pentru n de la 2 la 8 și pune
-  flopii numărați lângă formula de cost a algoritmului.
+  flopii numărați lângă formula de cost a algoritmului. Pentru perechile comparate în curs și în
+  carte (Gb și G, GPPb și GPP, UTRISb și UTRIS, Cholesky și G, QR și G) a doua serie este
+  algoritmul pereche la același n, rulat pe intrări aleatoare ale lui (flopii acestor algoritmi
+  depind doar de dimensiuni), iar tabelul are raportul; nota de sub grafic citează cursul
+  (Cholesky ≈ n³/3 față de ≈ 2n³/3; QR ≈ 4n³/3 pe o matrice pătrată, aici cu m = n + 1, deci
+  raportul formulelor 2 + 3/n) sau cartea (paginile 107-108 pentru bandă, secțiunea 2.9 pentru
+  UTRISb). Măsura este numărul de flopi, nu pașii.
 - Exercițiile de adaptare (`src/adaptari.ts`) sunt problemele din carte: P 1.24 a și c (pagina
   68), P 2.29 a (pagina 122) cu secțiunea 2.9 și partea de triangularizare din P 2.13 a (pagina
   120). Țintele de flopi (3n − 2, 3(n − 1), n² − 1) sunt numărate pe soluții, iar testele verifică

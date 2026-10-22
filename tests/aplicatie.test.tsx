@@ -814,4 +814,58 @@ describe('aplicația montată', () => {
     await apasa(gazda, 'EN')
     expect(panou()).toContain('division by zero')
   })
+
+  it('comparația MP cu MPI suprapune curbele e_k ale celor două rulări, pe iterații sau pe flopi, cu tabel', async () => {
+    const gazda = await monteaza()
+    await scrieIn(gazda.querySelector('header select')!, 'MP')
+    const panou = gazda.querySelector('.panou.comparatie')!
+    expect(panou.querySelector('select')?.value).toBe('MPI')
+    const curbe = panou.querySelector('.curbe')!
+    expect(curbe).not.toBeNull()
+    expect(curbe.querySelectorAll('svg polyline.serie')).toHaveLength(2)
+    // 24 de evaluari la MP, 6 la MPI, ca in tabelul 4.1 din carte
+    expect(curbe.querySelectorAll('.grafic circle.punct')).toHaveLength(24)
+    expect(curbe.querySelectorAll('.grafic rect.punct.a-doua')).toHaveLength(6)
+    expect([...curbe.querySelectorAll('.grafic text.eticheta')].map((e) => e.textContent)).toEqual(['MP', 'MPI'])
+    expect(curbe.querySelector('.grafic svg')?.getAttribute('aria-label')).toBe('curbele de convergență: MP cu 23 de iterații, MPI cu 5 iterații')
+    expect(curbe.querySelectorAll('tbody tr')).toHaveLength(24)
+    const randuri = [...curbe.querySelectorAll('tbody tr')].map((r) => [...r.querySelectorAll('td')].map((c) => c.textContent))
+    expect(randuri[0][0]).toBe('0')
+    expect(randuri[23][3]).toBe('–')
+    expect(curbe.textContent).toContain('pragul, 1e-15')
+    // pe axa flopilor, eticheta axei se schimba
+    const texte = () => [...curbe.querySelectorAll('.grafic text.gradatie')].map((e) => e.textContent)
+    expect(texte()).toContain('iterația')
+    await scrieIn(curbe.querySelector('select')!, 'flopi')
+    expect(texte()).toContain('flopi')
+    expect(texte()).not.toContain('iterația')
+    // G nu are iteratii: fara curbe
+    await scrieIn(gazda.querySelector('header select')!, 'G')
+    expect(gazda.querySelector('.panou.comparatie .curbe')).toBeNull()
+  })
+
+  it('costul în funcție de n pune a doua serie pentru perechile din curs: Cholesky lângă G, cu raportul în tabel', async () => {
+    const gazda = await monteaza()
+    await scrieIn(gazda.querySelector('header select')!, 'CHOL')
+    const panou = gazda.querySelector<HTMLDetailsElement>('.panou.cost-n')!
+    await act(async () => {
+      panou.open = true
+      panou.dispatchEvent(new Event('toggle'))
+    })
+    expect(panou.querySelectorAll('.grafic svg circle.punct')).toHaveLength(7)
+    expect(panou.querySelectorAll('.grafic svg rect.punct.a-doua')).toHaveLength(7)
+    expect(panou.querySelector('.legenda-cost')?.textContent).toContain('flopi numărați de G, la același n')
+    expect([...panou.querySelectorAll('.grafic text.eticheta')].map((e) => e.textContent)).toEqual(['G', 'CHOL', 'formula'])
+    expect([...panou.querySelectorAll('thead th')].map((e) => e.textContent)).toEqual(['n', 'CHOL', 'formula', 'numărați / formulă', 'G', 'CHOL / G'])
+    const randuri = [...panou.querySelectorAll('tbody tr')].map((r) => [...r.querySelectorAll('td')].map((c) => c.textContent))
+    // n = 8: G numara 308 flopi, raportul ≈ 0.5
+    expect(randuri[6][4]).toBe('308')
+    expect(Number(randuri[6][5])).toBeGreaterThan(0.4)
+    expect(Number(randuri[6][5])).toBeLessThan(0.7)
+    expect(panou.textContent).toContain('jumătate din cei ≈ 2n³/3')
+    // G nu are pereche: graficul ramane cu o serie si patru coloane
+    await scrieIn(gazda.querySelector('header select')!, 'G')
+    expect(gazda.querySelectorAll('.panou.cost-n .grafic svg rect.punct.a-doua')).toHaveLength(0)
+    expect(gazda.querySelectorAll('.panou.cost-n thead th')).toHaveLength(4)
+  })
 })

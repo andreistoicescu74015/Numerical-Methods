@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react'
-import { compatibili, diferenta, nrIteratii, ruleazaPe, type Rulat } from '../comparatie'
+import { compatibili, diferenta, numeScurt, pragComun, rulat, ruleazaPe, type Rulat } from '../comparatie'
 import type { Definitie } from '../intrari'
 import type { Algoritm } from '../motor/biblioteca'
 import type { Intrari, Rezultat } from '../motor/interpretor'
 import { nrFlopi } from '../i18n'
 import { usePreferinte } from '../preferinte'
 import { fmtNumar } from './Convergenta'
+import { CurbeComparate, type AxaX } from './CurbeComparate'
 import { Formula } from './Formula'
 import { fmtValoare } from './Verificare'
 
@@ -20,8 +21,7 @@ interface Props {
   onTreci: (id: string) => void
 }
 
-// "GPP" din "GPP, eliminare gaussiana cu pivotare partiala"
-const scurt = (a: Algoritm, limba: 'ro' | 'en') => a.titlu[limba].split(', ')[0]
+const scurt = numeScurt
 
 // Acelasi set de intrari, rulat si cu alt algoritm din biblioteca: cum se termina, flopii,
 // iteratiile si rezultatul, unul langa altul.
@@ -29,8 +29,9 @@ export function Comparatie({ alg, rez, intrari, cifre, definitii, onTreci }: Pro
   const { t, limba } = usePreferinte()
   const optiuni = useMemo(() => compatibili(alg.id, definitii), [alg.id, definitii])
   const [ales, setAles] = useState<string | null>(null)
+  const [axa, setAxa] = useState<AxaX>('iteratii')
   const id = ales && optiuni.some((a) => a.id === ales) ? ales : optiuni[0]?.id
-  const curent: Rulat = useMemo(() => ({ alg, rez, iteratii: nrIteratii(rez) }), [alg, rez])
+  const curent: Rulat = useMemo(() => rulat(alg, rez), [alg, rez])
   const alt = useMemo(() => {
     const a = optiuni.find((x) => x.id === id)
     if (!a) return null
@@ -67,6 +68,8 @@ export function Comparatie({ alg, rez, intrari, cifre, definitii, onTreci }: Pro
   // o metoda directa nu are iteratii de numarat
   const areIteratii = (r: Rulat) => r.iteratii > 0 || r.alg.grup === 'iterative' || r.alg.grup === 'proprii'
   const dif = alt ? diferenta(curent, alt) : null
+  // ambele rulari au o conditie de oprire evaluata de cel putin doua ori: curbele lor, suprapuse
+  const curbe = !!alt && curent.puncte.length >= 2 && alt.puncte.length >= 2
 
   return (
     <>
@@ -118,6 +121,19 @@ export function Comparatie({ alg, rez, intrari, cifre, definitii, onTreci }: Pro
               )}
             </tbody>
           </table>
+          {curbe && (
+            <div className="curbe">
+              <p className="ajutor">{t('comparatieCurbe')}</p>
+              <label className="alegere-comparatie axa-curbe">
+                {t('comparatieAxa')}
+                <select value={axa} onChange={(e) => setAxa(e.target.value as AxaX)}>
+                  <option value="iteratii">{t('comparatieAxaIteratii')}</option>
+                  <option value="flopi">{t('comparatieAxaFlopi')}</option>
+                </select>
+              </label>
+              <CurbeComparate serii={[{ nume: scurt(alg, limba), puncte: curent.puncte }, { nume: scurt(alt.alg, limba), puncte: alt.puncte }]} axa={axa} prag={pragComun(curent, alt)} />
+            </div>
+          )}
           {(matrice(curent) || matrice(alt)) && (
             <div className="matrice-comparate">
               {[curent, alt].map((r) => {

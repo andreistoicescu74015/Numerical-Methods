@@ -27,7 +27,7 @@ import { areConditionare, matriceaSistemului, type ExempluCarte } from './condit
 import { asteptat } from './exercitiu'
 import { nrFlopi, nrPasi, text, type CheieText } from './i18n'
 import { blocaj, definitiiDin, intrariDinDefinitii, textDinValoare, type Definitie } from './intrari'
-import { operatiiPeLinii, variabilePeLinie } from './motor/analiza'
+import { evaluari, operatiiPeLinii, variabilePeLinie } from './motor/analiza'
 import { EroareSintaxa, type Program } from './motor/ast'
 import { BIBLIOTECA, GRUPURI_ALGORITMI, algoritm, marimiDin, type Algoritm } from './motor/biblioteca'
 import { stareLa, urma, type Intrari as IntrariMotor, type Pas, type Rezultat } from './motor/interpretor'
@@ -579,13 +579,7 @@ function Continut() {
   }, [alg, rulare, limba])
 
   // evaluarile conditiei primei bucle "cat timp": marimea testata la fiecare iteratie
-  const iteratii: Punct[] = useMemo(() => {
-    const toate = (rez?.pasi ?? []).flatMap((p, idx) => (p.iteratie ? [{ ...p.iteratie, pas: idx, adevarat: !!p.adevarat }] : []))
-    // o bucla interioara reia numaratoarea; se pastreaza prima parcurgere a primei bucle
-    const prima = toate.filter((p) => p.linie === toate[0]?.linie)
-    const reluare = prima.findIndex((p, i) => i > 0 && p.iter === 0)
-    return reluare < 0 ? prima : prima.slice(0, reluare)
-  }, [rez])
+  const iteratii: Punct[] = useMemo(() => evaluari(rez?.pasi ?? []), [rez])
   const vazute = iteratii.filter((p) => p.pas <= k).length
 
   // crestaturile de pe urma: iteratiile sau pasii k ai buclei exterioare, scrierile, oprirea

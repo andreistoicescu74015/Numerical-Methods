@@ -1,15 +1,11 @@
 import { useCallback, useState } from 'react'
-import type { Iteratie } from '../motor/interpretor'
+import type { Evaluare } from '../motor/analiza'
 import { usePreferinte } from '../preferinte'
 import { Formula } from './Formula'
 import { nrFlopi } from '../i18n'
 
-export interface Punct extends Iteratie {
-  // indicele pasului din urma la care s-a evaluat conditia
-  pas: number
-  // conditia la aceasta evaluare: adevarata cat timp bucla continua, falsa la evaluarea care o opreste
-  adevarat: boolean
-}
+// un punct al graficului: o evaluare a conditiei buclei, cu pasul din urma si rezultatul ei
+export type Punct = Evaluare
 
 const OPUS: Record<string, string> = { '<': '≥', '>': '≤', '≤': '>', '≥': '<', '=': '≠', '≠': '=' }
 
@@ -73,6 +69,36 @@ export function gradatii(min: number, max: number, cate: number): number[] {
   return rez
 }
 
+export interface Axa {
+  logaritmic: boolean
+  // capetele axei: puteri ale lui 10 pe scara logaritmica, valori pe cea liniara
+  y0: number
+  y1: number
+  // locul unei valori pe axa (logaritmul ei pe scara logaritmica)
+  scara: (v: number) => number
+  gradatii: { v: number; text: string }[]
+}
+
+// Axa verticala pentru valorile unei conditii de oprire: logaritmica daca valorile sunt pozitive
+// si se intind pe mai mult de un ordin si jumatate de marime, altfel liniara. Zero nu are
+// logaritm: primeste o treapta a lui, sub cea mai mica putere a lui 10, ca un reziduu exact nul
+// sa nu se confunde cu pragul.
+export function axaValori(valori: number[]): Axa {
+  const pozitive = valori.every((v) => v >= 0) && valori.some((v) => v > 0)
+  const maxim = Math.max(...valori)
+  const minimPozitiv = Math.max(Math.min(...valori.filter((v) => v > 0)), MINIM_LOG)
+  const logaritmic = pozitive && maxim / minimPozitiv >= 50
+  const areZero = logaritmic && valori.some((v) => v < MINIM_LOG)
+  const y0 = logaritmic ? Math.floor(Math.log10(minimPozitiv)) - (areZero ? 1 : 0) : Math.min(0, ...valori)
+  const y1 = logaritmic ? Math.max(Math.ceil(Math.log10(maxim)), y0 + 1) : maxim === y0 ? y0 + 1 : maxim
+  const scara = (v: number) => (!logaritmic ? v : v < MINIM_LOG ? y0 : Math.log10(v))
+  const pasY = logaritmic ? Math.max(1, Math.ceil((y1 - y0) / 6)) : 0
+  const grad = logaritmic
+    ? Array.from({ length: Math.floor((y1 - y0) / pasY) + 1 }, (_, k) => y0 + k * pasY).map((e) => (areZero && e === y0 ? { v: 0, text: '0' } : { v: 10 ** e, text: putere(e) }))
+    : gradatii(y0, y1, 4).map((v) => ({ v, text: fmtNumar(v) }))
+  return { logaritmic, y0, y1, scara, gradatii: grad }
+}
+
 // Cum se apropie marimea din conditia buclei "cat timp" de prag, iteratie cu iteratie. Punctele
 // apar pe masura ce urma ajunge la ele; tabelul de dedesubt are aceleasi valori.
 export function Convergenta({ puncte, vazute, onPas, nota }: Props) {
@@ -81,24 +107,9 @@ export function Convergenta({ puncte, vazute, onPas, nota }: Props) {
   const [ref, L] = useLatime()
   if (puncte.length < 2) return null
 
-  const valori = puncte.flatMap((p) => [p.stanga, p.dreapta])
-  const pozitive = valori.every((v) => v >= 0) && valori.some((v) => v > 0)
-  const maxim = Math.max(...valori)
-  const minimPozitiv = Math.max(Math.min(...valori.filter((v) => v > 0)), MINIM_LOG)
-  const logaritmic = pozitive && maxim / minimPozitiv >= 50
-  // Zero nu are logaritm: primeste o treapta a lui, sub cea mai mica putere a lui 10, ca un
-  // reziduu exact nul sa nu se confunde cu pragul.
-  const areZero = logaritmic && valori.some((v) => v < MINIM_LOG)
-  const y0 = logaritmic ? Math.floor(Math.log10(minimPozitiv)) - (areZero ? 1 : 0) : Math.min(0, ...valori)
-  const y1 = logaritmic ? Math.max(Math.ceil(Math.log10(maxim)), y0 + 1) : maxim === y0 ? y0 + 1 : maxim
-  const scara = (v: number) => (!logaritmic ? v : v < MINIM_LOG ? y0 : Math.log10(v))
+  const { logaritmic, y0, y1, scara, gradatii: gradY } = axaValori(puncte.flatMap((p) => [p.stanga, p.dreapta]))
   const x = (k: number) => M.stanga + ((L - M.stanga - M.dreapta) * k) / (puncte.length - 1)
   const y = (v: number) => H - M.jos - ((H - M.sus - M.jos) * (Math.min(Math.max(scara(v), y0), y1) - y0)) / (y1 - y0)
-
-  const pasY = logaritmic ? Math.max(1, Math.ceil((y1 - y0) / 6)) : 0
-  const gradY = logaritmic
-    ? Array.from({ length: Math.floor((y1 - y0) / pasY) + 1 }, (_, k) => y0 + k * pasY).map((e) => (areZero && e === y0 ? { poz: y(0), text: '0' } : { poz: y(10 ** e), text: putere(e) }))
-    : gradatii(y0, y1, 4).map((v) => ({ poz: y(v), text: fmtNumar(v) }))
   const pasX = Math.max(1, Math.ceil((puncte.length - 1) / 8))
   const gradX = puncte.filter((_, k) => k % pasX === 0)
 
@@ -125,8 +136,8 @@ export function Convergenta({ puncte, vazute, onPas, nota }: Props) {
         <svg viewBox={`0 0 ${L} ${H}`} role="img" aria-label={t('convergentaDescriere', Math.max(vizibile.length - 1, 0), ultim ? fmtNumar(ultim.stanga) : '', fmtNumar(prag))} onPointerLeave={() => setPeste(null)}>
           {gradY.map((g, k) => (
             <g key={k}>
-              <line className="rigla" x1={M.stanga} x2={L - M.dreapta} y1={g.poz} y2={g.poz} />
-              <text className="gradatie" x={M.stanga - 8} y={g.poz} textAnchor="end" dominantBaseline="middle">
+              <line className="rigla" x1={M.stanga} x2={L - M.dreapta} y1={y(g.v)} y2={y(g.v)} />
+              <text className="gradatie" x={M.stanga - 8} y={y(g.v)} textAnchor="end" dominantBaseline="middle">
                 {g.text}
               </text>
             </g>

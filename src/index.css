@@ -108,6 +108,7 @@
   --f-avert: #fdf0d2;
   --c-avert: #7a4b00;
   --serie: #2a78d6;
+  --serie-2: #c2410c;
   --rigla: #e3e5e9;
   --umbra: 0 0.75rem 2rem rgba(20, 28, 44, 0.18);
   color-scheme: light;
@@ -135,6 +136,7 @@
   --f-avert: #3a2f12;
   --c-avert: #f2c768;
   --serie: #3987e5;
+  --serie-2: #d27b26;
   --rigla: #2e343c;
   --umbra: 0 0.75rem 2rem rgba(0, 0, 0, 0.5);
   color-scheme: dark;
@@ -1821,12 +1823,14 @@ button.mic {
 
 .operatii details,
 .convergenta details,
+.comparatie details,
 .cost-n details {
   font-size: 0.82rem;
 }
 
 .operatii summary,
 .convergenta summary,
+.comparatie summary,
 .cost-n summary {
   cursor: pointer;
   font-weight: 600;
@@ -1910,11 +1914,13 @@ button.mic {
 }
 
 .convergenta .grafic,
+.comparatie .grafic,
 .cost-n .grafic {
   position: relative;
 }
 
 .convergenta svg,
+.comparatie .grafic svg,
 .cost-n svg {
   display: block;
   width: 100%;
@@ -1922,17 +1928,20 @@ button.mic {
 }
 
 .convergenta .rigla,
+.comparatie .rigla,
 .cost-n .rigla {
   stroke: var(--rigla);
   stroke-width: 1;
 }
 
 .convergenta .rigla.tinta,
+.comparatie .rigla.tinta,
 .cost-n .rigla.tinta {
   stroke: var(--text-slab);
 }
 
 .convergenta .gradatie,
+.comparatie .gradatie,
 .cost-n .gradatie {
   fill: var(--text-sters);
   font-size: 11px;
@@ -1940,13 +1949,15 @@ button.mic {
 }
 
 .convergenta .eticheta,
+.comparatie .eticheta,
 .cost-n .eticheta {
   fill: var(--text);
   font-size: 12px;
 }
 
 /* pragul e o linie de referinta, nu o serie: intrerupta si in culoarea textului */
-.convergenta .prag {
+.convergenta .prag,
+.comparatie .prag {
   fill: none;
   stroke: var(--text-sters);
   stroke-width: 1.5;
@@ -1954,6 +1965,7 @@ button.mic {
 }
 
 .convergenta .serie,
+.comparatie .serie,
 .cost-n .serie {
   fill: none;
   stroke: var(--serie);
@@ -1963,6 +1975,7 @@ button.mic {
 }
 
 .convergenta .punct,
+.comparatie .punct,
 .cost-n .punct {
   fill: var(--serie);
   stroke: var(--panou);
@@ -1970,12 +1983,14 @@ button.mic {
 }
 
 .convergenta .lovire,
+.comparatie .lovire,
 .cost-n .lovire {
   fill: transparent;
   cursor: pointer;
 }
 
 .convergenta .indiciu,
+.comparatie .indiciu,
 .cost-n .indiciu {
   position: absolute;
   transform: translate(-50%, calc(-100% - 12px));
@@ -1992,6 +2007,7 @@ button.mic {
 }
 
 .convergenta .indiciu strong,
+.comparatie .indiciu strong,
 .cost-n .indiciu strong {
   font-size: 0.9rem;
   color: var(--text);
@@ -2457,4 +2473,44 @@ button.mic {
   stroke: var(--text-sters);
   stroke-width: 1.5;
   stroke-dasharray: 4 3;
+}
+
+.legenda-cost .serie {
+  stroke: var(--serie);
+  stroke-width: 2;
+}
+
+.legenda-cost .prag {
+  stroke: var(--text-sters);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+/* a doua serie a unui grafic (celalalt algoritm): alta culoare, linie intrerupta scurt si patrate,
+   ca sa se deosebeasca de prima si fara culoare */
+.comparatie .serie.a-doua,
+.cost-n .serie.a-doua,
+.legenda-cost .serie.a-doua {
+  stroke: var(--serie-2);
+  stroke-dasharray: 7 4;
+}
+
+.comparatie .punct.a-doua,
+.cost-n .punct.a-doua,
+.legenda-cost .punct.a-doua {
+  fill: var(--serie-2);
+}
+
+.comparatie .eticheta.a-doua,
+.cost-n .eticheta.a-doua {
+  fill: var(--serie-2);
+}
+
+.comparatie .eticheta {
+  fill: var(--serie);
+}
+
+/* axa curbelor comparate: iteratii sau flopi */
+.comparatie .axa-curbe {
+  margin-top: 0.5rem;
 }

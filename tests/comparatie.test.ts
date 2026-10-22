@@ -1,7 +1,7 @@
 // Comparatia pe aceleasi intrari: ce algoritmi se pot compara, iar pe exemplele din curs rezultatele
 // spun ce spun slide-urile (pivotarea repara exemplul cu 10⁻⁴, Cholesky si QR fata de eliminare).
 import { describe, expect, it } from 'vitest'
-import { compatibili, diferenta, nrIteratii, ruleazaPe } from '../src/comparatie'
+import { compatibili, diferenta, nrIteratii, pragComun, rulat, ruleazaPe } from '../src/comparatie'
 import { definitiiDin, type Definitie } from '../src/intrari'
 import { algoritm } from '../src/motor/biblioteca'
 import { urma } from '../src/motor/interpretor'
@@ -55,5 +55,39 @@ describe('comparația cu alt algoritm', () => {
     expect(diferenta(sg, sgpp)).toBeNull()
     // doua matrice rezultat de aceeasi forma se compara element cu element: fara interschimbari, G si GPP dau acelasi A
     expect(diferenta(ruleazaPe(algoritm('G')!, { A: [[2, 1], [1, 3]] }, 0), ruleazaPe(algoritm('GPP')!, { A: [[2, 1], [1, 3]] }, 0))).toEqual({ nume: 'A', valoare: 0 })
+  })
+})
+
+describe('curbele de convergență ale celor două rulări', () => {
+  const exemplu = (id: string) => Object.fromEntries(algoritm(id)!.intrari.map((i) => [i.nume, i.exemplu]))
+
+  it('MP și MPI pe matricea companion din curs: 23 și 5 iterații, cu același prag 10⁻¹⁵, iar e scade sub el la ultima evaluare', () => {
+    const mp = ruleazaPe(algoritm('MP')!, exemplu('MP'), 0)
+    const mpi = ruleazaPe(algoritm('MPI')!, exemplu('MP'), 0)
+    expect(mp.puncte.length - 1).toBe(23)
+    expect(mpi.puncte.length - 1).toBe(5)
+    expect(mp.puncte.map((p) => p.iter)).toEqual(Array.from({ length: 24 }, (_, k) => k))
+    expect(pragComun(mp, mpi)).toBe(1e-15)
+    for (const r of [mp, mpi]) {
+      expect(r.puncte.at(-1)!.adevarat).toBe(false)
+      expect(r.puncte.at(-1)!.stanga).toBeLessThanOrEqual(1e-15)
+      expect(r.puncte.slice(0, -1).every((p) => p.adevarat && p.stanga > 1e-15)).toBe(true)
+      // flopii numarati pana la fiecare evaluare cresc
+      for (let k = 1; k < r.puncte.length; k++) expect(r.puncte[k].flopi).toBeGreaterThan(r.puncte[k - 1].flopi)
+    }
+    // o iteratie MPI (un sistem rezolvat) costa mai mult decat una MP (un produs matrice-vector)
+    expect(mpi.puncte[1].flopi - mpi.puncte[0].flopi).toBeGreaterThan(mp.puncte[1].flopi - mp.puncte[0].flopi)
+  })
+
+  it('rulat() dă aceleași puncte ca ruleazaPe(), iar o metodă directă nu are niciunul', () => {
+    const alg = algoritm('JACOBI')!
+    const intrari = exemplu('JACOBI')
+    const rez = urma(parseaza(alg.sursa), intrari)
+    expect(rulat(alg, rez).puncte).toEqual(ruleazaPe(alg, intrari, 0).puncte)
+    expect(rulat(alg, rez).puncte.length).toBe(rez.scalari.k + 1)
+    expect(ruleazaPe(algoritm('G')!, { A: [[2, 1], [1, 3]] }, 0).puncte).toEqual([])
+    // Jacobi si Gauss-Seidel pe aceleasi intrari au acelasi prag; fara puncte, pragul lipseste
+    expect(pragComun(ruleazaPe(alg, intrari, 0), ruleazaPe(algoritm('GS')!, intrari, 0))).toBe(1e-3)
+    expect(pragComun(ruleazaPe(algoritm('G')!, { A: [[2, 1], [1, 3]] }, 0), ruleazaPe(algoritm('GPP')!, { A: [[2, 1], [1, 3]] }, 0))).toBeUndefined()
   })
 })

@@ -1,7 +1,7 @@
 // Costul unui algoritm din biblioteca in functie de n: ruleaza pe intrari aleatoare cu natura
 // ceruta, pentru n de la 2 la 8, iar flopii numarati se pun langa formula de cost din curs.
 import { aleatoare, intrariDinDefinitii, type Definitie } from './intrari'
-import { marimiDin, type Algoritm } from './motor/biblioteca'
+import { algoritm, marimiDin, type Algoritm } from './motor/biblioteca'
 import { urma, type Intrari } from './motor/interpretor'
 import { parseaza } from './motor/parser'
 import { rndDeterminist } from './natura'
@@ -14,10 +14,20 @@ export const areCostPeN = (a: Algoritm): boolean => a.grup !== 'iterative' && a.
 // matricea are o linie in plus: QR si SQR lucreaza cu m > n
 export const cuLiniaInPlus = (a: Algoritm): boolean => a.id === 'QR' || a.id === 'SQR'
 
+// Perechile pe care le compara cursul si cartea, ca a doua serie a graficului: varianta banda
+// fata de algoritmul plin (cartea, sectiunea 2.9), Cholesky fata de eliminarea gaussiana (de
+// doua ori mai putine operatii) si QR fata de eliminarea gaussiana (cost dublu pe o matrice
+// patrata). Perechea ruleaza pe intrari aleatoare ale ei, de acelasi n: flopii acestor algoritmi
+// depind doar de dimensiuni.
+export const PERECHE_COST: Record<string, string> = { Gb: 'G', GPPb: 'GPP', UTRISb: 'UTRIS', CHOL: 'G', QR: 'G' }
+export const perecheCost = (a: Algoritm): Algoritm | null => (PERECHE_COST[a.id] ? (algoritm(PERECHE_COST[a.id]) ?? null) : null)
+
 export interface PunctCost {
   n: number
   flopi: number
   formula: number
+  // flopii numarati de algoritmul pereche la acelasi n
+  pereche?: number
 }
 
 // Definitiile pentru dimensiunea n: tablourile au forma ceruta, scalarii raman cei curenti (latimile
@@ -41,12 +51,19 @@ function definitiiPentru(a: Algoritm, n: number, curente: Intrari, rnd: () => nu
 
 export function costuriPeN(a: Algoritm, curente: Intrari): PunctCost[] {
   const program = parseaza(a.sursa)
+  const pereche = perecheCost(a)
+  const programPereche = pereche ? parseaza(pereche.sursa) : null
   const rez: PunctCost[] = []
   for (const n of DIMENSIUNI) {
     const intrari = intrariDinDefinitii(definitiiPentru(a, n, curente, rndDeterminist(n)))
     const r = urma(program, intrari)
     if (r.final !== 'gata') continue
-    rez.push({ n, flopi: r.flopi, formula: a.estimare(marimiDin(intrari)) })
+    const p: PunctCost = { n, flopi: r.flopi, formula: a.estimare(marimiDin(intrari)) }
+    if (pereche && programPereche) {
+      const rp = urma(programPereche, intrariDinDefinitii(definitiiPentru(pereche, n, curente, rndDeterminist(n))))
+      if (rp.final === 'gata') p.pereche = rp.flopi
+    }
+    rez.push(p)
   }
   return rez
 }
