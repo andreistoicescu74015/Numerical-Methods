@@ -397,3 +397,12 @@ looks up the matrix with the uppercase letter. Comparisons: `<`, `>`, `≤` or `
 
 An indexed element of a variable that is not an array, such as `i_k`, is a scalar with that
 name.
+
+## Licence
+
+The code of the visualizer is under the MIT licence (file `LICENSE`). The bundled libraries are
+MIT and the IBM Plex fonts are under the SIL Open Font License; the build copies their texts,
+together with the MIT text of the visualizer, into the comment at the top of `dist/index.html`.
+The slides and the book of the course remain the work of their authors: the application
+reproduces their algorithms and examples for study and names the slide or page behind each
+statement.

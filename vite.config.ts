@@ -40,7 +40,7 @@ function licente(): Plugin {
       })
       texte.push(`Fonturile IBM Plex Sans si IBM Plex Mono (OFL-1.1)\n\n${readFileSync('src/fonturi/LICENSE', 'utf8').trim()}`)
       // "-->" ar inchide comentariul inainte de vreme
-      const comentariu = `<!--\nLicentele bibliotecilor si fonturilor incluse in acest fisier.\n\n${texte.join('\n\n----\n\n').replaceAll('-->', '- ->')}\n-->\n`
+      const comentariu = `<!--\nVizualizatorul de algoritmi pentru Metode numerice: licenta MIT.\n\n${readFileSync('LICENSE', 'utf8').trim()}\n\n----\n\nLicentele bibliotecilor si fonturilor incluse in acest fisier.\n\n${texte.join('\n\n----\n\n').replaceAll('-->', '- ->')}\n-->\n`
       const html = join(iesire, 'index.html')
       writeFileSync(html, readFileSync(html, 'utf8').replace(/^(<!doctype html>\s*)/i, `$1${comentariu}`))
     },
