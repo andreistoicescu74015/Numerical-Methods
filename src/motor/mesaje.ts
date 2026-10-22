@@ -48,7 +48,10 @@ const CATALOG = {
   seAsteptaExpresie: { ro: 'se aștepta o expresie', en: 'expected an expression' },
   liniiDiferite: { ro: 'liniile matricei au lungimi diferite', en: 'the matrix rows have different lengths' },
 
-  pesteMaxPasi: { ro: 'peste {0} de pași; buclă fără sfârșit?', en: 'more than {0} steps; endless loop?' },
+  pesteMaxPasi: {
+    ro: 'urma s-a oprit după {0} de pași, limita vizualizatorului: fie matricea este prea mare pentru a fi urmărită pas cu pas, fie bucla nu se termină; micșorează n, maxiter sau toleranța',
+    en: 'the trace stopped after {0} steps, the limit of the visualizer: either the matrix is too large to follow step by step, or the loop does not end; reduce n, maxiter or the tolerance',
+  },
   linia: { ro: 'linia {0}: {1}', en: 'line {0}: {1}' },
   stop: { ro: 'stop', en: 'stop' },
   gata: { ro: 'algoritmul s-a terminat', en: 'the algorithm has finished' },
