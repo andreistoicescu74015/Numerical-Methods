@@ -50,8 +50,8 @@ export const TEXTE = {
     en: 'Each equation a_i1 x₁ + a_i2 x₂ = b_i is a line; the solution of the system is the point where they meet. In Kaczmarz, each step takes x onto the line of one equation along the shortest path, that is perpendicular to it.',
   },
   geometrieMP: {
-    ro: 'y are norma 1, deci stă pe cercul de rază 1, și se rotește spre direcția vectorului propriu dominant (linia plină); linia întreruptă este direcția celuilalt vector propriu.',
-    en: 'y has norm 1, so it sits on the circle of radius 1, and turns towards the direction of the dominant eigenvector (the solid line); the dashed line is the direction of the other eigenvector.',
+    ro: 'y are norma 1, deci stă pe cercul de rază 1, și se rotește spre direcția vectorului propriu dominant (linia plină); linia întreruptă este direcția celuilalt vector propriu. Când λ₁ < 0, sensul lui y se schimbă la fiecare iterație, direcția rămâne.',
+    en: 'y has norm 1, so it sits on the circle of radius 1, and turns towards the direction of the dominant eigenvector (the solid line); the dashed line is the direction of the other eigenvector. When λ₁ < 0, the sense of y flips at every iteration, the direction stays.',
   },
   geometrieMPFara: {
     ro: 'y are norma 1, deci stă pe cercul de rază 1. A nu are o valoare proprie reală de modul strict mai mare decât al celeilalte, deci ipoteza metodei puterii nu este îndeplinită: y nu are o direcție spre care să se rotească.',
@@ -61,9 +61,13 @@ export const TEXTE = {
     ro: 'y are norma 1, deci stă pe cercul de rază 1, și se rotește spre vectorul propriu al valorii proprii de care se apropie μ; linia plină este direcția vectorului propriu dominant, cea întreruptă a celuilalt.',
     en: 'y has norm 1, so it sits on the circle of radius 1, and turns towards the eigenvector of the eigenvalue that μ approaches; the solid line is the direction of the dominant eigenvector, the dashed one that of the other.',
   },
+  geometrieMPIComplex: {
+    ro: 'y are norma 1, deci stă pe cercul de rază 1. A nu are valori proprii reale (discriminantul este negativ), deci nu există vectori proprii reali spre care y să se întoarcă, iar iterația nu converge.',
+    en: 'y has norm 1, so it sits on the circle of radius 1. A has no real eigenvalues (the discriminant is negative), so there are no real eigenvectors for y to turn towards, and the iteration does not converge.',
+  },
   geometrieRFG: {
-    ro: 'Reflectorul oglindește x față de dreapta întreruptă, perpendiculară pe vectorul Householder u; imaginea U₁x = (−σ, 0) stă pe axa x₁, deci a doua componentă a devenit zero.',
-    en: 'The reflector mirrors x across the dashed line, perpendicular to the Householder vector u; the image U₁x = (−σ, 0) lies on the x₁ axis, so the second component has become zero.',
+    ro: 'Reflectorul oglindește x față de dreapta întreruptă, perpendiculară pe vectorul Householder u = x + σe₁ (săgeata punctată); imaginea U₁x = (−σ, 0) stă pe axa x₁, deci a doua componentă a devenit zero.',
+    en: 'The reflector mirrors x across the dashed line, perpendicular to the Householder vector u = x + σe₁ (the dotted arrow); the image U₁x = (−σ, 0) lies on the x₁ axis, so the second component has become zero.',
   },
   geometrieAfara: {
     ro: 'Aproximarea curentă, ({0}, {1}), a ieșit din desen: pătratul de pe margine arată în ce direcție. Asta singur nu arată că metoda diverge: și un șir care converge se poate depărta întâi de soluție.',
@@ -105,12 +109,12 @@ export const TEXTE = {
     ro: 'nu se mai schimbă: calculat la pașii dinainte sau, într-un tablou pe care algoritmul îl modifică, folosit și lăsat cum era, ca prima linie a lui U la G (colț marcat)',
     en: 'final: computed at earlier steps or, in an array the algorithm changes, used and left as it was, like the first row of U in G (marked corner)',
   },
-  legendaMult: { ro: 'multiplicator, păstrat pentru mai târziu (litera μ)', en: 'multiplier, kept for later (the letter μ)' },
+  legendaMult: { ro: 'multiplicator (litera μ) sau componentă a vectorului Householder (litera u), păstrate pentru mai târziu', en: 'multiplier (the letter μ) or component of the Householder vector (the letter u), kept for later' },
   rolPivot: { ro: 'împărțitor sau pivot', en: 'divisor or pivot' },
   rolScris: { ro: 'se scrie acum', en: 'written now' },
   rolCitit: { ro: 'se citește acum', en: 'read now' },
   rolGata: { ro: 'gata', en: 'final' },
-  rolMult: { ro: 'multiplicator', en: 'multiplier' },
+  rolMult: { ro: 'multiplicator sau vector Householder', en: 'multiplier or Householder vector' },
   comenzi: { ro: 'comenzile urmei', en: 'trace controls' },
   intrebariAjutor: {
     ro: 'fiecare calcul apare întâi cu "?" în locul rezultatului, ca să-l poți face singur; un pas înainte îl arată',
@@ -138,13 +142,22 @@ export const TEXTE = {
   convergentaFata: { ro: 'față de', en: 'against' },
   convergentaLog: { ro: 'La fiecare evaluare a condiției buclei, pe scară logaritmică.', en: 'At every evaluation of the loop condition, on a logarithmic scale.' },
   convergentaLiniar: { ro: 'La fiecare evaluare a condiției buclei.', en: 'At every evaluation of the loop condition.' },
-  convergentaDescriere: { ro: 'grafic cu {0|iterație|iterații}; ultima valoare {1}, pragul {2}', en: 'chart with {0|iteration|iterations}; last value {1}, threshold {2}' },
+  convergentaDescriere: { ro: 'grafic cu {0|iterație|iterații} după pornire; ultima valoare {1}, pragul {2}', en: 'chart with {0|iteration|iterations} after the start; last value {1}, threshold {2}' },
   convergentaSalt: { ro: 'sari la această iterație', en: 'jump to this iteration' },
   convergentaDirect: {
-    ro: 'Până la această iterație: {0}. Pe aceeași matrice (n = {1}), {2} costă ≈ {3}. Pe o matrice fără zerouri metoda iterativă e mai ieftină doar dacă se oprește în mai puțin de n/6 iterații; pe una cu multe zerouri, o iterație care sare peste zerouri costă mai puțin, iar pragul crește (contorul de aici numără și înmulțirile cu zero, pentru că buclele din pseudocod trec prin toate elementele).',
-    en: 'Up to this iteration: {0}. On the same matrix (n = {1}), {2} costs ≈ {3}. On a matrix without zeros the iterative method is cheaper only when it stops in fewer than n/6 iterations; on one with many zeros, an iteration that skips the zeros costs less, and the threshold rises (the counter here also counts multiplications by zero, because the loops of the pseudocode run over all entries).',
+    ro: 'Până la această iterație: {0}. Pe aceeași matrice (n = {1}), {2} costă ≈ {3} după formula lui. Pe o matrice fără zerouri metoda iterativă e mai ieftină doar dacă se oprește în mai puțin de n/6 iterații; pe una cu multe zerouri, o iterație care sare peste zerouri costă mai puțin, iar pragul crește (contorul de aici numără și înmulțirile cu zero, pentru că buclele din pseudocod trec prin toate elementele).',
+    en: 'Up to this iteration: {0}. On the same matrix (n = {1}), {2} costs ≈ {3} by its formula. On a matrix without zeros the iterative method is cheaper only when it stops in fewer than n/6 iterations; on one with many zeros, an iteration that skips the zeros costs less, and the threshold rises (the counter here also counts multiplications by zero, because the loops of the pseudocode run over all entries).',
+  },
+  convergentaDirectMic: {
+    ro: 'Până la această iterație: {0}. Pe aceeași matrice (n = {1}), {2} costă ≈ {3} după formula lui. Cu contorul de aici o iterație costă ≈ 4n² flopi, deci metoda iterativă ar fi mai ieftină doar sub n/6 iterații; la n = {1} asta înseamnă mai puțin de una, deci pe o matrice atât de mică metoda directă este mereu mai ieftină. Metodele iterative au sens la n mare (slide-ul "Comparatie GPP - GS - K").',
+    en: 'Up to this iteration: {0}. On the same matrix (n = {1}), {2} costs ≈ {3} by its formula. With the counter here one iteration costs ≈ 4n² flops, so the iterative method would be cheaper only below n/6 iterations; at n = {1} that means fewer than one, so on such a small matrix the direct method is always cheaper. Iterative methods make sense for large n (slide "Comparatie GPP - GS - K").',
   },
   iteratia: { ro: 'iterația', en: 'iteration' },
+  vederiArata: { ro: 'arată matricele din formulă', en: 'show the matrices of the formula' },
+  vederiAjutor: {
+    ro: 'Grile doar de citit, calculate din starea de la pasul curent: factorii pe care algoritmul îi scrie peste A (L, U, R, vectorii Householder) sau matricele pe care le folosește fără să le formeze (Q, μI − A, D⁻¹N). Pseudocodul rămâne cel din curs.',
+    en: 'Read-only grids computed from the state at the current step: the factors the algorithm writes over A (L, U, R, the Householder vectors) or the matrices it uses without forming them (Q, μI − A, D⁻¹N). The pseudocode stays the one of the course.',
+  },
   tabel: { ro: 'tabel', en: 'table' },
   flopiAntet: { ro: 'flopi', en: 'flops' },
   urmatoareaScriere: { ro: 'următoarea scriere (Shift+săgeată dreapta)', en: 'next write (Shift+right arrow)' },
@@ -217,8 +230,8 @@ export const TEXTE = {
   adaptarePune: { ro: 'pune soluția în editor și rulează', en: 'put the solution in the editor and run' },
   costN: { ro: 'Cost în funcție de n', en: 'Cost as a function of n' },
   costNAjutor: {
-    ro: 'Algoritmul rulează pe intrări aleatoare cu natura cerută, pentru n de la 2 la 8. Punctele sunt flopii numărați, linia întreruptă este formula de cost a algoritmului (din curs sau din carte, ori numărată pe pseudocod, cum spune descrierea lui). O formulă exactă cade pe puncte; una cu ≈ lasă deoparte termenii cu puteri mai mici ale lui n, deci diferența relativă scade când n crește.',
-    en: 'The algorithm runs on random inputs with the required nature, for n from 2 to 8. The dots are the counted flops, the dashed line is the cost formula of the algorithm (from the course or the book, or counted on the pseudocode, as its description says). An exact formula falls on the dots; one with ≈ leaves out the terms with lower powers of n, so the relative difference shrinks as n grows.',
+    ro: 'Algoritmul rulează pe intrări aleatoare cu natura cerută, pentru n de la 2 la 8. Punctele sunt flopii numărați, linia întreruptă este formula de cost a algoritmului (din curs sau din carte, ori numărată pe pseudocod, cum spune descrierea lui). O formulă exactă cade pe puncte; una cu ≈ lasă deoparte termenii cu puteri mai mici ale lui n, deci diferența relativă scade când n crește. Scalarii rămân cei curenți (de exemplu r și q la matricele bandă; la RFG k = 1, iar n este lungimea vectorului), iar la produse matricele sunt n × n.',
+    en: 'The algorithm runs on random inputs with the required nature, for n from 2 to 8. The dots are the counted flops, the dashed line is the cost formula of the algorithm (from the course or the book, or counted on the pseudocode, as its description says). An exact formula falls on the dots; one with ≈ leaves out the terms with lower powers of n, so the relative difference shrinks as n grows. The scalars stay as they are (for instance r and q for banded matrices; for RFG k = 1 and n is the length of the vector), and for the products the matrices are n × n.',
   },
   costNAjutorM: {
     ro: 'Algoritmul rulează pe intrări aleatoare cu natura cerută, pentru n de la 2 la 8 și m = n + 1 linii. Punctele sunt flopii numărați, linia întreruptă este formula de cost a algoritmului, care lasă deoparte termenii cu puteri mai mici.',
@@ -232,13 +245,13 @@ export const TEXTE = {
   costNDescriere: { ro: 'Flopii numărați și formula de cost pentru n de la {0} la {1}; la n = {1}: {2} numărați, {3} după formulă.', en: 'The counted flops and the cost formula for n from {0} to {1}; at n = {1}: {2} counted, {3} by the formula.' },
   conditionare: { ro: 'Condiționare', en: 'Conditioning' },
   conditionareAjutor: {
-    ro: 'Teorema de pe slide-ul "Conditionarea sistemelor liniare", cu A neschimbată (ΔA = 0) și x ≠ 0: dacă b se schimbă cu Δb, soluția se schimbă cu ‖Δx‖/‖x‖ ≤ κ(A) ‖Δb‖/‖b‖, unde κ(A) = ‖A⁻¹‖ ‖A‖, iar doar matricea A determină condiționarea. Aici b se schimbă cu ε ‖b‖ în direcția pe care A⁻¹ o mărește cel mai mult, algoritmul rulează din nou în dublă precizie, iar normele sunt norma ∞ (cea mai mare sumă a modulelor pe o linie), pe care cartea cursului o alege pentru că se calculează ușor. La LTRIS și UTRIS contează doar triunghiul pe care îl citește algoritmul.',
-    en: 'The theorem on the slide "Conditionarea sistemelor liniare", with A unchanged (ΔA = 0) and x ≠ 0: if b changes by Δb, the solution changes by ‖Δx‖/‖x‖ ≤ κ(A) ‖Δb‖/‖b‖, where κ(A) = ‖A⁻¹‖ ‖A‖, and only the matrix A determines the conditioning. Here b changes by ε ‖b‖ in the direction that A⁻¹ enlarges most, the algorithm runs again in double precision, and the norms are the ∞-norm (the largest sum of absolute values in a row), which the book of the course picks because it is easy to compute. For LTRIS and UTRIS only the triangle the algorithm reads counts.',
+    ro: 'Teorema de pe slide-ul "Conditionarea sistemelor liniare", cu A neschimbată (ΔA = 0) și x ≠ 0: dacă b se schimbă cu Δb, soluția se schimbă cu ‖Δx‖/‖x‖ ≤ κ(A) ‖Δb‖/‖b‖, unde κ(A) = ‖A⁻¹‖ ‖A‖, iar doar matricea A determină condiționarea. Aici b se schimbă cu ε ‖b‖ în direcția pe care A⁻¹ o mărește cel mai mult, algoritmul rulează din nou în dublă precizie, iar normele sunt norma ∞ (cea mai mare sumă a modulelor pe o linie), pe care cartea cursului o alege pentru că se calculează ușor. La LTRIS și UTRIS contează doar triunghiul pe care îl citește algoritmul, iar la UTRISb doar banda lui.',
+    en: 'The theorem on the slide "Conditionarea sistemelor liniare", with A unchanged (ΔA = 0) and x ≠ 0: if b changes by Δb, the solution changes by ‖Δx‖/‖x‖ ≤ κ(A) ‖Δb‖/‖b‖, where κ(A) = ‖A⁻¹‖ ‖A‖, and only the matrix A determines the conditioning. Here b changes by ε ‖b‖ in the direction that A⁻¹ enlarges most, the algorithm runs again in double precision, and the norms are the ∞-norm (the largest sum of absolute values in a row), which the book of the course picks because it is easy to compute. For LTRIS and UTRIS only the triangle the algorithm reads counts, and for UTRISb only its band.',
   },
   conditionareEps: { ro: 'schimbarea relativă a lui b, ε', en: 'the relative change of b, ε' },
-  condNormaA: { ro: '‖A‖∞', en: '‖A‖∞' },
-  condNormaInv: { ro: '‖A⁻¹‖∞', en: '‖A⁻¹‖∞' },
-  condKappa: { ro: 'κ∞(A) = ‖A⁻¹‖∞ ‖A‖∞', en: 'κ∞(A) = ‖A⁻¹‖∞ ‖A‖∞' },
+  condNormaA: { ro: '‖{0}‖∞', en: '‖{0}‖∞' },
+  condNormaInv: { ro: '‖{0}⁻¹‖∞', en: '‖{0}⁻¹‖∞' },
+  condKappa: { ro: 'κ∞({0}) = ‖{0}⁻¹‖∞ ‖{0}‖∞', en: 'κ∞({0}) = ‖{0}⁻¹‖∞ ‖{0}‖∞' },
   condDb: { ro: '‖Δb‖∞ / ‖b‖∞', en: '‖Δb‖∞ / ‖b‖∞' },
   condDx: { ro: '‖Δx‖∞ / ‖x‖∞, după rularea din nou', en: '‖Δx‖∞ / ‖x‖∞, after running again' },
   condMargine: { ro: 'marginea κ∞(A) ‖Δb‖∞ / ‖b‖∞', en: 'the bound κ∞(A) ‖Δb‖∞ / ‖b‖∞' },
@@ -449,8 +462,8 @@ export const TEXTE = {
   },
   verificare: { ro: 'Verificare', en: 'Check' },
   verificareAjutor: {
-    ro: 'Identitățile pe care le promite algoritmul, recalculate independent de urmă; eroarea e raportată la mărimea datelor. Un reziduu mic spune că identitatea e satisfăcută până la rotunjiri; pentru Ax = b, eroarea relativă a lui x poate fi de κ(A) ori mai mare decât reziduul relativ ‖b − Ax‖ / ‖b‖ (teorema de condiționare din curs).',
-    en: 'The identities the algorithm promises, recomputed independently of the trace; the error is relative to the size of the data. A small residual says the identity holds up to rounding; for Ax = b, the relative error in x can be κ(A) times the relative residual ‖b − Ax‖ / ‖b‖ (the conditioning theorem of the course).',
+    ro: 'Identitățile pe care le promite algoritmul, recalculate independent de urmă; eroarea e raportată la mărimea datelor. Un reziduu mic spune că identitatea e satisfăcută până la rotunjiri; pentru Ax = b, eroarea relativă a lui x poate fi de κ(A) ori mai mare decât reziduul relativ ‖b − Ax‖ / ‖b‖ (cartea cursului, pagina 99, dedus din teorema de condiționare).',
+    en: 'The identities the algorithm promises, recomputed independently of the trace; the error is relative to the size of the data. A small residual says the identity holds up to rounding; for Ax = b, the relative error in x can be κ(A) times the relative residual ‖b − Ax‖ / ‖b‖ (the book of the course, page 99, derived from the conditioning theorem).',
   },
   verificareCifre: {
     ro: 'Rularea a rotunjit fiecare operație la {0} cifre. Pragul ales aici pentru reziduuri este 10^(2 − {0}) = {1}, de zece ori precizia mașinii pentru {0} cifre (de ordinul 10^(1 − {0}), după curs), nu 1e-9; un reziduu peste el arată că erorile de rotunjire s-au adunat peste acest prag.',

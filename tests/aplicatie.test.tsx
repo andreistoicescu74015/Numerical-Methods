@@ -51,7 +51,8 @@ async function faraIntrebari(gazda: HTMLElement) {
   await apasa(gazda, 'Parcurgere')
 }
 
-const celule = (gazda: HTMLElement, clasa = '') => gazda.querySelectorAll(`.grila .celula${clasa}`)
+// celulele grilelor algoritmului, fara matricele din formula (L, U, Q...) de sub ele
+const celule = (gazda: HTMLElement, clasa = '') => gazda.querySelectorAll(`.grile:not(.vederi-grile) .grila .celula${clasa}`)
 const formula = (gazda: HTMLElement) => gazda.querySelector('.pas .formula')?.textContent ?? ''
 
 beforeEach(() => {
@@ -115,7 +116,7 @@ describe('aplicația montată', () => {
     const gazda = await monteaza()
     await scrieIn(gazda.querySelector('header select')!, 'QR')
     // A si, dupa "fie", vectorul β
-    expect(gazda.querySelectorAll('.grila')).toHaveLength(1)
+    expect(gazda.querySelectorAll('.grile:not(.vederi-grile) .grila')).toHaveLength(1)
     expect(celule(gazda)).toHaveLength(6)
     expect(gazda.querySelector('.descriere')?.textContent).toContain('Householder')
     // locul din curs sta pe un rand; ce difera fata de slide se deschide la cerere
@@ -145,7 +146,7 @@ describe('aplicația montată', () => {
     const valori = [...gazda.querySelectorAll<HTMLTextAreaElement>('.intrare.vector textarea')].at(-1)!
     await scrieIn(valori, '5 6 7')
     await apasa(gazda, 'Rulează')
-    expect(gazda.querySelectorAll('.grila figcaption').length).toBe(5)
+    expect(gazda.querySelectorAll('.grile:not(.vederi-grile) .grila figcaption').length).toBe(5)
     expect(celule(gazda)).toHaveLength(21)
     expect(JSON.parse(localStorage.getItem('mn.propriu')!).definitii).toHaveLength(4)
   })
@@ -182,7 +183,7 @@ describe('aplicația montată', () => {
     const gazda = await monteaza()
     await scrieIn(gazda.querySelector('header select')!, 'LTRIS')
     await comanda(gazda, 'laSfarsit')
-    const grila = (nume: string) => [...gazda.querySelectorAll('.grila .celule')].find((g) => g.getAttribute('aria-label')?.startsWith(`${nume},`))!
+    const grila = (nume: string) => [...gazda.querySelectorAll('.grile:not(.vederi-grile) .grila .celule')].find((g) => g.getAttribute('aria-label')?.startsWith(`${nume},`))!
     expect(grila('L').querySelectorAll('.rol-gata')).toHaveLength(0)
     expect(grila('b').querySelectorAll('.rol-gata')).toHaveLength(0)
     expect(grila('x').querySelectorAll('.rol-gata')).toHaveLength(3)

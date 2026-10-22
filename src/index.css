@@ -1310,6 +1310,30 @@ button.mic {
   flex: none;
 }
 
+/* matricele din formula, sub grilele algoritmului: doar de citit, cu explicatia sub fiecare */
+.vederi {
+  margin-top: 0.5rem;
+  padding-top: 0.4rem;
+  border-top: 1px dashed var(--contur);
+}
+
+.vederi .bifa {
+  font-size: 0.8rem;
+  color: var(--text-sters);
+}
+
+.vederi-grile {
+  margin-top: 0.3rem;
+}
+
+.vedere .explicatie {
+  margin: 0.2rem 0 0;
+  max-width: 16rem;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--text-sters);
+}
+
 .grile.compact {
   --cel: 1.9rem;
   --cel-min: 2.1rem;
@@ -1407,6 +1431,10 @@ button.mic {
   border-color: var(--c-mult);
   /* loc pentru litera μ din colt, ca sa nu se lipeasca de un minus */
   padding-left: 0.65rem;
+}
+
+.celula.rol-mult.householder::after {
+  content: 'u';
 }
 
 .celula.rol-mult::after {
@@ -2074,6 +2102,14 @@ button.mic {
 .geometrie .sageata.veche {
   stroke: var(--serie);
   stroke-opacity: 0.35;
+}
+
+/* vectorul Householder u = x + σe₁, perpendicular pe oglinda */
+.geometrie .sageata.householder,
+.geometrie .varf.householder {
+  stroke: var(--c-mult);
+  fill: var(--c-mult);
+  stroke-dasharray: 2 3;
 }
 
 .legenda-geometrie {

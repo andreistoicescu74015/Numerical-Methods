@@ -21,6 +21,7 @@ import { ADAPTARI, adaptare as gasesteAdaptare, type Adaptare } from './adaptari
 import { ExercitiuAdaptare } from './componente/ExercitiuAdaptare'
 import { CONTRAEXEMPLE, type Contraexemplu } from './contraexemple'
 import { areInvariant, invariant } from './invarianti'
+import { vederi } from './vederi'
 import { areCostPeN } from './costuri'
 import { areConditionare, matriceaSistemului, type ExempluCarte } from './conditionare'
 import { asteptat } from './exercitiu'
@@ -46,6 +47,7 @@ const PROPRIU = 'propriu'
 const CHEIE_PROPRIU = 'mn.propriu'
 const CHEIE_INTREBARI = 'mn.intrebari'
 const CHEIE_PASTREAZA = 'mn.pastreaza'
+const CHEIE_VEDERI = 'mn.vederi'
 
 // pseudocodul algoritmului din biblioteca, cu cuvintele cheie in limba interfetei
 const sursaIn = (a: Algoritm, limba: Limba) => (limba === 'en' ? inEngleza(a.sursa) : a.sursa)
@@ -220,6 +222,8 @@ function Continut() {
   cifreAlese.current = cifre
   // la schimbarea algoritmului, intrarile cu aceleasi nume si tipuri raman (pentru comparatii)
   const [pastreaza, setPastreaza] = useState(() => localStorage.getItem(CHEIE_PASTREAZA) === '1')
+  // matricele din formula (L, U, Q, R...), calculate din starea curenta si aratate sub grile
+  const [cuVederi, setCuVederi] = useState(() => localStorage.getItem(CHEIE_VEDERI) !== '0')
   // algoritmul si limba curente, pentru ruleaza(), care nu se reface la fiecare randare
   const algCurent = useRef(alg)
   algCurent.current = alg
@@ -303,6 +307,10 @@ function Continut() {
   useEffect(() => {
     localStorage.setItem(CHEIE_PASTREAZA, pastreaza ? '1' : '0')
   }, [pastreaza])
+
+  useEffect(() => {
+    localStorage.setItem(CHEIE_VEDERI, cuVederi ? '1' : '0')
+  }, [cuVederi])
 
   useEffect(() => {
     if (id === PROPRIU) localStorage.setItem(CHEIE_PROPRIU, JSON.stringify({ sursa, definitii }))
@@ -504,9 +512,9 @@ function Continut() {
 
   // ultimul pas care scrie fiecare celula: inainte de el celula e „scris”, dupa el „gata” sau „mult”
   const ultimaScriere = useMemo(() => {
-    const m = new Map<string, { idx: number; mult: boolean }>()
+    const m = new Map<string, { idx: number; mult: boolean; litera?: string }>()
     rez?.pasi.forEach((p, idx) => {
-      for (const c of p.celule) if (c.rol === 'scris') m.set(`${c.nume}:${c.i}:${c.j ?? 1}`, { idx, mult: !!c.mult })
+      for (const c of p.celule) if (c.rol === 'scris') m.set(`${c.nume}:${c.i}:${c.j ?? 1}`, { idx, mult: !!c.mult, litera: c.litera })
     })
     return m
   }, [rez])
@@ -535,20 +543,26 @@ function Continut() {
   const finale = useMemo(() => {
     const gata = new Map<string, Set<string>>()
     const mult = new Map<string, Set<string>>()
+    // dintre valorile pastrate, cele scrise cu litera u: componentele vectorilor Householder
+    const householder = new Map<string, Set<string>>()
     const adauga = (tinta: Map<string, Set<string>>, cheie: string) => {
       const [nume, i, j] = cheie.split(':')
       if (!tinta.has(nume)) tinta.set(nume, new Set())
       tinta.get(nume)!.add(`${i}:${j}`)
     }
-    for (const [cheie, u] of ultimaScriere) if (u.idx < k) adauga(u.mult ? mult : gata, cheie)
+    for (const [cheie, u] of ultimaScriere) {
+      if (u.idx >= k) continue
+      adauga(u.mult ? mult : gata, cheie)
+      if (u.mult && u.litera === 'u') adauga(householder, cheie)
+    }
     for (const [cheie, idx] of primaCitire) if (idx < k) adauga(gata, cheie)
-    return { gata, mult }
+    return { gata, mult, householder }
   }, [ultimaScriere, primaCitire, k])
 
   // o metoda iterativa oprita de maxiter are si ea o stare de verificat: reziduul de la oprire
   const verificari = useMemo(
     () =>
-      alg && rulare && (rulare.rez.final === 'gata' || (rulare.rez.final === 'stop' && alg.grup === 'iterative'))
+      alg && rulare && (rulare.rez.final === 'gata' || (rulare.rez.final === 'stop' && (alg.grup === 'iterative' || alg.grup === 'proprii')))
         ? verifica(alg.id, rulare.intrari, rulare.rez.stare, rulare.rez.scalari, rulare.cifre || undefined)
         : [],
     [alg, rulare],
@@ -556,6 +570,8 @@ function Continut() {
 
   // etapele scrise de mana raman valabile doar cat timp pseudocodul e cel din biblioteca
   const dinBiblioteca = !!alg && !!rulare && eSursa(alg, rulare.sursa)
+  // matricele din formula algoritmului din biblioteca, la pasul curent
+  const listaVederi = useMemo(() => (rulare && dinBiblioteca && alg ? vederi(alg.id, rulare.program, rulare.rez, rulare.intrari, k) : []), [rulare, dinBiblioteca, alg, k])
   const etape: Etapa[] = useMemo(() => {
     if (!rulare) return []
     if (alg && eSursa(alg, rulare.sursa)) return alg.etape.map((e) => ({ de: e.linii[0], la: e.linii[1], tex: e.tex, text: e.text[limba] }))
@@ -647,7 +663,7 @@ function Continut() {
   // ce trebuie sa raspunda studentul la pasul curent, cat timp rezultatul e ascuns
   const dorit = ascuns && pas ? asteptat(pas) : null
   const n = rulare?.rez.scalari.n
-  const nota = alg?.direct && dinBiblioteca && n && iteratii[vazute - 1] ? t('convergentaDirect', nrFlopi(limba, iteratii[vazute - 1].flopi), n, alg.direct.nume[limba], nrFlopi(limba, alg.direct.flopi(n))) : undefined
+  const nota = alg?.direct && dinBiblioteca && n && iteratii[vazute - 1] ? t(n < 6 ? 'convergentaDirectMic' : 'convergentaDirect', nrFlopi(limba, iteratii[vazute - 1].flopi), n, alg.direct.nume[limba], nrFlopi(limba, alg.direct.flopi(n))) : undefined
 
   // verificarea: inainte de ultimul pas, la ultimul pas, sau dupa o oprire
   const stareVerificare: 'inainte' | 'gata' | 'oprit' = rulare?.rez.final !== 'gata' ? 'oprit' : k === total - 1 ? 'gata' : 'inainte'
@@ -931,6 +947,7 @@ function Continut() {
               celule={pas?.celule ?? []}
               gata={finale.gata.get(nume)}
               mult={finale.mult.get(nume)}
+              householder={finale.householder.get(nume)}
               zerouri={zerouri?.tablou === nume ? zerouri.set : undefined}
               latimi={latimi.get(nume)}
               pasIdx={k}
@@ -941,6 +958,24 @@ function Continut() {
             />
           ))}
         </div>
+        {listaVederi.length > 0 && (
+          <div className="vederi">
+            <label className="bifa" title={t('vederiAjutor')}>
+              <input type="checkbox" checked={cuVederi} onChange={(e) => setCuVederi(e.target.checked)} />
+              {t('vederiArata')}
+            </label>
+            {cuVederi && (
+              <div className={`grile vederi-grile${compact ? ' compact' : ''}`}>
+                {listaVederi.map((v) => (
+                  <div key={v.nume} className="vedere">
+                    <Grila nume={v.nume} tablou={v.tablou} celule={[]} pasIdx={k} intrebare={false} durata={0} animat={false} />
+                    <p className="explicatie">{v.text[limba]}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
         <div className="legenda-rand">
           <ul className="legenda" aria-label={t('legenda')}>
             {ROLURI_LEGENDA.map((rol) => (
