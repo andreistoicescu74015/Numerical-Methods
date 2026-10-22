@@ -19,9 +19,13 @@ const pseudocod = StreamLanguage.define({
     if (stream.match(/^%.*/)) return 'comment'
     if (stream.match(/^('[^']*'?|"[^"]*"?)/)) return 'string'
     if (stream.match(/^\d+(\.\d+)?([eE][+-]?\d+)?/)) return 'number'
-    if (stream.match(/^[\p{L}][\p{L}\p{N}_]*/u)) {
-      // numele unui algoritm din biblioteca (S_GPP cu tot cu "_") se coloreaza ca o functie
-      if (APELABILE.has(stream.current())) return 'atom'
+    // numele unui algoritm din biblioteca (S_GPP cu tot cu "_") se coloreaza ca o functie
+    const compus = stream.match(/^[\p{L}][\p{L}\p{N}]*(?:_[\p{L}][\p{L}\p{N}]*)?/u, false) as RegExpMatchArray | null
+    if (compus && APELABILE.has(compus[0])) {
+      stream.match(compus[0])
+      return 'atom'
+    }
+    if (stream.match(/^[\p{L}][\p{L}\p{N}]*/u)) {
       const cuvant = norm(stream.current())
       if (CUVINTE.has(cuvant)) return 'keyword'
       if (FUNCTII.has(cuvant)) return 'atom'

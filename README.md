@@ -112,8 +112,9 @@ the one from the image.
   Gauss-Seidel), so the two can be compared on the same data.
 - The "Comparison" panel of the drawer runs the same inputs, with the same arithmetic, through
   another library algorithm that takes them (the pairs the course compares come first: G and
-  GPP, S_G and S_GPP, Cholesky or QR and G, Jacobi, Gauss-Seidel and Kaczmarz, the power method
-  and the inverse power method) and shows side by
+  GPP, S_G and S_GPP, Cholesky or QR and G, Gauss-Seidel and Kaczmarz with each other and with
+  GPP as on the slide "Comparatie GPP - GS - K", the power method and the inverse power method;
+  Jacobi is offered next to them) and shows side by
   side how each run finishes, the counted flops, the iterations, the result (a result matrix of at
   most 5 x 5 in full) and the largest difference between the two solution vectors. When both runs
   have a stopping condition, their curves are drawn on the same axes, as the slide "Exemple
@@ -137,7 +138,8 @@ the one from the image.
   bound is reached. For LTRIS and UTRIS only the triangle the algorithm reads counts.
 - "Cost as a function of n" runs a direct algorithm on random inputs with the required nature for
   n from 2 to 8 and plots the counted flops next to the cost formula of the algorithm, with a
-  table. For the pairs the course and the book compare (Gb and G, GPPb and GPP, UTRISb and
+  table. For the pairs the course and the book compare or derive from one another (Gb and G,
+  GPPb and GPP, UTRISb and
   UTRIS, Cholesky and G, QR and G) a second series shows the flops the other algorithm counts on
   the same inputs (for QR, which needs m > n here while G needs a square matrix, G runs on an
   n × n matrix of its own), the table has the ratio of the two, and a note says what the course
@@ -420,7 +422,8 @@ Statements:
 - `fie U[m,p], β[p]`: new arrays, filled with zeros.
 - `x ← UTRIS(U, d)`, `[U, p] ← GPP(A)`: a call to a library algorithm, with its inputs in the
   order of the library and its outputs assigned in order. In an assignment, the id of a library
-  algorithm followed by `(` is a call; elsewhere `G(i, j)` is still an element of a matrix `G`.
+  algorithm followed by `(` is a call when the program has no array with that name; with a
+  matrix `G`, `G(i, j)` is still its element.
 - Several statements on one line are separated by `;`; the declarations `fie` and `peste` stand on
   a line of their own. Comments start with `%`.
 

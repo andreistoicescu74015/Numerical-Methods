@@ -123,7 +123,9 @@ export interface Rezultat {
   stare: Record<string, Tablou>
   scalari: Record<string, number>
   final: 'stop' | 'eroare' | 'gata'
+  // mesajul erorii, cu linia in fata; `eroareText` este acelasi mesaj fara linie
   eroare?: string
+  eroareText?: string
   flopi: number
 }
 
@@ -200,11 +202,12 @@ function toateCelulele(nume: string, t: Tablou, rol: Rol): Celula[] {
 }
 
 export function urma(program: Program, intrari: Intrari, optiuni: Optiuni = {}): Rezultat {
-  const it = new Interpretor(program, intrari, optiuni.culori ?? false, optiuni.instantanee ?? 'cadre', optiuni.cifre)
+  const it = new Interpretor(program, intrari, optiuni.culori ?? false, optiuni.instantanee ?? 'cadre', optiuni.cifre, optiuni.maxPasi)
   const maxPasi = optiuni.maxPasi ?? 20000
   const pasi: Pas[] = []
   let final: Rezultat['final'] = 'gata'
   let eroare: string | undefined
+  let eroareText: string | undefined
   try {
     for (const pas of it.ruleaza()) {
       pasi.push(pas)
@@ -217,11 +220,12 @@ export function urma(program: Program, intrari: Intrari, optiuni: Optiuni = {}):
   } catch (e) {
     if (!(e instanceof EroareRulare)) throw e
     final = 'eroare'
+    eroareText = e.message
     eroare = mesaj('linia', e.linie, e.message)
     it.uita()
     pasi.push(it.pas('final', e.linie, [], { mesaj: eroare, final: 'eroare', formula: e.formula }))
   }
-  return { pasi, stare: it.instantaneu(), scalari: it.scalari(), final, eroare, flopi: it.flopi }
+  return { pasi, stare: it.instantaneu(), scalari: it.scalari(), final, eroare, eroareText, flopi: it.flopi }
 }
 
 function cloneazaStare(s: Record<string, Tablou>): Record<string, Tablou> {
@@ -277,6 +281,8 @@ class Interpretor implements InfoLatex {
     public culori: boolean,
     private instantanee: 'cadre' | 'toate',
     private cifre?: number,
+    // limita de pasi a rularii, trecuta si algoritmilor apelati
+    private maxPasi?: number,
   ) {
     for (const [nume, v] of Object.entries(intrari)) {
       const x = dinIntrare(v)
@@ -514,18 +520,16 @@ class Interpretor implements InfoLatex {
     if (s.tinte.length > alg.iesiri.length) throw this.eroare(mesaj('apelIesiri', s.nume, alg.iesiri.length, alg.iesiri.join(', '), s.tinte.length))
     this.citite = []
     this.uita()
-    const flopiInainte = this.flopi
     const intrari: Intrari = {}
+    // argumentele se evalueaza ca orice expresie a apelantului, cu flopii lor (b - A x costa)
     alg.intrari.forEach((i, k) => {
       const v = this.ev(s.args[k])
       const tip = v.tip === 'rand' ? 'vector' : v.tip
       if (tip !== i.tip) throw this.eroare(mesaj('apelTip', s.nume, i.nume, mesaj(i.tip === 'matrice' ? 'tipMatrice' : i.tip === 'vector' ? 'tipVector' : 'tipNumar'), descrie(v)))
       intrari[i.nume] = v.tip === 'scalar' ? v.v : v.tip === 'matrice' ? linii(v) : [...v.d]
     })
-    // evaluarea argumentelor nu e un calcul al apelantului: flopii sunt ai algoritmului apelat
-    this.flopi = flopiInainte
-    const rez = urma(parseaza(alg.sursa), intrari, { cifre: this.cifre })
-    if (rez.final === 'eroare') throw this.eroare(mesaj('apelEroare', s.nume, rez.eroare ?? ''))
+    const rez = urma(parseaza(alg.sursa), intrari, { cifre: this.cifre, maxPasi: this.maxPasi })
+    if (rez.final === 'eroare') throw this.eroare(mesaj('apelEroare', s.nume, rez.eroareText ?? rez.eroare ?? ''))
     if (rez.final === 'stop') throw new Oprire(mesaj('apelOprit', s.nume, rez.pasi.at(-1)?.mesaj ?? ''))
     this.flopi += rez.flopi
     const scrise: Celula[] = []
@@ -548,7 +552,18 @@ class Interpretor implements InfoLatex {
     yield this.pas('apel', s.linie, [...this.citite, ...scrise], { formula: f, apel: { id: alg.id, intrari, pasi: rez.pasi.length, flopi: rez.flopi } })
   }
 
+  // x ← UTRIS(U, d) cu un nume simplu se parseaza ca element: este un apel cand numele este al unui
+  // algoritm din biblioteca si nu exista un tablou cu acest nume (G(i, j) cu matricea G ramane element)
+  private esteApel(s: Extract<Instr, { tip: 'atrib' }>): s is Extract<Instr, { tip: 'atrib' }> & { expr: Extract<Expr, { tip: 'elem' }> } {
+    return s.expr.tip === 'elem' && !!algoritm(s.expr.nume) && !esteTablou(this.env.get(this.tablouElem(s.expr)))
+  }
+
   private *atrib(s: Extract<Instr, { tip: 'atrib' }>): Generator<Pas, void, undefined> {
+    if (this.esteApel(s)) {
+      if (s.tinta.tip !== 'var' || s.eticheta || s.bucla) throw this.eroare(mesaj('apelTinta'))
+      yield* this.apelAlgoritm({ tip: 'apel', linie: s.linie, tinte: [s.tinta.nume], nume: s.expr.nume, args: s.expr.idx })
+      return
+    }
     if (!s.bucla) {
       yield* this.atribUnu(s)
       return

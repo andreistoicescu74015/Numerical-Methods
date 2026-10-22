@@ -158,7 +158,7 @@ class Parser {
     }
     if (!c.esteOp('←') && !c.esteOp('=')) throw c.eroare(mesaj('seAsteptaAtribuire'))
     c.ia()
-    const ap = c.apelabil()
+    const ap = c.apelabil(true)
     if (ap) {
       if (tinta.tip !== 'var') throw c.eroare(mesaj('apelTinta'))
       return this.apel(c, nr, [tinta.nume], ap)
@@ -327,11 +327,13 @@ class Cursor {
   }
 
   // Numele unui algoritm din biblioteca urmat de "(", cu numarul de token-uri pe care le ocupa:
-  // S_GPP se lexeaza ca S, _, GPP.
-  apelabil(): { nume: string; toks: number } | null {
+  // S_GPP se lexeaza ca S, _, GPP. Cu `doarCompuse`, doar numele cu "_", care nu pot fi acces la
+  // element: un nume simplu, ca G(i, j), se parseaza ca element si devine apel abia la rulare,
+  // daca nu exista un tablou cu acest nume.
+  apelabil(doarCompuse = false): { nume: string; toks: number } | null {
     const a = this.peek()
     if (a.t !== 'id') return null
-    if (APELABILE.has(a.s) && this.esteOp('(', 1)) return { nume: a.s, toks: 1 }
+    if (!doarCompuse && APELABILE.has(a.s) && this.esteOp('(', 1)) return { nume: a.s, toks: 1 }
     const b = this.peek(2)
     if (this.esteOp('_', 1) && b.t === 'id' && APELABILE.has(`${a.s}_${b.s}`) && this.esteOp('(', 3)) return { nume: `${a.s}_${b.s}`, toks: 3 }
     return null

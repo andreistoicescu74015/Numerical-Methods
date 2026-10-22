@@ -162,8 +162,10 @@ interface Inventar {
   cititeInAfara: Set<string>
   // tablou -> capetele buclelor "v = 1 : L" care ii scriu direct fiecare element x_v
   acoperite: Map<string, string[]>
-  // algoritmii din biblioteca apelati
+  // algoritmii din biblioteca apelati (sau nume de element care ar putea fi apeluri)
   apeluri: Set<string>
+  // tablourile declarate cu "fie"
+  declarate: Set<string>
 }
 
 // numele Python al unei functii: al algoritmului din biblioteca sau al programului
@@ -208,8 +210,9 @@ class Emitator {
     private stare: Stare,
     private inv: Inventar,
   ) {
-    // numele functiilor apelate raman ale lor: o variabila cu acelasi nume primeste alt nume Python
-    for (const id of inv.apeluri) this.luate.add(functiePython(id))
+    // numele functiilor apelate raman ale lor: o variabila cu acelasi nume primeste alt nume Python;
+    // un nume care e tablou al programului nu e apel, deci nu se rezerva
+    for (const id of inv.apeluri) if (!opt.intrari.some((i) => i.nume === id) && !inv.atribuite.has(id) && !inv.declarate.has(id)) this.luate.add(functiePython(id))
     for (const i of opt.intrari) {
       this.tipuri.set(i.nume, i.tip)
       this.nume(i.nume)
@@ -867,6 +870,14 @@ class Emitator {
           }
         })
         this.linie(nivel, `${s.tinte.map((t) => this.nume(t)).join(', ')} = ${functiePython(alg.id)}(${s.args.map((a) => this.expr(a)).join(', ')})`)
+        // o iesire intoarsa ca pozitii de la 0 pe care programul nu o tine ca pozitii (o scrie apoi
+        // cu valori) trece la valorile din pseudocod
+        s.tinte.forEach((t, k) => {
+          if (!cod.indici.includes(alg.iesiri[k])) return
+          const tip = cod.tipuriIesiri[k]
+          const tablou = tip === 'matrice' || tip === 'vector' || tip === 'rand'
+          if (tablou ? !this.stare.pozTablouri.has(t) : !this.pozitie(t)) this.linie(nivel, `${this.nume(t)} = ${this.nume(t)} + 1`)
+        })
         return
       }
     }
@@ -918,6 +929,12 @@ class Emitator {
   }
 
   private atrib(s: Extract<Instr, { tip: 'atrib' }>, nivel: number): void {
+    // x ← UTRIS(U, d) cu nume simplu: apel cand numele e al unui algoritm din biblioteca si nu
+    // exista un tablou cu acest nume, ca in interpretor
+    if (s.expr.tip === 'elem' && algoritm(s.expr.nume) && !this.esteTablou(this.tablouElem(s.expr)) && s.tinta.tip === 'var' && !s.eticheta && !s.bucla) {
+      this.instr({ tip: 'apel', linie: s.linie, tinte: [s.tinta.nume], nume: s.expr.nume, args: s.expr.idx }, nivel)
+      return
+    }
     this.scoateSume(s.expr, nivel)
     const tipExpr = this.tip(s.expr)
     if (s.tinta.tip === 'felie') {
@@ -1054,6 +1071,7 @@ function inventar(program: Program): Inventar {
   const cititeLiber = new Set<string>()
   const acoperite = new Map<string, string[]>()
   const apeluri = new Set<string>()
+  const declarate = new Set<string>()
   const legate: string[] = []
   const acopera = (tablou: string, la: Expr) => acoperite.set(tablou, [...(acoperite.get(tablou) ?? []), JSON.stringify(la)])
   const dinExpr = (e: Expr): void => {
@@ -1121,6 +1139,7 @@ function inventar(program: Program): Inventar {
           if (unu(s.bucla.de) && s.tinta.tip === 'elem' && s.tinta.idx.length === 1 && s.tinta.idx[0].tip === 'var' && s.tinta.idx[0].nume === s.bucla.var) acopera(s.tinta.nume, s.bucla.la)
         }
         dinExpr(s.expr)
+        if (s.expr.tip === 'elem' && s.tinta.tip === 'var' && !s.bucla && !s.eticheta && algoritm(s.expr.nume)) apeluri.add(s.expr.nume)
         if (s.tinta.tip === 'var') {
           nume.add(s.tinta.nume)
           atribuite.add(s.tinta.nume)
@@ -1162,6 +1181,7 @@ function inventar(program: Program): Inventar {
       case 'fie':
         for (const d of s.decl) {
           nume.add(d.nume)
+          declarate.add(d.nume)
           d.dims.forEach(dinExpr)
         }
         return
@@ -1179,7 +1199,7 @@ function inventar(program: Program): Inventar {
     }
   }
   program.instr.forEach((s) => dinInstr(s, true))
-  return { nume, bucle, citite, atribuite, cititeInAfara: new Set([...cititeLiber].filter((n) => bucle.has(n))), acoperite, apeluri }
+  return { nume, bucle, citite, atribuite, cititeInAfara: new Set([...cititeLiber].filter((n) => bucle.has(n))), acoperite, apeluri, declarate }
 }
 
 const aceeasi = (a: Set<string>, b: Set<string>) => a.size === b.size && [...a].every((x) => b.has(x))
@@ -1217,7 +1237,9 @@ export function emitePython(program: Program, opt: OptiuniPython): CodPython {
     stare = urm
   }
 
-  const functie = functiePython(opt.nume)
+  // programul nu poate purta numele unei functii pe care o apeleaza (GPP editat ca sa apeleze GPP)
+  let functie = functiePython(opt.nume)
+  if ([...em.apeluri.keys()].some((id) => functiePython(id) === functie)) functie = `${functie}_program`
   const prolog: string[] = [`def ${functie}(${opt.intrari.map((i) => em.nume(i.nume)).join(', ')}):`]
   // comentariul sta la capatul liniei cat incape in 79 de coloane; altfel, pe linia de deasupra
   const cuNota = (cod: string, nota: string) => (cod.length + nota.length + 4 <= 79 ? [`${cod}  # ${nota}`] : [`    # ${nota}`, cod])

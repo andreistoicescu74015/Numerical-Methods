@@ -316,8 +316,8 @@ export const TEXTE = {
   contraexemple: { ro: 'Contraexemple din curs ({0})', en: 'Counterexamples from the course ({0})' },
   comparatie: { ro: 'Comparație', en: 'Comparison' },
   comparatieAjutor: {
-    ro: 'Aceleași intrări și aceeași aritmetică, rulate și cu alt algoritm din bibliotecă. Cursul compară astfel eliminarea fără și cu pivotare, Cholesky cu eliminarea gaussiană (de două ori mai puține operații), QR cu eliminarea pe o matrice pătrată (cost dublu) și metodele iterative între ele.',
-    en: 'The same inputs and the same arithmetic, run with another algorithm of the library as well. The course compares in this way elimination without and with pivoting, Cholesky with Gaussian elimination (half the operations), QR with elimination on a square matrix (double the cost) and the iterative methods with one another.',
+    ro: 'Aceleași intrări și aceeași aritmetică, rulate și cu alt algoritm din bibliotecă. Cursul compară astfel eliminarea fără și cu pivotare, Cholesky cu eliminarea gaussiană (de două ori mai puține operații), QR cu eliminarea pe o matrice pătrată (cost dublu), Gauss-Seidel și Kaczmarz între ele și cu GPP (slide-ul "Comparatie GPP - GS - K") și metoda puterii cu metoda puterii inverse.',
+    en: 'The same inputs and the same arithmetic, run with another algorithm of the library as well. The course compares in this way elimination without and with pivoting, Cholesky with Gaussian elimination (half the operations), QR with elimination on a square matrix (double the cost), Gauss-Seidel and Kaczmarz with each other and with GPP (slide "Comparatie GPP - GS - K") and the power method with the inverse power method.',
   },
   comparatieCu: { ro: 'compară cu', en: 'compare with' },
   comparatieNimic: { ro: 'Niciun alt algoritm din bibliotecă nu are aceleași intrări.', en: 'No other algorithm in the library has the same inputs.' },

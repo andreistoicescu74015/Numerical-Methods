@@ -233,8 +233,8 @@ eliminarea ar da pivot nul, pasul la care Cholesky s-ar opri, raza spectrală a 
 iterație). Contraexemplele din curs (`src/contraexemple.ts`) încarcă intrări care încalcă o
 ipoteză și spun unde e ipoteza în curs; fiecare are un rezultat așteptat, verificat în teste.
 Panoul de comparație rulează aceleași intrări cu alt algoritm (G și GPP, S_G și S_GPP pe 3 cifre,
-Cholesky sau QR și G, metodele iterative între ele, MP și MPI), comparațiile pe care le face
-cursul. Când ambele rulări au o condiție de oprire, curbele lor stau pe aceleași axe, ca pe
+Cholesky sau QR și G, Gauss-Seidel și Kaczmarz între ele și cu GPP ca pe slide-ul 169, MP și
+MPI), comparațiile pe care le face cursul; Jacobi este oferit lângă ele. Când ambele rulări au o condiție de oprire, curbele lor stau pe aceleași axe, ca pe
 slide-ul "Exemple numerice MP/MPI" (eroarea e_k pe scară logaritmică, pe iterații), cu pragul
 comun și, la alegere, cu flopii numărați până la fiecare evaluare pe axa orizontală, ca să se
 vadă și cât costă o iterație a fiecăruia (`src/componente/CurbeComparate.tsx`, cu evaluările
@@ -271,8 +271,9 @@ Patru funcții leagă algoritmul de teoria din curs:
   norma ∞, pe care cartea o alege pentru κ (paginile 98-99). Exemplele D, T și H₃ sunt cele din
   carte (pagina 99). La LTRIS și UTRIS se ia doar triunghiul pe care îl citește algoritmul.
 - Costul în funcție de n (`src/costuri.ts`) rulează algoritmul pentru n de la 2 la 8 și pune
-  flopii numărați lângă formula de cost a algoritmului. Pentru perechile comparate în curs și în
-  carte (Gb și G, GPPb și GPP, UTRISb și UTRIS, Cholesky și G, QR și G) a doua serie este
+  flopii numărați lângă formula de cost a algoritmului. Pentru perechile pe care cursul și cartea
+  le compară sau le derivă una din alta (Gb și G, GPPb și GPP, UTRISb și UTRIS, Cholesky și G,
+  QR și G) a doua serie este
   algoritmul pereche pe aceleași intrări (matricea bandă sau cea pozitiv definită dată lui G);
   singura excepție este QR, care cere aici m > n, în timp ce G cere o matrice pătrată, deci G
   rulează pe o matrice n × n a lui (flopii acestor algoritmi depind doar de dimensiuni). Tabelul
@@ -403,10 +404,13 @@ Compararea linie cu linie a pseudocodului din bibliotecă cu slide-urile și cu 
   după 23 de iterații, cât arată graficul de pe slide.
 - MPI (slide-ul 318): pașii buclei sunt cei de pe slide, iar "se rezolvă sistemul (μI_n − A)z = y"
   este scris desfășurat ca S_GPP, pe copia B = μI − A și pe copia z a lui y, cu două linii în
-  plus, marcate cu %, care opresc algoritmul când un pivot iese exact 0 (μ este exact o valoare
-  proprie; slide-ul nu tratează cazul). Pe exemplul de pe slide-ul 320 interpretorul reproduce
-  tabelul 4.1 din carte (pagina 237): μ = 2.9411764705882, 3.0045159755566, 3.0000169808688,
-  3.0000000001717 și oprirea după 5 iterații, iar MP dă λ = 3.0000000351815 după 23.
+  plus, "dacă … = 0 atunci stop", care opresc algoritmul când un pivot iese exact 0 (μ este
+  exact o valoare proprie; slide-ul nu tratează cazul). Pe exemplul de pe slide-ul 320
+  interpretorul reproduce tabelul 4.1 din carte (pagina 237): μ = 2.9411764705882,
+  3.0045159755566, 3.0000169808688, 3.0000000001717 și oprirea după 5 iterații, iar MP dă
+  λ = 3.0000000351815 după 23. Ultima valoare din tabel, 3.0000000000000, este câtul Rayleigh al
+  vectorului final, pe care pseudocodul nu îl mai calculează; îl calculează comparația din codul
+  Python generat.
 - RFG: linia `β ← 0` nu este pe slide; este convenția cărții (pagina 129, punctul 2) pentru cazul
   în care nu este nimic de anulat.
 - S_G (slide-ul 138 descrie pașii fără pseudocod) pornește pe exemplul de pe slide-ul 114 cu 3
@@ -507,6 +511,10 @@ Greșeli din surse, unde aplicația urmează varianta corectă:
 - cartea, tabelul 4.1 (pagina 237): la MP e₈ este tipărit 0.0000014882055, recalculat
   0.0000014282055; la MPI e₂ este tipărit 0.2003991735561, recalculat 0.0200399173556; restul
   tabelului coincide cu rulările aplicației cifră cu cifră.
+- slide-ul 317 dă costul rezolvării sistemului dintr-o iterație MPI ca ≈ n³/3 "operații";
+  cartea (pagina 236) numără aceeași cantitate ca ≈ n³/3 operații de tipul α ← α + βγ, adică
+  perechi înmulțire-adunare. În flopi, unitatea slide-ului 140 pentru S_GPP (≈ 2n³/3), aplicația
+  dă ≈ 2n³/3 pe iterație: aceeași cantitate, în unitatea cursului pentru flopi.
 
 ## 12. Recenzia UI/UX și așezarea
 

@@ -42,6 +42,20 @@ const PROPRII: { nume: string; sursa: string; intrari: Intrari; iesiri?: string[
     iesiri: ['x'],
   },
   {
+    // p vine de la GPP ca pozitii, apoi programul scrie in el o valoare: in Python trece la valori
+    nume: 'apel_pozitii_scrise',
+    sursa: '[U, p] ← GPP(A)\np_1 ← 1\nd ← b\npentru k = 1 : n-1\n    d_k ↔ d_{p_k}',
+    intrari: { A: [[0.01, 1, 1], [1, 2, 0], [2, 0, 1]], b: [4, 5, 4] },
+    iesiri: ['d', 'p'],
+  },
+  {
+    // argumentul este o expresie, calculata de apelant
+    nume: 'apel_cu_expresie',
+    sursa: 'x ← UTRIS(U, b - A x)',
+    intrari: { U: [[2, 1, -1], [0, 3, 2], [0, 0, 4]], A: [[1, 2, 1], [2, 1, 2], [1, 1, 2]], b: [4, 5, 4], x: [1, 1, 1] },
+    iesiri: ['x'],
+  },
+  {
     nume: 'eliminare_pe_linii',
     sursa: `pentru k = 1 : n-1
     pentru i = k+1 : n

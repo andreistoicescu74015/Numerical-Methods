@@ -25,16 +25,36 @@ pentru k = 1 : n-1
 x ← UTRIS(U, d)`
 
 describe('apelurile de algoritmi din bibliotecă', () => {
-  it('se parsează cu una sau mai multe ținte și cu nume cu "_"; o țintă cu indice nu primește un apel', () => {
+  it('se parsează: cu mai multe ținte sau cu nume cu "_" la parsare, cu nume simplu ca element care devine apel la rulare', () => {
     const p = parseaza(SURSA)
     expect(p.instr[0]).toEqual({ tip: 'apel', linie: 1, tinte: ['U', 'p'], nume: 'GPP', args: [{ tip: 'var', nume: 'A' }] })
-    expect(p.instr.at(-1)).toMatchObject({ tip: 'apel', linie: 7, tinte: ['x'], nume: 'UTRIS' })
+    expect(p.instr.at(-1)).toMatchObject({ tip: 'atrib', linie: 7, tinta: { tip: 'var', nume: 'x' }, expr: { tip: 'elem', nume: 'UTRIS' } })
     expect(parseaza('y ← S_GPP(A, b)').instr[0]).toMatchObject({ tip: 'apel', nume: 'S_GPP', tinte: ['y'] })
-    expect(parseaza('y = JACOBI(A, b, x, 0.001, 100)').instr[0]).toMatchObject({ tip: 'apel', nume: 'JACOBI' })
-    expect(() => parseaza('x_1 ← UTRIS(U, b)')).toThrow(/x ← UTRIS/)
+    expect(parseaza('y = JACOBI(A, b, x, 0.001, 100)').instr[0]).toMatchObject({ tip: 'atrib', expr: { tip: 'elem', nume: 'JACOBI' } })
+    expect(() => parseaza('x_1 ← S_GPP(A, b)')).toThrow(/x ← UTRIS/)
     expect(() => parseaza('[x] ← 3')).toThrow(/GPP\(A\)/)
     // intr-o expresie, un nume urmat de indici ramane un element
     expect(parseaza('t ← a_ij + U(i, j)').instr[0]).toMatchObject({ tip: 'atrib' })
+  })
+
+  it('un tablou numit ca un algoritm rămâne tablou, o țintă cu indice nu primește un apel, iar expresiile-argument costă flopii lor', () => {
+    const g = urma(parseaza('t ← G(i, j)\nv ← G(1:2, 1)\ns ← G(1, 2) + 1'), { G: [[1, 2], [3, 4]], i: 1, j: 2 })
+    expect(g.final).toBe('gata')
+    expect(g.scalari.t).toBe(2)
+    expect(g.stare.v.d).toEqual([1, 3])
+    expect(g.scalari.s).toBe(3)
+    const rau = urma(parseaza('x_1 ← UTRIS(U, b)'), { U: [[1]], b: [1] })
+    expect(rau.final).toBe('eroare')
+    expect(rau.eroare).toMatch(/x ← UTRIS/)
+    // b - A x costa 18 flopi la apelant, UTRIS 9: la fel ca scris pe doua linii
+    const U = [[2, 1, -1], [0, 3, 2], [0, 0, 4]]
+    const cu = urma(parseaza('x ← UTRIS(U, b - A x)'), { U, A, b, x: [1, 1, 1] })
+    const doua = urma(parseaza('d ← b - A x\nx ← UTRIS(U, d)'), { U, A, b, x: [1, 1, 1] })
+    expect(cu.final).toBe('gata')
+    expect(cu.flopi).toBe(27)
+    expect(cu.flopi).toBe(doua.flopi)
+    expect(cu.pasi[0].operatii?.map((o) => o.fel)).toEqual(['matvec', 'scadere'])
+    expect(cu.stare.x.d).toEqual(doua.stare.x.d)
   })
 
   it('GPP, apoi substituția pe b, apoi UTRIS dau soluția lui S_GPP, cu aceiași flopi', () => {
@@ -70,9 +90,15 @@ describe('apelurile de algoritmi din bibliotecă', () => {
   })
 
   it('erorile și opririle algoritmului apelat ajung la apelant, cu numele lui', () => {
-    const err = urma(parseaza('x ← LTRIS(L, b)'), { L: [[0, 0], [1, 1]], b: [1, 2] })
+    const err = urma(parseaza('t ← 1\nx ← LTRIS(L, b)'), { L: [[0, 0], [1, 1]], b: [1, 2] })
     expect(err.final).toBe('eroare')
-    expect(err.eroare).toContain('LTRIS')
+    // linia apelantului, numele algoritmului, mesajul lui fara linia din interiorul lui
+    expect(err.eroare).toMatch(/^linia 2: LTRIS/)
+    expect(err.eroare).not.toMatch(/linia 5/)
+    // limita de pasi a apelantului se aplica si in apel
+    const lung = urma(parseaza('[x, k] ← JACOBI(A, b, x, 0.001, 1000000)'), { A: [[1, 1], [1, 1]], b: [1, 1], x: [0, 0] }, { maxPasi: 100 })
+    expect(lung.final).toBe('eroare')
+    expect(lung.eroare).toContain('100')
     const stop = urma(parseaza('R ← CHOL(A)'), { A: [[1, 2], [2, 1]] })
     expect(stop.final).toBe('stop')
     expect(stop.pasi.at(-1)!.mesaj).toContain('CHOL')
@@ -91,9 +117,17 @@ describe('apelurile de algoritmi din bibliotecă', () => {
     expect(cod.indexOf('def GPP')).toBeLessThan(cod.indexOf('def rezolvare'))
     expect(cod.indexOf('def UTRIS')).toBeLessThan(cod.indexOf('def rezolvare'))
     // numele functiei apelate ramane al ei chiar daca programul are o variabila cu acelasi nume
-    const cu = emitePython(parseaza('G ← A\nU ← G(A)'), { nume: 'p', intrari: [{ nume: 'A', tip: 'matrice' }] }).cod
-    expect(cu).toContain('def G(A):')
-    expect(cu).toMatch(/G_2 = A\.copy\(\)/)
-    expect(cu).toContain('U = G(A)')
+    // o iesire-pozitii pe care programul o scrie apoi cu valori trece la valorile din pseudocod
+    const poz = emitePython(parseaza('[U, p] ← GPP(A)\np_1 ← 1\nd ← b\npentru k = 1 : n-1\n    d_k ↔ d_{p_k}'), { nume: 'poz', intrari: [{ nume: 'A', tip: 'matrice' }, { nume: 'b', tip: 'vector' }], iesiri: ['d', 'p'] })
+    expect(poz.cod).toContain('p = p + 1')
+    expect(poz.indici).toEqual([])
+    // programul nu poate purta numele functiei pe care o apeleaza
+    const acelasi = emitePython(parseaza('[A, p] ← GPP(A)'), { nume: 'GPP', intrari: [{ nume: 'A', tip: 'matrice' }], iesiri: ['A', 'p'] }).cod
+    expect(acelasi.match(/def GPP\(/g)).toHaveLength(1)
+    expect(acelasi).toContain('def GPP_program(A):')
+    // un tablou al programului numit ca un algoritm ramane tablou si in Python
+    const tablou = emitePython(parseaza('t ← G(1, 2)'), { nume: 'p', intrari: [{ nume: 'G', tip: 'matrice' }] }).cod
+    expect(tablou).toContain('t = G[0, 1]')
+    expect(tablou).not.toContain('def G(')
   })
 })
