@@ -518,7 +518,8 @@ button.mic {
 /* anotarea se muta intreaga pe randul urmator cand nu incape dupa cod */
 .cm-anotare {
   display: inline-block;
-  white-space: nowrap;
+  /* intr-o coloana ingusta anotarea se rupe la virgule, nu largeste editorul */
+  max-width: calc(100% - 1.2rem);
   margin-left: 1.2rem;
   padding: 0 0.4rem;
   border-radius: 3px;
@@ -1813,6 +1814,10 @@ button.mic {
   border-collapse: collapse;
   margin: 0.3rem 0;
   font-size: 0.82rem;
+  /* intr-un sertar ingust tabelul deruleaza singur, nu tot sertarul */
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .operatii td,
@@ -2234,9 +2239,20 @@ button.mic {
     order: -1;
   }
 
+  /* popoverul se intinde pe latimea randului legendei, nu iese din ecran pe langa "ce inseamna" */
+  .legenda-rand {
+    position: relative;
+  }
+
+  .legenda-explicatii {
+    position: static;
+  }
+
   .legenda-explicatii ul {
-    left: auto;
+    left: 0;
     right: 0;
+    width: auto;
+    max-width: none;
   }
 }
 
