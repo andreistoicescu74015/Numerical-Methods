@@ -33,6 +33,8 @@ describe('costul în funcție de n', () => {
       const p = costuriPeN(algoritm(id)!, exemplu(id))
       expect(p.map((x) => x.n), id).toEqual(DIMENSIUNI)
       for (const x of p) expect(x.pereche, `${id}, n = ${x.n}`).toBeGreaterThan(0)
+      // perechea ruleaza pe aceleasi intrari; doar QR (m > n) nu poate da matricea lui lui G
+      for (const x of p) expect(x.aceleasi, `${id}, n = ${x.n}`).toBe(id !== 'QR')
     }
     // UTRIS numara exact n²; cu q = 1, UTRISb numara 3n − 2
     for (const x of costuriPeN(algoritm('UTRISb')!, exemplu('UTRISb'))) {

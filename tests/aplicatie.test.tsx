@@ -854,7 +854,7 @@ describe('aplicația montată', () => {
     })
     expect(panou.querySelectorAll('.grafic svg circle.punct')).toHaveLength(7)
     expect(panou.querySelectorAll('.grafic svg rect.punct.a-doua')).toHaveLength(7)
-    expect(panou.querySelector('.legenda-cost')?.textContent).toContain('flopi numărați de G, la același n')
+    expect(panou.querySelector('.legenda-cost')?.textContent).toContain('flopi numărați de G, pe aceleași intrări')
     expect([...panou.querySelectorAll('.grafic text.eticheta')].map((e) => e.textContent)).toEqual(['G', 'CHOL', 'formula'])
     expect([...panou.querySelectorAll('thead th')].map((e) => e.textContent)).toEqual(['n', 'CHOL', 'formula', 'numărați / formulă', 'G', 'CHOL / G'])
     const randuri = [...panou.querySelectorAll('tbody tr')].map((r) => [...r.querySelectorAll('td')].map((c) => c.textContent))
@@ -862,7 +862,7 @@ describe('aplicația montată', () => {
     expect(randuri[6][4]).toBe('308')
     expect(Number(randuri[6][5])).toBeGreaterThan(0.4)
     expect(Number(randuri[6][5])).toBeLessThan(0.7)
-    expect(panou.textContent).toContain('jumătate din cei ≈ 2n³/3')
+    expect(panou.textContent).toContain('de două ori mai puține decât eliminarea gaussiană')
     // G nu are pereche: graficul ramane cu o serie si patru coloane
     await scrieIn(gazda.querySelector('header select')!, 'G')
     expect(gazda.querySelectorAll('.panou.cost-n .grafic svg rect.punct.a-doua')).toHaveLength(0)
@@ -887,7 +887,10 @@ describe('aplicația montată', () => {
     expect(gazda.querySelector('.ecuatie-card .nr')?.textContent).toBe('ec. 1')
     expect(gazda.querySelector('.ecuatie-card annotation')?.textContent).toBe('2\\,x_{1} = 2')
     await comanda(gazda, 'laSfarsit')
-    // pasul final nu are linie de cod: scena pastreaza ultima, x_3 ← x_3 / l_33, cu ecuatia 3 satisfacuta de x
+    // pasul final nu are linie de cod, deci nici ecuatie marcata; cu un pas inapoi, x_3 ← x_3 / l_33 cu ecuatia 3 satisfacuta de x
+    expect(gazda.querySelector('.ecuatie-card')).toBeNull()
+    expect(gazda.querySelector('.rand.ec')).toBeNull()
+    await comanda(gazda, 'pasInapoi')
     expect(gazda.querySelector('.ecuatie-card .nr')?.textContent).toBe('ec. 3')
     expect(gazda.querySelector('.ecuatie-card .cu-valori.satisfacuta')).not.toBeNull()
     expect(gazda.querySelector('.ecuatie-card .cu-valori')?.textContent).toContain('cu x curent:')
@@ -917,10 +920,13 @@ describe('aplicația montată', () => {
     expect(gazda.querySelector('.geometrie svg .punct.curent')).toBeNull()
     expect(gazda.querySelector('.geometrie')?.textContent).toContain('soluția CMMP x*, (0.667, 0)')
     await comanda(gazda, 'laSfarsit')
-    expect(gazda.querySelector('.faza .nr')?.textContent).toBe('faza 3 din 3')
-    expect(gazda.querySelector('.faza annotation')?.textContent).toBe("R' x = d'")
+    // pasul final nu are linie, deci nici faza; x calculat ramane in desen
+    expect(gazda.querySelector('.faza')).toBeNull()
     expect(gazda.querySelectorAll('.geometrie svg .punct.curent')).toHaveLength(1)
     expect(gazda.querySelector('.geometrie svg')?.getAttribute('aria-label')).toContain('x calculat de algoritm: (0.667,')
+    await comanda(gazda, 'pasInapoi')
+    expect(gazda.querySelector('.faza .nr')?.textContent).toBe('faza 3 din 3')
+    expect(gazda.querySelector('.faza annotation')?.textContent).toBe("R' x = d'")
     // QR singur nu are faze
     await scrieIn(gazda.querySelector('header select')!, 'QR')
     expect(gazda.querySelector('.faza')).toBeNull()

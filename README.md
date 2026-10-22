@@ -138,9 +138,10 @@ the one from the image.
 - "Cost as a function of n" runs a direct algorithm on random inputs with the required nature for
   n from 2 to 8 and plots the counted flops next to the cost formula of the algorithm, with a
   table. For the pairs the course and the book compare (Gb and G, GPPb and GPP, UTRISb and
-  UTRIS, Cholesky and G, QR and G) a second series shows the flops the other algorithm counts at
-  the same n, the table has the ratio of the two, and a note says what the course states about
-  it.
+  UTRIS, Cholesky and G, QR and G) a second series shows the flops the other algorithm counts on
+  the same inputs (for QR, which needs m > n here while G needs a square matrix, G runs on an
+  n × n matrix of its own), the table has the ratio of the two, and a note says what the course
+  or the book states about the pair.
 - "Adaptation exercises", at the end of the algorithm list, start from a library algorithm and
   ask to adapt it to a structured matrix, as in the problems of the book: LTRIS for a lower
   bidiagonal matrix and UTRIS for an upper bidiagonal one (P 1.24), G for a tridiagonal matrix
@@ -198,7 +199,7 @@ the one from the image.
   current line uses the row variable of the pseudocode (i, or l for the inverse power method),
   that row of A, x_i and b_i are framed, and the step card writes equation i with the current
   numbers, then with the current values of x and whether it holds; the second part stays hidden
-  while a result is hidden in exercise mode. At the final step the scene keeps the last line.
+  while a result is hidden in exercise mode. The final step has no line, so it marks nothing.
 - For SQR a title above the grids names the phase of the current line, QᵀA = R, d = Qᵀb or
   R′x = d′, with what it does.
 - Cells: red with a double outline for the divisor (the pivot in elimination), orange with a

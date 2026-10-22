@@ -43,6 +43,7 @@ export function CostPeN({ alg, intrari, deschis }: Props) {
 
   const pereche = perecheCost(alg)
   const cuPereche = !!pereche && puncte.every((p) => p.pereche !== undefined)
+  const aceleasi = cuPereche && puncte.every((p) => p.aceleasi)
   const numePereche = pereche ? numeScurt(pereche, limba) : ''
   const n0 = DIMENSIUNI[0]
   const n1 = DIMENSIUNI.at(-1)!
@@ -79,7 +80,7 @@ export function CostPeN({ alg, intrari, deschis }: Props) {
               <line className="serie a-doua" x1="0" y1="5" x2="18" y2="5" />
               <rect className="punct a-doua" x="6" y="2" width="6" height="6" />
             </svg>{' '}
-            {t('costNPereche', numePereche)}
+            {t(aceleasi ? 'costNPereche' : 'costNPerecheAlta', numePereche)}
           </li>
         )}
       </ul>

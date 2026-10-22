@@ -621,17 +621,16 @@ function Continut() {
   const xEc = sistem ? stare[sistem.x] : undefined
   const bEc = sistem ? stare[sistem.b] : undefined
   const cuEcuatie = !!sistem && matriceEc?.tip === 'matrice' && bEc?.tip === 'vector'
-  // pasul final nu are linie de cod: scena pastreaza linia ultimului pas executat
-  const linieScena = pas && pas.linie > 0 ? pas.linie : pas?.final === 'gata' && k > 0 && rez ? rez.pasi[k - 1].linie : 0
-  const linieEc = cuEcuatie && matriceEc && bEc && pas ? (() => {
-    const l = linieEcuatie(alg!, { ...pas, linie: linieScena }, variabile.get(linieScena) ?? [])
+  // pasul final nu are linie de cod, deci nici ecuatie marcata, ca editorul si lista etapelor
+  const linieEc = cuEcuatie && matriceEc && bEc ? (() => {
+    const l = linieEcuatie(alg!, pas, variabile.get(pas?.linie ?? 0) ?? [])
     return l !== null && l <= matriceEc.m && l <= bEc.n ? l : null
   })() : null
   const ecuatieCurenta = cuEcuatie && linieEc !== null ? ecuatia(matriceEc as Matrice, bEc as Vector, xEc?.tip === 'vector' ? xEc : null, sistem!.x, linieEc) : null
   const inSistem = (nume: string) => !!sistem && (nume === sistem.A || nume === sistem.x || nume === sistem.b)
   const esteIntrare = (nume: string) => definitii.some((d) => d.nume.trim() === nume)
   // faza algoritmului (SQR pune QR, d = Qᵀb si substitutia unul dupa altul)
-  const faza = alg?.faze && dinBiblioteca && linieScena > 0 ? alg.faze.findIndex((f) => linieScena >= f.linii[0] && linieScena <= f.linii[1]) : -1
+  const faza = alg?.faze && dinBiblioteca && pas && pas.linie > 0 ? alg.faze.findIndex((f) => pas.linie >= f.linii[0] && pas.linie <= f.linii[1]) : -1
 
   const intrariScalare = new Set(definitii.filter((d) => d.tip === 'scalar').map((d) => d.nume.trim()))
   const scalari = pas

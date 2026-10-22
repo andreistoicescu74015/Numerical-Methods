@@ -254,23 +254,24 @@ export const TEXTE = {
   costNRaport: { ro: 'numărați / formulă', en: 'counted / formula' },
   costNIndiciu: { ro: '{0} numărați, {1} după formulă', en: '{0} counted, {1} by the formula' },
   costNDescriere: { ro: 'Flopii numărați și formula de cost pentru n de la {0} la {1}; la n = {1}: {2} numărați, {3} după formulă.', en: 'The counted flops and the cost formula for n from {0} to {1}; at n = {1}: {2} counted, {3} by the formula.' },
-  costNPereche: { ro: 'flopi numărați de {0}, la același n', en: 'flops counted by {0}, at the same n' },
+  costNPereche: { ro: 'flopi numărați de {0}, pe aceleași intrări', en: 'flops counted by {0}, on the same inputs' },
+  costNPerecheAlta: { ro: 'flopi numărați de {0}, pe o matrice n × n a lui', en: 'flops counted by {0}, on an n × n matrix of its own' },
   costNIndiciuPereche: { ro: '{0}: {1}', en: '{0}: {1}' },
   costNNotaCHOL: {
-    ro: 'A doua serie: {1} pe o matrice de același n. Cursul dă pentru Cholesky ≈ n³/3 flopi, jumătate din cei ≈ 2n³/3 ai eliminării gaussiene; raportul din tabel se apropie de 1/2 când n crește.',
-    en: 'The second series: {1} on a matrix of the same n. The course gives ≈ n³/3 flops for Cholesky, half of the ≈ 2n³/3 of Gaussian elimination; the ratio in the table approaches 1/2 as n grows.',
+    ro: 'A doua serie: {1} pe aceeași matrice. Cursul (slide-ul "Sisteme simetrice pozitiv definite"): CHOL necesită ≈ n³/3 operații, de două ori mai puține decât eliminarea gaussiană, cu ≈ 2n³/3; raportul din tabel se apropie de 1/2 când n crește.',
+    en: 'The second series: {1} on the same matrix. The course (slide "Sisteme simetrice pozitiv definite"): CHOL takes ≈ n³/3 operations, half as many as Gaussian elimination, with ≈ 2n³/3; the ratio in the table approaches 1/2 as n grows.',
   },
   costNNotaQR: {
-    ro: 'A doua serie: {1} pe o matrice n × n. Cursul: pe o matrice pătrată QR costă ≈ 4n³/3 flopi, dublul eliminării gaussiene. Aici QR rulează cu m = n + 1 linii, deci raportul formulelor este 2 + 3/n, iar cel numărat, din tabel, se apropie de el când n crește.',
-    en: 'The second series: {1} on an n × n matrix. The course: on a square matrix QR costs ≈ 4n³/3 flops, double Gaussian elimination. Here QR runs with m = n + 1 rows, so the ratio of the formulas is 2 + 3/n, and the counted one, in the table, approaches it as n grows.',
+    ro: 'A doua serie: {1} pe o matrice n × n a lui, pentru că aici QR cere m > n, iar G o matrice pătrată. Cursul (slide-ul "Triangularizare ortogonala"): QR costă ≈ 2(mn² − n³/3) operații, care pentru m = n se reduc la ≈ 4n³/3, dublul eliminării gaussiene; de aceea în cazul pătrat cursul preferă eliminarea gaussiană. Cu m = n + 1 raportul formulelor este 2 + 3/n, iar cel numărat, din tabel, scade spre el când n crește.',
+    en: 'The second series: {1} on an n × n matrix of its own, because here QR requires m > n and G a square matrix. The course (slide "Triangularizare ortogonala"): QR costs ≈ 2(mn² − n³/3) operations, which for m = n reduce to ≈ 4n³/3, double Gaussian elimination; this is why the course prefers Gaussian elimination in the square case. With m = n + 1 the ratio of the formulas is 2 + 3/n, and the counted one, in the table, decreases towards it as n grows.',
   },
   costNNotaBanda: {
-    ro: 'A doua serie: {1} pe o matrice plină de același n. Cartea cursului (paginile 107-108): este destul ca r sau q să fie mult mai mic decât n pentru ca varianta bandă să coste mult sub 2n³/3. Raportul din tabel este costul numărat al lui {0} împărțit la cel al lui {1}, cu lățimile curente.',
-    en: 'The second series: {1} on a full matrix of the same n. The book of the course (pages 107-108): it is enough for r or q to be much smaller than n for the banded variant to cost far below 2n³/3. The ratio in the table is the counted cost of {0} divided by that of {1}, with the current widths.',
+    ro: 'A doua serie: {1} pe aceeași matrice, cu zerourile din afara benzii tratate ca orice element. Cartea cursului (paginile 107-108): dacă r ≪ n sau q ≪ n, numărul de operații al variantei bandă este ≪ 2n³/3. Raportul din tabel este costul numărat al lui {0} împărțit la cel al lui {1}, cu lățimile curente.',
+    en: 'The second series: {1} on the same matrix, with the zeros outside the band treated like any entry. The book of the course (pages 107-108): if r ≪ n or q ≪ n, the number of operations of the banded variant is ≪ 2n³/3. The ratio in the table is the counted cost of {0} divided by that of {1}, with the current widths.',
   },
   costNNotaUTRISb: {
-    ro: 'A doua serie: {1} pe o matrice de același n. Cartea cursului (secțiunea 2.9): substituția adaptată la bandă face Σ (2 min(q, n − i) + 1) ≈ n(2q + 1) flopi, față de n². Raportul din tabel este costul numărat al lui {0} împărțit la cel al lui {1}, cu q curent.',
-    en: 'The second series: {1} on a matrix of the same n. The book of the course (section 2.9): the substitution adapted to the band takes Σ (2 min(q, n − i) + 1) ≈ n(2q + 1) flops, against n². The ratio in the table is the counted cost of {0} divided by that of {1}, with the current q.',
+    ro: 'A doua serie: {1} pe aceiași U și b. Cartea cursului (secțiunea 2.9) adaptează UTRIS la bandă oprind suma la min(i + q, n); numărat pe pseudocod, costul este Σ (2 min(q, n − i) + 1) ≈ n(2q + 1) flopi, față de n². Raportul din tabel este costul numărat al lui {0} împărțit la cel al lui {1}, cu q curent.',
+    en: 'The second series: {1} on the same U and b. The book of the course (section 2.9) adapts UTRIS to the band by stopping the sum at min(i + q, n); counted on the pseudocode, the cost is Σ (2 min(q, n − i) + 1) ≈ n(2q + 1) flops, against n². The ratio in the table is the counted cost of {0} divided by that of {1}, with the current q.',
   },
   conditionare: { ro: 'Condiționare', en: 'Conditioning' },
   conditionareAjutor: {

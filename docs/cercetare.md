@@ -240,7 +240,8 @@ UTRIS, UTRISb, S_G, S_GPP, Jacobi, Gauss-Seidel, Kaczmarz și MPI, cu (μI − A
 cu locul lui x gol până când algoritmul îl creează. Când linia de pseudocod folosește variabila
 de linie (i, la MPI l), linia i a lui A, x_i și b_i sunt încadrate, iar cardul scrie ecuația i cu
 numerele curente și, dedesubt, cu valorile curente ale lui x și dacă este satisfăcută
-(`src/ecuatie.ts`); partea a doua rămâne ascunsă cât timp rezultatul pasului este ascuns. La SQR
+(`src/ecuatie.ts`); partea a doua rămâne ascunsă cât timp rezultatul pasului este ascuns, iar
+pasul final, fără linie de cod, nu marchează nimic, ca editorul și lista etapelor. La SQR
 titlul fazei (QᵀA = R, d = Qᵀb, R′x = d′, câmpul `faze`) stă deasupra grilelor, iar vederea
 geometrică pentru n = 2 desenează dreptele ecuațiilor, care nu trec prin același punct (slide-ul
 "Rezolvarea de sisteme liniare: m ≠ n"), soluția CMMP calculată separat și x-ul algoritmului după
@@ -262,11 +263,15 @@ Patru funcții leagă algoritmul de teoria din curs:
 - Costul în funcție de n (`src/costuri.ts`) rulează algoritmul pentru n de la 2 la 8 și pune
   flopii numărați lângă formula de cost a algoritmului. Pentru perechile comparate în curs și în
   carte (Gb și G, GPPb și GPP, UTRISb și UTRIS, Cholesky și G, QR și G) a doua serie este
-  algoritmul pereche la același n, rulat pe intrări aleatoare ale lui (flopii acestor algoritmi
-  depind doar de dimensiuni), iar tabelul are raportul; nota de sub grafic citează cursul
-  (Cholesky ≈ n³/3 față de ≈ 2n³/3; QR ≈ 4n³/3 pe o matrice pătrată, aici cu m = n + 1, deci
-  raportul formulelor 2 + 3/n) sau cartea (paginile 107-108 pentru bandă, secțiunea 2.9 pentru
-  UTRISb). Măsura este numărul de flopi, nu pașii.
+  algoritmul pereche pe aceleași intrări (matricea bandă sau cea pozitiv definită dată lui G);
+  singura excepție este QR, care cere aici m > n, în timp ce G cere o matrice pătrată, deci G
+  rulează pe o matrice n × n a lui (flopii acestor algoritmi depind doar de dimensiuni). Tabelul
+  are raportul, iar nota de sub grafic citează cursul (slide-ul 162: CHOL ≈ n³/3, de două ori mai
+  puține operații decât eliminarea gaussiană; slide-ul 210: QR ≈ 4n³/3 pe o matrice pătrată,
+  dublu, aici cu m = n + 1, deci raportul formulelor 2 + 3/n) sau cartea (paginile 107-108: dacă
+  r ≪ n sau q ≪ n, costul variantei bandă este ≪ 2n³/3; secțiunea 2.9 pentru UTRISb, al cărui
+  cost este numărat pe pseudocod, cartea dând doar formula substituției). Măsura este numărul de
+  flopi, nu pașii.
 - Exercițiile de adaptare (`src/adaptari.ts`) sunt problemele din carte: P 1.24 a și c (pagina
   68), P 2.29 a (pagina 122) cu secțiunea 2.9 și partea de triangularizare din P 2.13 a (pagina
   120). Țintele de flopi (3n − 2, 3(n − 1), n² − 1) sunt numărate pe soluții, iar testele verifică
