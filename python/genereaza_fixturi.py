@@ -165,6 +165,50 @@ yc, ic = alg.mpi(Ac, np.array([1.0, 0.0, 0.0, 0.0]), 1e-15, 50)
 assert yc is not None and ic == 5
 cazuri.append({"algoritm": "MPI", "descriere": f"matricea companion din curs, {ic} iteratii", "intrari": {"A": lista(Ac), "y": [1.0, 0.0, 0.0, 0.0], "tol": 1e-15, "maxiter": 50}, "iesiri": {"y": lista(yc), "i": ic}})
 
+# S_G: exemplul din curs cu pivotul 10^-4, in dubla precizie (solutia corecta), si o matrice cu
+# submatricele lider nesingulare (cea diagonal dominanta de mai sus)
+Asg = np.array([[0.0001, 1.0], [1.0, 1.0]])
+bsg = np.array([1.0, 2.0])
+xsg, Fsg, dsg = alg.s_g(alg.pad(Asg), alg.pad(bsg), 2)
+assert np.allclose(Asg @ xsg[1:], bsg)
+cazuri.append({"algoritm": "S_G", "descriere": "exemplul din curs cu pivotul 1e-4, dubla precizie", "intrari": {"A": lista(Asg), "b": lista(bsg)}, "iesiri": {"A": lista(Fsg[1:, 1:]), "b": lista(dsg[1:]), "x": lista(xsg[1:])}})
+xs4, Fs4, ds4 = alg.s_g(alg.pad(A), alg.pad(b), n)
+assert np.allclose(A @ xs4[1:], b)
+cazuri.append({"algoritm": "S_G", "descriere": "n = 4, fara pivotare", "intrari": {"A": lista(A), "b": lista(b)}, "iesiri": {"A": lista(Fs4[1:, 1:]), "b": lista(ds4[1:]), "x": lista(xs4[1:])}})
+
+# Gb si GPPb: exemplele din biblioteca (r = q = 1) si o matrice banda 6x6 cu r = 2, q = 1,
+# diagonal dominanta, ca eliminarea fara pivotare sa aiba pivoti nenuli
+Agb = np.array([[2.0, 1, 0, 0, 0], [4, 3, 1, 0, 0], [0, 3, 4, 1, 0], [0, 0, 2, 3, 1], [0, 0, 0, 1, 2]])
+Fgb = alg.gb(alg.pad(Agb), 5, 1, 1)
+Lgb = np.tril(Fgb[1:, 1:], -1) + np.eye(5)
+assert np.allclose(Lgb @ np.triu(Fgb[1:, 1:]), Agb)
+cazuri.append({"algoritm": "Gb", "descriere": "tridiagonala 5x5 din biblioteca", "intrari": {"A": lista(Agb), "r": 1, "q": 1}, "iesiri": {"A": lista(Fgb[1:, 1:])}})
+nb = 6
+Ab = rotunjit(rng.standard_normal((nb, nb)))
+Ab = np.array([[Ab[i, j] if i - j <= 2 and j - i <= 1 else 0.0 for j in range(nb)] for i in range(nb)]) + nb * np.eye(nb)
+Fb = alg.gb(alg.pad(Ab), nb, 2, 1)
+assert np.allclose((np.tril(Fb[1:, 1:], -1) + np.eye(nb)) @ np.triu(Fb[1:, 1:]), Ab)
+cazuri.append({"algoritm": "Gb", "descriere": "banda 6x6 cu r = 2, q = 1", "intrari": {"A": lista(Ab), "r": 2, "q": 1}, "iesiri": {"A": lista(Fb[1:, 1:])}})
+
+Agppb = np.array([[1.0, 2, 0, 0, 0], [3, 1, 1, 0, 0], [0, 4, 1, 2, 0], [0, 0, 1, 3, 1], [0, 0, 0, 2, 1]])
+Fgppb, pgppb = alg.gppb(alg.pad(Agppb), 5, 1, 1)
+assert any(pgppb[k] != k for k in range(1, 5)), "exemplul GPPb trebuie sa aiba macar o interschimbare"
+cazuri.append({"algoritm": "GPPb", "descriere": "banda 5x5 din biblioteca, cu interschimbari", "intrari": {"A": lista(Agppb), "r": 1, "q": 1}, "iesiri": {"A": lista(Fgppb[1:, 1:]), "p": lista(pgppb[1:])}})
+Fb2, pb2 = alg.gppb(alg.pad(Ab), nb, 2, 1)
+cazuri.append({"algoritm": "GPPb", "descriere": "banda 6x6 cu r = 2, q = 1", "intrari": {"A": lista(Ab), "r": 2, "q": 1}, "iesiri": {"A": lista(Fb2[1:, 1:]), "p": lista(pb2[1:])}})
+
+# UTRISb: exemplul din biblioteca (q = 1) si o matrice superior banda 6x6 cu q = 2
+Ub = np.array([[2.0, 1, 0, 0, 0], [0, 1, 1, 0, 0], [0, 0, 1, 1, 0], [0, 0, 0, 1, 1], [0, 0, 0, 0, 1]])
+bub = np.array([3.0, 2, 2, 2, 1])
+xub = alg.utrisb(alg.pad(Ub), alg.pad(bub), 5, 1)
+assert np.allclose(Ub @ xub[1:], bub)
+cazuri.append({"algoritm": "UTRISb", "descriere": "bidiagonala 5x5 din biblioteca", "intrari": {"U": lista(Ub), "b": lista(bub), "q": 1}, "iesiri": {"x": lista(xub[1:])}})
+Ub2 = np.array([[Ab[i, j] if 0 <= j - i <= 2 else 0.0 for j in range(nb)] for i in range(nb)])
+bub2 = rotunjit(rng.standard_normal(nb))
+xub2 = alg.utrisb(alg.pad(Ub2), alg.pad(bub2), nb, 2)
+assert np.allclose(Ub2 @ xub2[1:], bub2)
+cazuri.append({"algoritm": "UTRISb", "descriere": "superior banda 6x6 cu q = 2", "intrari": {"U": lista(Ub2), "b": lista(bub2), "q": 2}, "iesiri": {"x": lista(xub2[1:])}})
+
 iesire = pathlib.Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "algoritmi.json"
 iesire.parent.mkdir(parents=True, exist_ok=True)
 iesire.write_text(json.dumps({"sursa": "python/genereaza_fixturi.py, samanta 7", "cazuri": cazuri}, indent=1, ensure_ascii=False), encoding="utf-8")

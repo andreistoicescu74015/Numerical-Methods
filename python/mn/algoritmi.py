@@ -74,6 +74,48 @@ def s_gpp(A, b, n):
     return utris(F, b, n), F, p, b
 
 
+def s_g(A, b, n):
+    """S_G: eliminarea fara pivotare pe A, aceiasi multiplicatori pe b, apoi UTRIS."""
+    F = g(A, n)
+    b = b.copy()
+    for k in r(1, n - 1):
+        for i in r(k + 1, n):
+            b[i] = b[i] - F[i, k] * b[k]
+    return utris(F, b, n), F, b
+
+
+def gb(A, n, rb, qb):
+    """Gb (cartea, algoritmul 2.14): eliminarea pe o matrice banda cu rb diagonale sub si qb peste."""
+    A = A.copy()
+    for k in r(1, n - 1):
+        for i in r(k + 1, min(k + rb, n)):
+            A[i, k] = A[i, k] / A[k, k]
+        for i in r(k + 1, min(k + rb, n)):
+            for j in r(k + 1, min(k + qb, n)):
+                A[i, j] = A[i, j] - A[i, k] * A[k, j]
+    return A
+
+
+def gppb(A, n, rb, qb):
+    """GPPb (cartea, algoritmul 2.15): pivotul cautat in banda, banda de sus largita la qb + rb."""
+    A = A.copy()
+    p = np.zeros(n, dtype=int)
+    for k in r(1, n - 1):
+        ik = k
+        for i in r(k, min(k + rb, n)):
+            if abs(A[i, k]) > abs(A[ik, k]):
+                ik = i
+        p[k] = ik
+        for j in r(k, min(k + qb + rb, n)):
+            A[k, j], A[ik, j] = A[ik, j], A[k, j]
+        for i in r(k + 1, min(k + rb, n)):
+            A[i, k] = A[i, k] / A[k, k]
+        for i in r(k + 1, min(k + rb, n)):
+            for j in r(k + 1, min(k + qb + rb, n)):
+                A[i, j] = A[i, j] - A[i, k] * A[k, j]
+    return A, p
+
+
 def ltris(L, b, n):
     x = b.copy()
     for i in r(1, n):
@@ -87,6 +129,16 @@ def utris(U, b, n):
     x = b.copy()
     for i in r(n, 1, -1):
         for j in r(i + 1, n):
+            x[i] = x[i] - U[i, j] * x[j]
+        x[i] = x[i] / U[i, i]
+    return x
+
+
+def utrisb(U, b, n, qb):
+    """UTRISb (cartea, sectiunea 2.9): UTRIS cu suma oprita la min(i + qb, n)."""
+    x = b.copy()
+    for i in r(n, 1, -1):
+        for j in r(i + 1, min(i + qb, n)):
             x[i] = x[i] - U[i, j] * x[j]
         x[i] = x[i] / U[i, i]
     return x
