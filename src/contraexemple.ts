@@ -109,6 +109,15 @@ export const CONTRAEXEMPLE: Record<string, Contraexemplu[]> = {
       valori: { A: [[0, 1], [1, 1]], b: [1, 2] },
       final: 'eroare',
     },
+    {
+      titlu: { ro: 'matrice singulară', en: 'singular matrix' },
+      explicatie: {
+        ro: 'A[1] = 1 este nesingulară, deci G merge până la capăt, dar A este singulară (linia 2 este dublul liniei 1) și u_22 iese 0: substituția înapoi nu poate împărți la el. Slide-ul "Rezolvarea sistemelor liniare utilizand G" observă că pentru G matricea poate fi singulară; rezolvarea sistemului are nevoie și de A nesingulară.',
+        en: 'A[1] = 1 is nonsingular, so G runs to the end, but A is singular (row 2 is twice row 1) and u_22 comes out 0: back substitution cannot divide by it. The slide "Rezolvarea sistemelor liniare utilizand G" remarks that for G the matrix may be singular; solving the system also needs A nonsingular.',
+      },
+      valori: { A: [[1, 2], [2, 4]], b: [3, 6] },
+      final: 'eroare',
+    },
   ],
   LU: [{ titlu: { ro: 'pivot nul, deși A este nesingulară', en: 'zero pivot, although A is nonsingular' }, explicatie: PIVOT_NUL_TEXT, valori: { A: PIVOT_NUL }, final: 'eroare' }],
   CHOL: [

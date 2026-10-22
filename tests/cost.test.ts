@@ -37,6 +37,8 @@ const CAZURI: Record<string, { intrari: (n: number, rnd: () => number) => Intrar
   QR: { intrari: (n, r) => ({ A: aleatoare(2 * n, n, r) }), ordin: 3 },
   SQR: { intrari: (n, r) => ({ A: aleatoare(2 * n, n, r), b: vector(2 * n, r) }), ordin: 3 },
   MP: { intrari: (n, r) => ({ A: cuSpectru([5, 2, ...Array.from({ length: n - 2 }, (_, k) => 1 / (k + 1))], r), y: vector(n, r), tol: 1e-10, maxiter: 500 }), ordin: 2 },
+  // la fiecare iteratie se rezolva un sistem n x n
+  MPI: { intrari: (n, r) => ({ A: cuSpectru([5, 2, ...Array.from({ length: n - 2 }, (_, k) => 1 / (k + 1))], r), y: vector(n, r), tol: 1e-10, maxiter: 500 }), ordin: 3 },
 }
 
 function masoara(id: string, n: number) {

@@ -57,6 +57,10 @@ export const TEXTE = {
     ro: 'y are norma 1, deci stă pe cercul de rază 1. A nu are o valoare proprie reală de modul strict mai mare decât al celeilalte, deci ipoteza metodei puterii nu este îndeplinită: y nu are o direcție spre care să se rotească.',
     en: 'y has norm 1, so it sits on the circle of radius 1. A has no real eigenvalue of strictly larger absolute value than the other, so the hypothesis of the power method does not hold: y has no direction to turn towards.',
   },
+  geometrieMPI: {
+    ro: 'y are norma 1, deci stă pe cercul de rază 1, și se rotește spre vectorul propriu al valorii proprii de care se apropie μ; linia plină este direcția vectorului propriu dominant, cea întreruptă a celuilalt.',
+    en: 'y has norm 1, so it sits on the circle of radius 1, and turns towards the eigenvector of the eigenvalue that μ approaches; the solid line is the direction of the dominant eigenvector, the dashed one that of the other.',
+  },
   geometrieRFG: {
     ro: 'Reflectorul oglindește x față de dreapta întreruptă, perpendiculară pe vectorul Householder u; imaginea U₁x = (−σ, 0) stă pe axa x₁, deci a doua componentă a devenit zero.',
     en: 'The reflector mirrors x across the dashed line, perpendicular to the Householder vector u; the image U₁x = (−σ, 0) lies on the x₁ axis, so the second component has become zero.',
@@ -187,6 +191,7 @@ export const TEXTE = {
     en: 'random: A = T D T⁻¹ with an integer T and a diagonal D; A and D are similar, so they have the same eigenvalues, those in D, one of them dominant',
   },
   aleatorPornire: { ro: 'aleator: un vector nenul cu o componentă pe vectorul propriu dominant al lui A', en: 'random: a nonzero vector with a component along the dominant eigenvector of A' },
+  aleatorPornireInversa: { ro: 'aleator: un vector nenul al cărui cât Rayleigh yᵀAy/yᵀy nu este o valoare proprie exactă a lui A', en: 'random: a nonzero vector whose Rayleigh quotient yᵀAy/yᵀy is not an exact eigenvalue of A' },
   aleatorBandaLider: { ro: 'aleator: bandă cu lățimile r și q, cu submatricele lider principale nesingulare', en: 'random: banded with widths r and q, with nonsingular leading principal submatrices' },
   aleatorBandaNesingulara: { ro: 'aleator: bandă cu lățimile r și q, nesingulară', en: 'random: banded with widths r and q, nonsingular' },
   aleatorSuperiorBanda: { ro: 'aleator: superior triunghiulară, bandă de lățime q, cu diagonala nenulă', en: 'random: upper triangular, banded with width q, with a nonzero diagonal' },

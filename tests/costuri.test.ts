@@ -13,7 +13,7 @@ describe('costul în funcție de n', () => {
       expect(p.map((x) => x.n), a.id).toEqual(DIMENSIUNI)
       for (let k = 1; k < p.length; k++) expect(p[k].flopi, `${a.id}, n = ${p[k].n}`).toBeGreaterThan(p[k - 1].flopi)
     }
-    expect(BIBLIOTECA.filter((a) => !areCostPeN(a)).map((a) => a.id)).toEqual(['JACOBI', 'GS', 'KACZMARZ', 'MP'])
+    expect(BIBLIOTECA.filter((a) => !areCostPeN(a)).map((a) => a.id)).toEqual(['JACOBI', 'GS', 'KACZMARZ', 'MP', 'MPI'])
   })
 
   it('formulele exacte cad pe puncte: n² la substituții, 2mn la produsul matrice-vector, 2n³ la produsul de matrice', () => {

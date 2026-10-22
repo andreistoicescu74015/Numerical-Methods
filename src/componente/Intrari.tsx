@@ -49,6 +49,7 @@ const TITLU_ALEATOR: Record<Exclude<Aleator, 'oarecare' | 'simetrica' | 'diagona
   coloaneIndependente: 'aleatorColoane',
   asemenea: 'aleatorAsemenea',
   pornire: 'aleatorPornire',
+  pornireInversa: 'aleatorPornireInversa',
   bandaLider: 'aleatorBandaLider',
   bandaNesingulara: 'aleatorBandaNesingulara',
   superiorBanda: 'aleatorSuperiorBanda',

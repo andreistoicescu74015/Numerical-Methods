@@ -333,8 +333,8 @@ pentru j = 1 : n
       },
     ],
     practic: {
-      ro: 'L este nesingulară exact când toate elementele l_ii sunt nenule; un l_ii nul oprește algoritmul la împărțire. Se folosește după o factorizare: cu A = LU, sistemul Ax = b devine Ly = b, apoi Ux = y. În SciPy: scipy.linalg.solve_triangular(L, b, lower=True).',
-      en: 'L is nonsingular exactly when every l_ii is nonzero; a zero l_ii stops the algorithm at the division. It is used after a factorization: with A = LU, the system Ax = b becomes Ly = b, then Ux = y. In SciPy: scipy.linalg.solve_triangular(L, b, lower=True).',
+      ro: 'L este nesingulară exact când toate elementele l_ii sunt nenule; un l_ii nul oprește algoritmul la împărțire. Se folosește după o factorizare: cu A = LU, sistemul Ax = b devine Ly = b, apoi Ux = y. Slide-ul "Inversarea matricelor triunghiulare" arată că inversa L⁻¹ (algoritmul LINV) costă O(n³/3) flopi, deci Lx = b se rezolvă prin substituție, cu n² flopi, nu prin inversare. Cartea cursului (pagina 102) notează că substituția este numeric stabilă: într-o rezolvare Ax = b, erorile vin mai ales din triangularizare. În SciPy: scipy.linalg.solve_triangular(L, b, lower=True).',
+      en: 'L is nonsingular exactly when every l_ii is nonzero; a zero l_ii stops the algorithm at the division. It is used after a factorization: with A = LU, the system Ax = b becomes Ly = b, then Ux = y. The slide "Inversarea matricelor triunghiulare" shows that the inverse L⁻¹ (algorithm LINV) costs O(n³/3) flops, so Lx = b is solved by substitution, with n² flops, not by inversion. The book of the course (page 102) notes that substitution is numerically stable: when solving Ax = b, the errors come mostly from the triangularization. In SciPy: scipy.linalg.solve_triangular(L, b, lower=True).',
     },
     iesiri: ['x'],
     numpy: fataDeSolve('L', '{x}'),
@@ -377,8 +377,8 @@ pentru i = 1 : n
       },
     ],
     practic: {
-      ro: 'Este ultimul pas după eliminarea gaussiană sau după triangularizarea ortogonală, care lasă de rezolvat un sistem superior triunghiular. U este nesingulară exact când toate elementele u_ii sunt nenule. În SciPy: scipy.linalg.solve_triangular(U, b).',
-      en: 'It is the last step after Gaussian elimination or orthogonal triangularization, which leave an upper triangular system to solve. U is nonsingular exactly when every u_ii is nonzero. In SciPy: scipy.linalg.solve_triangular(U, b).',
+      ro: 'Este ultimul pas după eliminarea gaussiană sau după triangularizarea ortogonală, care lasă de rezolvat un sistem superior triunghiular. U este nesingulară exact când toate elementele u_ii sunt nenule. Cartea cursului (pagina 102) notează că substituția este numeric stabilă: într-o rezolvare Ax = b, erorile vin mai ales din triangularizare. În SciPy: scipy.linalg.solve_triangular(U, b).',
+      en: 'It is the last step after Gaussian elimination or orthogonal triangularization, which leave an upper triangular system to solve. U is nonsingular exactly when every u_ii is nonzero. The book of the course (page 102) notes that substitution is numerically stable: when solving Ax = b, the errors come mostly from the triangularization. In SciPy: scipy.linalg.solve_triangular(U, b).',
     },
     iesiri: ['x'],
     numpy: fataDeSolve('U', '{x}'),
@@ -424,8 +424,8 @@ pentru i = n : -1 : 1
       },
     ],
     practic: {
-      ro: 'Fără pivotare, un pivot nul oprește algoritmul chiar dacă A este nesingulară, iar un pivot mic strică rezultatul: în exemplul din curs, pivotul 10⁻⁴ și o precizie de trei cifre dau x_1 = 0 în loc de 1. De aceea în practică se folosește GPP. Algoritmul merge până la capăt exact când submatricele lider principale A[k], k = 1 : n-1, sunt nesingulare.',
-      en: 'Without pivoting, a zero pivot stops the algorithm even when A is nonsingular, and a small pivot ruins the result: in the course example, the pivot 10⁻⁴ and three digits of precision give x_1 = 0 instead of 1. This is why GPP is used in practice. The algorithm runs to the end exactly when the leading principal submatrices A[k], k = 1 : n-1, are nonsingular.',
+      ro: 'Fără pivotare, un pivot nul oprește algoritmul chiar dacă A este nesingulară, iar un pivot mic strică rezultatul: în exemplul din curs, pivotul 10⁻⁴ și o precizie de trei cifre dau x_1 = 0 în loc de 1. De aceea în practică se folosește GPP. Algoritmul merge până la capăt exact când submatricele lider principale A[k], k = 1 : n-1, sunt nesingulare; teorema din curs adaugă că, dacă A este nesingulară, atunci și U este nesingulară. Cartea cursului (pagina 103) numește G numeric instabil, pentru că fără pivotare factorul de creștere γ poate fi oricât de mare.',
+      en: 'Without pivoting, a zero pivot stops the algorithm even when A is nonsingular, and a small pivot ruins the result: in the course example, the pivot 10⁻⁴ and three digits of precision give x_1 = 0 instead of 1. This is why GPP is used in practice. The algorithm runs to the end exactly when the leading principal submatrices A[k], k = 1 : n-1, are nonsingular; the theorem of the course adds that, if A is nonsingular, then U is nonsingular too. The book of the course (page 103) calls G numerically unstable, because without pivoting the growth factor γ can be arbitrarily large.',
     },
     iesiri: ['A'],
     numpy: [
@@ -453,8 +453,8 @@ pentru k = 1 : n-1
       en: 'Gaussian elimination in which, at step k, the pivot is the entry with the largest absolute value in column k, on or below the diagonal. Its row is swapped with row k, then elimination goes on as in algorithm G. The vector p records which row was brought up at each step.',
     },
     curs: {
-      ro: 'Curs III, slide-ul "Algoritmul GPP - Eliminare gaussiana cu pivotare partiala", rând cu rând; la egalitate se alege cel mai mic indice, ca pe slide. Exemplul este matricea de la algoritmul G.',
-      en: 'Course III, slide "Algoritmul GPP - Eliminare gaussiana cu pivotare partiala", line by line; on ties the smallest index is chosen, as on the slide. The example is the matrix of algorithm G.',
+      ro: 'Curs III, slide-ul "Algoritmul GPP - Eliminare gaussiana cu pivotare partiala", rând cu rând; la egalitate se alege cel mai mic indice, ca pe slide. Exemplul este cel lucrat pe slide-urile "Eliminarea Gaussiana cu Pivotare Partiala - exemplu": la pasul 1 pivotul este 2, din linia 3, cu multiplicatorii 0.5 și 0.005; la pasul 2 pivotul rămâne pe loc, iar U iese [2 0 1; 0 2 −0.5; 0 0 1.245], cu p = (3, 2).',
+      en: 'Course III, slide "Algoritmul GPP - Eliminare gaussiana cu pivotare partiala", line by line; on ties the smallest index is chosen, as on the slide. The example is the one worked on the slides "Eliminarea Gaussiana cu Pivotare Partiala - exemplu": at step 1 the pivot is 2, from row 3, with multipliers 0.5 and 0.005; at step 2 the pivot stays in place, and U comes out [2 0 1; 0 2 −0.5; 0 0 1.245], with p = (3, 2).',
     },
     cost: { ro: '≈ 2n³/3 flopi și ≈ n²/2 comparații', en: '≈ 2n³/3 flops and ≈ n²/2 comparisons' },
     estimare: eliminare('A'),
@@ -474,7 +474,7 @@ pentru k = 1 : n-1
     sursa: `μ peste A
 fie p[n-1]
 ${SURSA_GPP}`,
-    intrari: [{ nume: 'A', tip: 'matrice', exemplu: [[1, 2, 1], [2, 1, 2], [1, 1, 2]], descriere: { ro: 'n × n, nesingulară', en: 'n × n, nonsingular' }, natura: 'nesingulara' }],
+    intrari: [{ nume: 'A', tip: 'matrice', exemplu: [[0.01, 1, 1], [1, 2, 0], [2, 0, 1]], descriere: { ro: 'n × n, nesingulară', en: 'n × n, nonsingular' }, natura: 'nesingulara' }],
   },
   {
     id: 'S_GPP',
@@ -557,8 +557,8 @@ pentru i = n : -1 : 1
       },
     ],
     practic: {
-      ro: 'Teorema din curs: factorizarea există și este unică dacă și numai dacă submatricele lider principale A[k], k = 1 : n-1, sunt nesingulare. Varianta cu 1 pe diagonala lui L se numește Doolittle și este cea pe care o produce eliminarea gaussiană. După factorizare, Ax = b se rezolvă cu două substituții: Ly = b, apoi Ux = y. Fără pivotare, un l_kk mic are același efect ca un pivot mic la algoritmul G; scipy.linalg.lu factorizează cu pivotare parțială și întoarce P, L, U cu A = PLU; cursul scrie PA = LU, deci P din SciPy este transpusa permutării din curs.',
-      en: 'The theorem of the course: the factorization exists and is unique if and only if the leading principal submatrices A[k], k = 1 : n-1, are nonsingular. The variant with ones on the diagonal of L is called Doolittle and is the one Gaussian elimination produces. After the factorization, Ax = b is solved with two substitutions: Ly = b, then Ux = y. Without pivoting, a small l_kk has the same effect as a small pivot in algorithm G; scipy.linalg.lu factorizes with partial pivoting and returns P, L, U with A = PLU; the course writes PA = LU, so the P of SciPy is the transpose of the permutation in the course.',
+      ro: 'Teorema din curs: factorizarea există și este unică dacă și numai dacă submatricele lider principale A[k], k = 1 : n-1, sunt nesingulare. Varianta cu 1 pe diagonala lui L se numește Doolittle și este cea pe care o produce eliminarea gaussiană. Slide-ul "Factorizari LU compacte" le leagă: cu D = diag(U_Do), L_Cr = L_Do D și U_Cr = D⁻¹U_Do; dacă D se păstrează separat, A = LDU cu ambele triunghiulare unitate, factorizarea LDU definită în curs. După factorizare, Ax = b se rezolvă cu două substituții: Ly = b, apoi Ux = y. Fără pivotare, un l_kk mic are același efect ca un pivot mic la algoritmul G; scipy.linalg.lu factorizează cu pivotare parțială și întoarce P, L, U cu A = PLU; cursul scrie PA = LU, deci P din SciPy este transpusa permutării din curs.',
+      en: 'The theorem of the course: the factorization exists and is unique if and only if the leading principal submatrices A[k], k = 1 : n-1, are nonsingular. The variant with ones on the diagonal of L is called Doolittle and is the one Gaussian elimination produces. The slide "Factorizari LU compacte" links the two: with D = diag(U_Do), L_Cr = L_Do D and U_Cr = D⁻¹U_Do; if D is kept apart, A = LDU with both triangular factors unit, the LDU factorization defined in the course. After the factorization, Ax = b is solved with two substitutions: Ly = b, then Ux = y. Without pivoting, a small l_kk has the same effect as a small pivot in algorithm G; scipy.linalg.lu factorizes with partial pivoting and returns P, L, U with A = PLU; the course writes PA = LU, so the P of SciPy is the transpose of the permutation in the course.',
     },
     iesiri: ['A'],
     numpy: [
@@ -604,8 +604,8 @@ pentru k = 1 : n
       },
     ],
     practic: {
-      ro: 'Cursul notează că face de două ori mai puține operații decât eliminarea gaussiană. Nu are nevoie de pivotare: cartea cursului arată că algoritmul este numeric stabil, mai bine decât eliminarea gaussiană cu pivotare completă. Factorizarea există dacă și numai dacă A este pozitiv definită, deci algoritmul este și un test de pozitiv definire. Se citește doar triunghiul inferior al lui A. Sistemul Ax = b se rezolvă apoi cu Ly = b și Lᵀx = y. numpy.linalg.cholesky întoarce același L.',
-      en: 'The course notes that it performs half as many operations as Gaussian elimination. It needs no pivoting: the book of the course shows that the algorithm is numerically stable, better than Gaussian elimination with complete pivoting. The factorization exists if and only if A is positive definite, so the algorithm is also a test for positive definiteness. Only the lower triangle of A is read. The system Ax = b is then solved with Ly = b and Lᵀx = y. numpy.linalg.cholesky returns the same L.',
+      ro: 'Cursul notează că face de două ori mai puține operații decât eliminarea gaussiană. Nu are nevoie de pivotare: cartea cursului arată că algoritmul este numeric stabil, mai bine decât eliminarea gaussiană cu pivotare completă. Factorizarea există dacă și numai dacă A este pozitiv definită, deci algoritmul este și un test de pozitiv definire. Teorema din curs spune și că L este unic când i se cer elementele diagonale pozitive, ceea ce radicalul asigură; de aceea numpy.linalg.cholesky întoarce același L. Se citește doar triunghiul inferior al lui A. Sistemul Ax = b se rezolvă apoi cu Ly = b și Lᵀx = y.',
+      en: 'The course notes that it performs half as many operations as Gaussian elimination. It needs no pivoting: the book of the course shows that the algorithm is numerically stable, better than Gaussian elimination with complete pivoting. The factorization exists if and only if A is positive definite, so the algorithm is also a test for positive definiteness. The theorem of the course also says that L is unique once its diagonal entries are required to be positive, which the square root ensures; this is why numpy.linalg.cholesky returns the same L. Only the lower triangle of A is read. The system Ax = b is then solved with Ly = b and Lᵀx = y.',
     },
     iesiri: ['A'],
     numpy: ['print("np.linalg.cholesky(A) =", np.linalg.cholesky(A), sep="\\n")', dif('np.tril({A})', 'np.linalg.cholesky(A)')],
@@ -756,8 +756,8 @@ cât timp e > tol    % bucla nu este pe slide
       { linii: [7, 7], tex: 'r = A x - b, \\qquad e = \\|r\\| / \\|b\\|', text: TEST_OPRIRE },
     ],
     practic: {
-      ro: 'Un pas folosește o singură linie a lui A și costă O(n) operații; cursul o numește una dintre cele mai eficiente metode pentru date foarte mari și notează că nu cere condiții asupra matricei, spre deosebire de Jacobi și Gauss-Seidel. Slide-ul dă convergența liniară ‖x^k − x*‖² ≤ (1 − λ_min(AᵀA)/‖A‖_F²)^k ‖x⁰ − x*‖², în care k numără actualizările pe câte o linie, nu trecerile prin toate liniile numărate aici. Un singur pas nu micșorează întotdeauna eroarea: din formula actualizării, ‖x_nou − x*‖² = ‖x − x*‖² − (a_iᵀ(x − x*))²/‖a_i‖², deci un pas pe o linie perpendiculară pe x − x* o lasă neschimbată. Sistemul trebuie să aibă soluție, altfel reziduul nu poate ajunge la zero, iar nicio linie nu poate fi nulă, pentru că se împarte la norma ei.',
-      en: 'One step uses a single row of A and costs O(n) operations; the course calls it one of the most efficient methods for very large data and notes that it asks for no conditions on the matrix, unlike Jacobi and Gauss-Seidel. The slide gives the linear convergence ‖x^k − x*‖² ≤ (1 − λ_min(AᵀA)/‖A‖_F²)^k ‖x⁰ − x*‖², where k counts updates on one row each, not the passes through all rows counted here. A single step does not always reduce the error: from the update formula, ‖x_new − x*‖² = ‖x − x*‖² − (a_iᵀ(x − x*))²/‖a_i‖², so a step on a row perpendicular to x − x* leaves it unchanged. The system must have a solution, otherwise the residual cannot reach zero, and no row can be zero, because the step divides by its norm.',
+      ro: 'Un pas folosește o singură linie a lui A și costă O(n) operații; cursul o numește una dintre cele mai eficiente metode pentru date foarte mari și notează că nu cere condiții asupra matricei, spre deosebire de Jacobi și Gauss-Seidel. Slide-ul dă convergența liniară ‖x^k − x*‖² ≤ (1 − λ_min(AᵀA)/‖A‖_F²)^k ‖x⁰ − x*‖², în care k numără actualizările pe câte o linie, nu trecerile prin toate liniile numărate aici. Un singur pas nu micșorează întotdeauna eroarea: din formula actualizării, ‖x_nou − x*‖² = ‖x − x*‖² − (a_iᵀ(x − x*))²/‖a_i‖², deci un pas pe o linie perpendiculară pe x − x* o lasă neschimbată. Sistemul trebuie să aibă soluție, altfel reziduul nu poate ajunge la zero, iar nicio linie nu poate fi nulă, pentru că se împarte la norma ei. Marginea are sens doar când λ_min(AᵀA) > 0, adică A are coloanele liniar independente (deci m ≥ n). Pentru m < n sistemul are o infinitate de soluții; cursul (slide-ul "Compressed sensing") spune că și atunci se poate folosi Kaczmarz pentru soluția CMMP de normă minimă: pornit din x⁰ = 0, fiecare pas adună un multiplu al unei linii, deci x rămâne în spațiul liniilor lui A, unde soluția este unică și de normă minimă.',
+      en: 'One step uses a single row of A and costs O(n) operations; the course calls it one of the most efficient methods for very large data and notes that it asks for no conditions on the matrix, unlike Jacobi and Gauss-Seidel. The slide gives the linear convergence ‖x^k − x*‖² ≤ (1 − λ_min(AᵀA)/‖A‖_F²)^k ‖x⁰ − x*‖², where k counts updates on one row each, not the passes through all rows counted here. A single step does not always reduce the error: from the update formula, ‖x_new − x*‖² = ‖x − x*‖² − (a_iᵀ(x − x*))²/‖a_i‖², so a step on a row perpendicular to x − x* leaves it unchanged. The system must have a solution, otherwise the residual cannot reach zero, and no row can be zero, because the step divides by its norm. The bound makes sense only when λ_min(AᵀA) > 0, that is when A has linearly independent columns (so m ≥ n). For m < n the system has infinitely many solutions; the course (slide "Compressed sensing") says Kaczmarz can still be used for the least-squares solution of minimal norm: started from x⁰ = 0, every step adds a multiple of a row, so x stays in the row space of A, where the solution is unique and of minimal norm.',
     },
     iesiri: ['x', 'k'],
     numpy: [
@@ -815,8 +815,8 @@ cât timp e > tol    % bucla nu este pe slide
       },
     ],
     practic: {
-      ro: 'Este pasul de bază al triangularizării ortogonale (Algoritmul QR). Slide-ul motivează scalarea prin stabilitatea numerică și prin faptul că u contează doar ca direcție; după scalare β = u_k, deci pe lângă vector se memorează un singur număr. Semnul lui σ este cel al lui x_k, ca u_k = 1 + |x_k|/‖x(k : m)‖ să fie între 1 și 2, fără scăderi de numere apropiate; de aceea sgn(0) se ia 1. Reflectorul nu se formează ca matrice: pe un vector y se aplică prin y ← y − ν u, cu ν = uᵀy / β.',
-      en: 'It is the basic step of orthogonal triangularization (Algorithm QR). The slide motivates the scaling by numerical stability and by the fact that u matters only as a direction; after scaling β = u_k, so a single number is stored besides the vector. The sign of σ is that of x_k, so that u_k = 1 + |x_k|/‖x(k : m)‖ lies between 1 and 2, with no subtraction of close numbers; this is why sgn(0) is taken as 1. The reflector is not formed as a matrix: it is applied to a vector y by y ← y − ν u, with ν = uᵀy / β.',
+      ro: 'Este pasul de bază al triangularizării ortogonale (Algoritmul QR). Slide-ul motivează scalarea prin stabilitatea numerică și prin faptul că u contează doar ca direcție; după scalare β = u_k, deci pe lângă vector se memorează un singur număr. Semnul lui σ este cel al lui x_k, ca u_k = 1 + |x_k|/‖x(k : m)‖ să fie între 1 și 2, fără scăderi de numere apropiate; cartea cursului (pagina 129) numește alegerea esențială pentru stabilitate. Tot cartea cere sgn(0) = 1: cu convenția sgn(0) = 0 a multor limbaje, pentru x_k = 0 ar ieși σ = 0, reflectorul ar fi sărit și componentele de sub poziția k ar rămâne neanulate. Reflectorul nu se formează ca matrice: pe un vector y se aplică prin y ← y − ν u, cu ν = uᵀy / β.',
+      en: 'It is the basic step of orthogonal triangularization (Algorithm QR). The slide motivates the scaling by numerical stability and by the fact that u matters only as a direction; after scaling β = u_k, so a single number is stored besides the vector. The sign of σ is that of x_k, so that u_k = 1 + |x_k|/‖x(k : m)‖ lies between 1 and 2, with no subtraction of close numbers; the book of the course (page 129) calls this choice essential for stability. The book also requires sgn(0) = 1: with the convention sgn(0) = 0 of many languages, x_k = 0 would give σ = 0, the reflector would be skipped and the components below position k would stay unannihilated. The reflector is not formed as a matrix: it is applied to a vector y by y ← y − ν u, with ν = uᵀy / β.',
     },
     iesiri: ['x', 'β'],
     numpy: [
@@ -879,8 +879,8 @@ dacă k < m atunci
       en: 'For a system with more equations than unknowns (m > n), finds the x that makes the residual ‖b − Ax‖ as small as possible. It first triangularizes A with Algorithm QR, then applies the same reflectors to b (d = Qᵀb) and solves the upper triangular system formed by the first n rows. The norm of the remaining part of d, r = ‖d(n+1 : m)‖, is the minimal residual.',
     },
     curs: {
-      ro: 'Curs IV, slide-ul "Calculul solutiei CMMP: m > n", Algoritmul SQR, care pornește de la ieșirea Algoritmului QR; aici cele două sunt scrise unul după altul. Pe slide prima linie din buclă apare ca "t = a_kk = 0"; aici este t ← a_kk, valoarea pe care ultima linie o pune la loc. Linia cu r nu este în algoritm: vine din slide-ul de dinainte, unde reziduul minim este ‖d"‖. Exemplul este cel din slide: aici iese x = (2/3, 0) până la rotunjiri, iar slide-ul obține (0.65, 0.003) pentru că lucrează cu Qᵀ scris cu două zecimale.',
-      en: 'Course IV, slide "Calculul solutiei CMMP: m > n", Algorithm SQR, which starts from the output of Algorithm QR; here the two are written one after the other. On the slide the first line of the loop appears as "t = a_kk = 0"; here it is t ← a_kk, the value the last line puts back. The line with r is not in the algorithm: it comes from the preceding slide, where the minimal residual is ‖d"‖. The example is the one on the slide: here x = (2/3, 0) up to rounding, and the slide gets (0.65, 0.003) because it works with Qᵀ written with two decimals.',
+      ro: 'Curs IV, slide-ul "Calculul solutiei CMMP: m > n", Algoritmul SQR, care pornește de la ieșirea Algoritmului QR; aici cele două sunt scrise unul după altul. Pe slide prima linie din buclă apare ca "t = a_kk = 0"; aici este t ← a_kk, valoarea pe care ultima linie o pune la loc. Linia cu r nu este în algoritm: vine din slide-ul de dinainte, unde reziduul minim este ‖d"‖. Exemplul este cel din slide: aici iese x = (2/3, 0) până la rotunjiri, iar slide-ul obține (0.65, 0.003) pentru că lucrează cu Qᵀ scris cu două zecimale. Slide-ul pornește de la ieșirea lui QR cu m ≥ n; aici se cere m > n, pentru că la m = n Algoritmul QR calculează doar s = n − 1 reflectori, iar bucla lui SQR ar citi β_n, care nu există.',
+      en: 'Course IV, slide "Calculul solutiei CMMP: m > n", Algorithm SQR, which starts from the output of Algorithm QR; here the two are written one after the other. On the slide the first line of the loop appears as "t = a_kk = 0"; here it is t ← a_kk, the value the last line puts back. The line with r is not in the algorithm: it comes from the preceding slide, where the minimal residual is ‖d"‖. The example is the one on the slide: here x = (2/3, 0) up to rounding, and the slide gets (0.65, 0.003) because it works with Qᵀ written with two decimals. The slide starts from the output of QR with m ≥ n; here m > n is required, because for m = n Algorithm QR computes only s = n − 1 reflectors, and the loop of SQR would read β_n, which does not exist.',
     },
     cost: { ro: '≈ 2(mn² − n³/3) flopi pentru triangularizare, plus ≈ 4mn − n² pentru b și substituție', en: '≈ 2(mn² − n³/3) flops for the triangularization, plus ≈ 4mn − n² for b and the substitution' },
     // n reflectori aplicati pe b, cate ≈ 4(m − k + 1) flopi, si substitutia inapoi, n²
@@ -908,8 +908,8 @@ dacă k < m atunci
       },
     ],
     practic: {
-      ro: 'Teorema din curs: soluția este unică exact când A are coloanele liniar independente (A este monică). Regula de aur din curs: nu se formează AᵀA, care este rău condiționată; se lucrează direct pe A, cu reflectori. Tot cursul notează că, pentru A monică, sensibilitatea soluției poate crește cu pătratul numărului de condiționare. numpy.linalg.lstsq(A, b, rcond=None) rezolvă aceeași problemă și întoarce, pe lângă x, suma pătratelor reziduurilor, adică r².',
-      en: 'The theorem of the course: the solution is unique exactly when A has linearly independent columns. The golden rule of the course: AᵀA, which is ill conditioned, is not formed; one works directly on A, with reflectors. The course also notes that, for such A, the sensitivity of the solution can grow with the square of the condition number. numpy.linalg.lstsq(A, b, rcond=None) solves the same problem and returns, besides x, the sum of squared residuals, that is r².',
+      ro: 'Teorema din curs: soluția este unică exact când A are coloanele liniar independente (A este monică), și atunci R′ din factorizarea QR este inversabilă (slide-ul "Factorizarea QR: m ≥ n"), deci împărțirile la a_kk din substituție sunt sigure. Regula de aur din curs: nu se formează AᵀA, care este rău condiționată; se lucrează direct pe A, cu reflectori. Tot cursul notează că, pentru A monică, sensibilitatea soluției poate crește cu pătratul numărului de condiționare. numpy.linalg.lstsq(A, b, rcond=None) rezolvă aceeași problemă și întoarce, pe lângă x, suma pătratelor reziduurilor, adică r².',
+      en: 'The theorem of the course: the solution is unique exactly when A has linearly independent columns (A is monic), and then R′ of the QR factorization is invertible (slide "Factorizarea QR: m ≥ n"), so the divisions by a_kk in the substitution are safe. The golden rule of the course: AᵀA, which is ill conditioned, is not formed; one works directly on A, with reflectors. The course also notes that, for such A, the sensitivity of the solution can grow with the square of the condition number. numpy.linalg.lstsq(A, b, rcond=None) solves the same problem and returns, besides x, the sum of squared residuals, that is r².',
     },
     iesiri: ['x', 'r'],
     numpy: [
@@ -944,8 +944,8 @@ r ← ‖b(n+1:m)‖    % din slide-ul de dinainte`,
       en: 'Finds an eigenvector of the dominant eigenvalue, the one with the largest absolute value. The vector y is repeatedly multiplied by A and normalized, y ← Ay / ‖Ay‖, and its direction approaches that of the eigenvector. The iteration stops when two consecutive vectors have practically the same direction: e = |1 − |zᵀy|| drops below tol.',
     },
     curs: {
-      ro: 'Curs V, slide-ul "Metoda puterii", Algoritm MP, rând cu rând. Pe slide y se alege aleator; aici este o intrare, ca rularea să se poată repeta. Slide-ul scrie "tol > 1"; cum e pornește de la 1, bucla nu s-ar executa niciodată, deci toleranța trebuie să fie sub 1. Testul i > maxiter, luat de pe slide, lasă să treacă maxiter + 1 iterații.',
-      en: 'Course V, slide "Metoda puterii", Algorithm MP, line by line. On the slide y is chosen at random; here it is an input, so that the run can be repeated. The slide writes "tol > 1"; since e starts from 1, the loop would never run, so the tolerance has to be below 1. The test i > maxiter, taken from the slide, lets maxiter + 1 iterations through.',
+      ro: 'Curs V, slide-ul "Metoda puterii", Algoritm MP, rând cu rând. Pe slide y se alege aleator; aici este o intrare, ca rularea să se poată repeta. Slide-ul scrie "tol > 1"; cum e pornește de la 1, bucla nu s-ar executa niciodată, deci toleranța trebuie să fie sub 1. Testul i > maxiter, luat de pe slide, lasă să treacă maxiter + 1 iterații. Exemplul este matricea companion de pe slide-ul "Exemple numerice MP/MPI", cu y⁰ = e₁ și toleranța 10⁻¹⁵ ca acolo: valorile proprii sunt 3, −1 ± i și 1, raportul |λ₂/λ₁| = √2/3 ≈ 0.47, iar metoda ajunge sub toleranță după 23 de iterații, ca în graficul de pe slide; pentru imaginea din planul vectorilor se poate reveni la ordinul 2.',
+      en: 'Course V, slide "Metoda puterii", Algorithm MP, line by line. On the slide y is chosen at random; here it is an input, so that the run can be repeated. The slide writes "tol > 1"; since e starts from 1, the loop would never run, so the tolerance has to be below 1. The test i > maxiter, taken from the slide, lets maxiter + 1 iterations through. The example is the companion matrix on the slide "Exemple numerice MP/MPI", with y⁰ = e₁ and the tolerance 10⁻¹⁵ as there: the eigenvalues are 3, −1 ± i and 1, the ratio |λ₂/λ₁| = √2/3 ≈ 0.47, and the method gets below the tolerance after 23 iterations, as in the chart on the slide; for the picture in the plane of the vectors one can go back to order 2.',
     },
     cost: { ro: '≈ 2n² flopi pe iterație', en: '≈ 2n² flops per iteration' },
     estimare: (x) => 2 * x.iteratii * x.forme.A[0] ** 2,
@@ -967,8 +967,8 @@ r ← ‖b(n+1:m)‖    % din slide-ul de dinainte`,
       },
     ],
     practic: {
-      ro: 'Ipotezele din curs: A are o valoare proprie dominantă, |λ₁| > |λ₂|, iar vectorul de pornire are o componentă nenulă pe direcția vectorului ei propriu (un vector aleator o are, generic). Viteza de convergență este dată de raportul |λ₂/λ₁|: cu cât este mai mic, cu atât metoda este mai rapidă; fără valoare proprie dominantă, șirul poate să nu conveargă. Valoarea proprie se obține la sfârșit din λ = yᵀAy. Testul măsoară unghiul θ dintre doi vectori consecutivi: e = 1 − |cos θ|, care este 0 exact când cei doi vectori au aceeași direcție. Cursul notează că metoda este eficientă pentru matrice cu multe zerouri, pentru că o iterație este un singur produs matrice-vector.',
-      en: 'The hypotheses of the course: A has a dominant eigenvalue, |λ₁| > |λ₂|, and the starting vector has a nonzero component along its eigenvector (a random vector generically has one). The speed of convergence is given by the ratio |λ₂/λ₁|: the smaller it is, the faster the method; without a dominant eigenvalue the sequence may not converge. The eigenvalue is obtained at the end from λ = yᵀAy. The test measures the angle θ between two consecutive vectors: e = 1 − |cos θ|, which is 0 exactly when the two vectors have the same direction. The course notes that the method is efficient for matrices with many zeros, because one iteration is a single matrix-vector product.',
+      ro: 'Ipotezele din curs (slide-ul "Metoda puterii"): A are o valoare proprie dominantă, |λ₁| > |λ₂| ≥ ... ≥ |λₙ|; vectorii proprii x₁, ..., xₙ formează o bază, deci y⁰ = Σ γᵢxᵢ; iar vectorul de pornire are γ₁ ≠ 0, adică o componentă nenulă pe direcția vectorului propriu dominant (un vector aleator o are, generic). Viteza de convergență este dată de raportul |λ₂/λ₁|: cu cât este mai mic, cu atât metoda este mai rapidă; fără valoare proprie dominantă, șirul poate să nu conveargă. Algoritmul MP de pe slide calculează doar vectorul propriu; valoarea proprie se obține apoi din câtul Rayleigh λ = yᵀAy (y având norma 1), cel pe care cursul îl folosește ca deplasare în metoda puterii inverse (MPI). Testul măsoară unghiul θ dintre doi vectori consecutivi: e = 1 − |cos θ|, care este 0 exact când cei doi vectori au aceeași direcție. Cursul notează că metoda este eficientă pentru matrice cu multe zerouri, pentru că o iterație este un singur produs matrice-vector.',
+      en: 'The hypotheses of the course (slide "Metoda puterii"): A has a dominant eigenvalue, |λ₁| > |λ₂| ≥ ... ≥ |λₙ|; the eigenvectors x₁, ..., xₙ form a basis, so y⁰ = Σ γᵢxᵢ; and the starting vector has γ₁ ≠ 0, that is a nonzero component along the dominant eigenvector (a random vector generically has one). The speed of convergence is given by the ratio |λ₂/λ₁|: the smaller it is, the faster the method; without a dominant eigenvalue the sequence may not converge. Algorithm MP on the slide computes only the eigenvector; the eigenvalue is then obtained from the Rayleigh quotient λ = yᵀAy (y having norm 1), the one the course uses as the shift in the inverse power method (MPI). The test measures the angle θ between two consecutive vectors: e = 1 − |cos θ|, which is 0 exactly when the two vectors have the same direction. The course notes that the method is efficient for matrices with many zeros, because one iteration is a single matrix-vector product.',
     },
     iesiri: ['y', 'i'],
     numpy: [
@@ -986,17 +986,133 @@ cât timp e > tol
     e ← |1 - |z^T y||
     y ← z; i ← i + 1`,
     intrari: [
-      { nume: 'A', tip: 'matrice', exemplu: [[2, 1], [1, 2]], descriere: { ro: 'n × n, cu o valoare proprie dominantă', en: 'n × n, with a dominant eigenvalue' }, aleator: 'asemenea' },
+      {
+        nume: 'A',
+        tip: 'matrice',
+        exemplu: [
+          [2, 3, 2, -6],
+          [1, 0, 0, 0],
+          [0, 1, 0, 0],
+          [0, 0, 1, 0],
+        ],
+        descriere: { ro: 'n × n, cu o valoare proprie dominantă', en: 'n × n, with a dominant eigenvalue' },
+        aleator: 'asemenea',
+      },
       {
         nume: 'y',
         tip: 'vector',
-        exemplu: [1, 0],
+        exemplu: [1, 0, 0, 0],
         descriere: { ro: 'lungime n, vectorul de pornire: nenul, cu o componentă pe vectorul propriu dominant', en: 'length n, the starting vector: nonzero, with a component along the dominant eigenvector' },
         natura: 'pornire',
         cu: 'A',
         dimensiune: ['A', 'linii'],
       },
-      { nume: 'tol', tip: 'scalar', exemplu: 1e-6, descriere: { ro: 'toleranța pentru e, între 0 și 1', en: 'tolerance for e, between 0 and 1' }, natura: 'toleranta' },
+      { nume: 'tol', tip: 'scalar', exemplu: 1e-15, descriere: { ro: 'toleranța pentru e, între 0 și 1', en: 'tolerance for e, between 0 and 1' }, natura: 'toleranta' },
+      { nume: 'maxiter', tip: 'scalar', exemplu: 50, descriere: MAXITER, natura: 'iteratii' },
+    ],
+  },
+  {
+    id: 'MPI',
+    grup: 'proprii',
+    notiuni: ['valoare_proprie', 'metoda_puterii', 'norma', 'produs_scalar', 'eliminare', 'pivot', 'substitutie', 'criteriu_oprire'],
+    titlu: { ro: 'MPI, metoda puterii inverse', en: 'MPI, inverse power method' },
+    descriere: {
+      ro: 'Găsește un vector propriu al lui A pornind de la y, cu deplasarea Rayleigh: la fiecare iterație μ = yᵀAy este aproximarea unei valori proprii pe care o dă y, iar z se obține rezolvând sistemul (μI − A) z = y, în loc să se înmulțească y cu A ca la metoda puterii. Cum μ se apropie de o valoare proprie λ, matricea μI − A este aproape singulară și z crește mult pe direcția vectorului propriu al lui λ; după normare, y se aliniază cu el în câțiva pași. Sistemul se rezolvă cu eliminare gaussiană cu pivotare parțială și substituție înapoi, scrise desfășurat pe copia B = μI − A.',
+      en: 'Finds an eigenvector of A starting from y, with the Rayleigh shift: at every iteration μ = yᵀAy is the eigenvalue approximation that y gives, and z is obtained by solving the system (μI − A) z = y, instead of multiplying y by A as in the power method. As μ approaches an eigenvalue λ, the matrix μI − A is nearly singular and z grows a lot along the eigenvector of λ; after normalization, y lines up with it in a few steps. The system is solved by Gaussian elimination with partial pivoting and back substitution, written out on the copy B = μI − A.',
+    },
+    curs: {
+      ro: 'Curs V, slide-ul "Metoda puterii inverse", Algoritm MPI, rând cu rând: normarea, μ = yᵀAy, sistemul (μI_n − A) z = y, normarea lui z, e = |1 − |zᵀy||, y ← z. Pasul "se rezolvă sistemul" este scris desfășurat ca S_GPP, pe matricea B = μI − A și pe copia z a lui y, pentru că pseudocodul de aici nu are apeluri între algoritmi; liniile lui au comentariul %. Pe slide y se alege aleator; aici este o intrare. "tol > 1" de pe slide și testul i > maxiter sunt ca la MP. Exemplul este matricea companion de pe slide-ul "Exemple numerice MP/MPI", cu y⁰ = e₁ și toleranța 10⁻¹⁵: cartea cursului (tabelul 4.1, pagina 237) dă μ = 2.9411764705882, 3.0045159755566, 3.0000169808688, 3.0000000001717, 3 și oprirea după 5 iterații, față de 23 la metoda puterii; aici ies aceleași numere.',
+      en: 'Course V, slide "Metoda puterii inverse", Algorithm MPI, line by line: the normalization, μ = yᵀAy, the system (μI_n − A) z = y, the normalization of z, e = |1 − |zᵀy||, y ← z. The step "solve the system" is written out as in S_GPP, on the matrix B = μI − A and on the copy z of y, because the pseudocode here has no calls between algorithms; its lines carry the % comment. On the slide y is chosen at random; here it is an input. The "tol > 1" of the slide and the test i > maxiter are as in MP. The example is the companion matrix on the slide "Exemple numerice MP/MPI", with y⁰ = e₁ and the tolerance 10⁻¹⁵: the book of the course (table 4.1, page 237) gives μ = 2.9411764705882, 3.0045159755566, 3.0000169808688, 3.0000000001717, 3 and the stop after 5 iterations, against 23 for the power method; the same numbers come out here.',
+    },
+    cost: { ro: '≈ 2n³/3 flopi pe iterație pentru eliminarea pe μI − A, plus ≈ 4n² pentru produsul Ay, aplicarea multiplicatorilor și substituție', en: '≈ 2n³/3 flops per iteration for the elimination on μI − A, plus ≈ 4n² for the product Ay, the multipliers and the substitution' },
+    // numarat pe pseudocod: GPP n(n−1)(4n+1)/6, Ay 2n² − n, μ 2n − 1, diagonala n, z la eliminare
+    // n(n − 1), UTRIS n², normarea 3n − 1, e 2n; inainte de bucla, normarea 3n − 1
+    estimare: (x) => {
+      const n = x.forme.A[0]
+      return x.iteratii * ((n * (n - 1) * (4 * n + 1)) / 6 + 4 * n * n + 6 * n - 2) + 3 * n - 1
+    },
+    forma: '\\mu_k = (y^{(k-1)})^T A\\, y^{(k-1)}, \\qquad (\\mu_k I - A)\\, z = y^{(k-1)}, \\qquad y^{(k)} = \\dfrac{z}{\\|z\\|}',
+    etape: [
+      { linii: [1, 1], tex: 'y \\leftarrow y / \\|y\\|', text: { ro: 'vectorul de pornire se normează', en: 'the starting vector is normalized' } },
+      { linii: [5, 6], tex: '\\mu = y^T A\\, y', text: { ro: 'câtul Rayleigh: aproximarea valorii proprii pe care o dă y', en: 'the Rayleigh quotient: the eigenvalue approximation that y gives' } },
+      { linii: [7, 10], tex: 'B = \\mu I - A', text: { ro: 'matricea sistemului, într-o copie: A rămâne neschimbată', en: 'the matrix of the system, in a copy: A stays unchanged' } },
+      {
+        linii: [11, 27],
+        tex: '(\\mu I - A)\\, z = y',
+        text: { ro: 'sistemul se rezolvă ca în S_GPP: eliminare cu pivotare parțială pe B și pe z, apoi substituție înapoi; un pivot nul înseamnă că μ este exact o valoare proprie', en: 'the system is solved as in S_GPP: elimination with partial pivoting on B and on z, then back substitution; a zero pivot means that μ is exactly an eigenvalue' },
+      },
+      {
+        linii: [28, 29],
+        tex: 'z \\leftarrow \\dfrac{z}{\\|z\\|}, \\qquad e = \\bigl|1 - |z^T y|\\bigr|',
+        text: { ro: 'z se normează, iar e arată cât s-a mai schimbat direcția față de y', en: 'z is normalized, and e shows how much the direction changed from y' },
+      },
+    ],
+    practic: {
+      ro: 'Cartea cursului (pagina 237) numește metoda puterii inverse cu deplasare Rayleigh cea mai bună cale de calcul al unui vector propriu: convergența este pătratică, ‖y⁽ᵏ⁺¹⁾ − γx₁‖ ≤ τ‖y⁽ᵏ⁾ − γx₁‖², iar valoarea proprie vine odată cu vectorul, ca valoarea finală a lui μ. Prețul este sistemul rezolvat la fiecare iterație, ≈ 2n³/3 flopi față de ≈ 2n² la metoda puterii; cartea notează că pentru eficiență A se aduce întâi la forma superior Hessenberg, unde sistemul costă ≈ n². Cu o deplasare μ constantă, cartea arată că metoda converge la vectorul propriu al valorii proprii celei mai apropiate de μ; cu deplasarea Rayleigh limita depinde de pornire și nu este neapărat valoarea dominantă. Aproape de convergență μI − A este aproape singulară și z iese foarte mare înainte de normare. Dacă μ nimerește exact o valoare proprie, sistemul este singular: un pivot iese 0 și algoritmul se oprește spunând asta (liniile cu % nu sunt pe slide, care nu tratează cazul). Se întâmplă fie când y este deja vectorul propriu, fie, rar, din coincidență la pornire, de exemplu pentru o matrice cu valori proprii întregi și un y cu yᵀAy/yᵀy întreg; atunci se pornește de la alt y.',
+      en: 'The book of the course (page 237) calls the inverse power method with the Rayleigh shift the best way to compute an eigenvector: the convergence is quadratic, ‖y⁽ᵏ⁺¹⁾ − γx₁‖ ≤ τ‖y⁽ᵏ⁾ − γx₁‖², and the eigenvalue comes along with the vector, as the final value of μ. The price is the system solved at every iteration, ≈ 2n³/3 flops against ≈ 2n² for the power method; the book notes that for efficiency A is first brought to upper Hessenberg form, where the system costs ≈ n². With a constant shift μ, the book shows that the method converges to the eigenvector of the eigenvalue closest to μ; with the Rayleigh shift the limit depends on the start and is not necessarily the dominant eigenvalue. Near convergence μI − A is nearly singular and z comes out very large before normalization. If μ hits an eigenvalue exactly, the system is singular: a pivot comes out 0 and the algorithm stops saying so (the lines with % are not on the slide, which does not treat the case). This happens either when y is already the eigenvector or, rarely, by coincidence at the start, for instance for a matrix with integer eigenvalues and a y with yᵀAy/yᵀy an integer; then one starts from another y.',
+    },
+    iesiri: ['y', 'i'],
+    numpy: [
+      'mu = {y} @ A @ {y}',
+      'print("mu = y^T A y =", mu)',
+      'val = np.linalg.eigvals(A)',
+      'print("np.linalg.eigvals(A) =", val)',
+      '# fata de valoarea proprie cea mai apropiata de mu',
+      dif('mu', 'val[np.argmin(np.abs(val - mu))]'),
+    ],
+    sursa: `y ← y / ‖y‖; i ← 0; e ← 1
+fie B[n,n]
+cât timp e > tol
+    dacă i > maxiter atunci stop 'nu a convers în maxiter iterații'
+    z ← A y
+    μ ← y^T z
+    pentru l = 1 : n    % B = μI − A
+        pentru j = 1 : n
+            b_lj ← -a_lj
+        b_ll ← μ - a_ll
+    z ← y    % B z = y ca în S_GPP: GPP pe B și z, apoi UTRIS
+    pentru k = 1 : n-1
+        l_k ← argmax_{l=k:n} |b_lk|
+        dacă b_{l_k, k} = 0 atunci stop 'μI − A singulară: μ e valoare proprie'
+        pentru j = k : n
+            b_kj ↔ b_{l_k, j}
+        z_k ↔ z_{l_k}
+        pentru l = k+1 : n
+            b_lk ← b_lk / b_kk
+            z_l ← z_l - b_lk z_k
+            pentru j = k+1 : n
+                b_lj ← b_lj - b_lk b_kj
+    dacă b_nn = 0 atunci stop 'μI − A singulară: μ e valoare proprie'
+    pentru k = n : -1 : 1
+        pentru j = k+1 : n
+            z_k ← z_k - b_kj z_j
+        z_k ← z_k / b_kk
+    z ← z / ‖z‖
+    e ← |1 - |z^T y||
+    y ← z; i ← i + 1`,
+    intrari: [
+      {
+        nume: 'A',
+        tip: 'matrice',
+        exemplu: [
+          [2, 3, 2, -6],
+          [1, 0, 0, 0],
+          [0, 1, 0, 0],
+          [0, 0, 1, 0],
+        ],
+        descriere: { ro: 'n × n', en: 'n × n' },
+        aleator: 'asemenea',
+      },
+      {
+        nume: 'y',
+        tip: 'vector',
+        exemplu: [1, 0, 0, 0],
+        descriere: { ro: 'lungime n, vectorul de pornire, nenul; de el depinde la ce vector propriu se ajunge', en: 'length n, the starting vector, nonzero; it decides which eigenvector is reached' },
+        natura: 'pornireInversa',
+        cu: 'A',
+        dimensiune: ['A', 'linii'],
+      },
+      { nume: 'tol', tip: 'scalar', exemplu: 1e-15, descriere: { ro: 'toleranța pentru e, între 0 și 1', en: 'tolerance for e, between 0 and 1' }, natura: 'toleranta' },
       { nume: 'maxiter', tip: 'scalar', exemplu: 50, descriere: MAXITER, natura: 'iteratii' },
     ],
   },
@@ -1034,8 +1150,8 @@ cât timp e > tol
       },
     ],
     practic: {
-      ro: 'Cu pivotare parțială (S_GPP), aceleași date și aceeași precizie dau x_1 = 1: panoul "Comparație" arată cele două rulări una lângă alta. Fără pivotare, pivotul mic dă un multiplicator mare (10⁴), iar rotunjirea la 3 cifre pierde informația din ecuații. Slide-ul de după exemplu propune remediul: strategiile de pivotare. În dublă precizie (aritmetica implicită a vizualizatorului, cu circa 16 cifre semnificative după cartea cursului) exemplul dă soluția corectă, pentru că 16 cifre ajung aici; un pivot mai mic ar strica și acolo rezultatul.',
-      en: 'With partial pivoting (S_GPP), the same data and the same precision give x_1 = 1: the "Comparison" panel shows the two runs side by side. Without pivoting, the small pivot gives a large multiplier (10⁴), and rounding to 3 digits loses the information in the equations. The slide after the example proposes the remedy: pivoting strategies. In double precision (the default arithmetic of the visualizer, with about 16 significant digits according to the book of the course) the example gives the correct solution, because 16 digits are enough here; a smaller pivot would spoil the result there too.',
+      ro: 'Cu pivotare parțială (S_GPP), aceleași date și aceeași precizie dau x_1 = 1: panoul "Comparație" arată cele două rulări una lângă alta. Fără pivotare, pivotul mic dă un multiplicator mare (10⁴), iar rotunjirea la 3 cifre pierde informația din ecuații. Slide-ul de după exemplu propune remediul: strategiile de pivotare. În dublă precizie (aritmetica implicită a vizualizatorului, cu circa 16 cifre semnificative după cartea cursului) exemplul dă soluția corectă, pentru că 16 cifre ajung aici; un pivot mai mic ar strica și acolo rezultatul. Slide-ul observă că pentru G ajunge ca A[1], ..., A[n−1] să fie nesingulare, A putând fi chiar singulară; S_G are însă nevoie și de A nesingulară, altfel u_nn iese 0 și substituția înapoi nu poate împărți la el (contraexemplul "matrice singulară").',
+      en: 'With partial pivoting (S_GPP), the same data and the same precision give x_1 = 1: the "Comparison" panel shows the two runs side by side. Without pivoting, the small pivot gives a large multiplier (10⁴), and rounding to 3 digits loses the information in the equations. The slide after the example proposes the remedy: pivoting strategies. In double precision (the default arithmetic of the visualizer, with about 16 significant digits according to the book of the course) the example gives the correct solution, because 16 digits are enough here; a smaller pivot would spoil the result there too. The slide remarks that G only needs A[1], ..., A[n−1] nonsingular, A itself may even be singular; S_G, however, also needs A nonsingular, otherwise u_nn comes out 0 and back substitution cannot divide by it (the counterexample "singular matrix").',
     },
     iesiri: ['x'],
     numpy: fataDeSolve('A', '{x}'),
@@ -1092,8 +1208,8 @@ pentru i = n : -1 : 1
       },
     ],
     practic: {
-      ro: 'Cartea arată (teorema 2.9) că eliminarea fără pivotare păstrează structura: U este bandă cu q diagonale deasupra diagonalei principale, iar multiplicatorii stau doar pe primele r poziții de sub ea. Zerourile din afara benzii, marcate în grilă, nu se citesc și nu se scriu niciodată. Pentru o matrice tridiagonală costul scade de la ≈ 2n³/3 la ≈ 3n flopi; descrierea arată și cât numără algoritmul G pe aceeași matrice. Ca la G, un pivot nul sau mic este o problemă; cu pivotare, banda de deasupra diagonalei se lărgește (vezi GPPb). Slide-urile notează că o matrice tridiagonală se memorează în trei vectori.',
-      en: 'The book shows (theorem 2.9) that elimination without pivoting keeps the structure: U is banded with q diagonals above the main one, and the multipliers sit only in the first r positions below it. The zeros outside the band, marked in the grid, are never read or written. For a tridiagonal matrix the cost drops from ≈ 2n³/3 to ≈ 3n flops; the description also shows how many algorithm G counts on the same matrix. As with G, a zero or small pivot is a problem; with pivoting, the band above the diagonal widens (see GPPb). The slides note that a tridiagonal matrix is stored in three vectors.',
+      ro: 'Cartea arată (teorema 2.9) că eliminarea fără pivotare păstrează structura: U este bandă cu q diagonale deasupra diagonalei principale, iar multiplicatorii stau doar pe primele r poziții de sub ea. Zerourile din afara benzii, marcate în grilă, nu se citesc și nu se scriu niciodată. Pentru o matrice tridiagonală costul scade de la ≈ 2n³/3 la ≈ 3n flopi; descrierea arată și cât numără algoritmul G pe aceeași matrice. Ca la G, un pivot nul sau mic este o problemă; cu pivotare, banda de deasupra diagonalei se lărgește (vezi GPPb). Cartea cursului (pagina 41) notează că o matrice tridiagonală se poate memora în trei vectori, câte unul pentru fiecare diagonală.',
+      en: 'The book shows (theorem 2.9) that elimination without pivoting keeps the structure: U is banded with q diagonals above the main one, and the multipliers sit only in the first r positions below it. The zeros outside the band, marked in the grid, are never read or written. For a tridiagonal matrix the cost drops from ≈ 2n³/3 to ≈ 3n flops; the description also shows how many algorithm G counts on the same matrix. As with G, a zero or small pivot is a problem; with pivoting, the band above the diagonal widens (see GPPb). The book of the course (page 41) notes that a tridiagonal matrix can be stored in three vectors, one per diagonal.',
     },
     iesiri: ['A'],
     numpy: [
@@ -1162,8 +1278,8 @@ pentru k = 1 : n-1
       },
     ],
     practic: {
-      ro: 'Cartea (teorema 2.10): cu pivotare parțială, U este bandă cu cel mult q + r diagonale deasupra diagonalei principale, iar multiplicatorii rămân pe primele r poziții de sub ea; după permutări, L nu mai este însă bandă. Pivotarea completă ar distruge banda și cartea nu o recomandă aici. Costul rămâne mult sub 2n³/3 când r și q sunt mici; descrierea arată și cât numără GPP pe aceeași matrice.',
-      en: 'The book (theorem 2.10): with partial pivoting, U is banded with at most q + r diagonals above the main one, and the multipliers stay in the first r positions below it; after the permutations, however, L is no longer banded. Complete pivoting would destroy the band and the book does not recommend it here. The cost stays far below 2n³/3 when r and q are small; the description also shows how many GPP counts on the same matrix.',
+      ro: 'Cartea (teorema 2.10): cu pivotare parțială, U este bandă cu cel mult q + r diagonale deasupra diagonalei principale, iar multiplicatorii rămân pe primele r poziții de sub ea; după permutări, L nu mai este însă bandă. Pivotarea completă ar distruge banda și cartea nu o recomandă aici. Cartea (paginile 107-108) notează că este destul ca r sau q să fie mult mai mic decât n pentru ca ambele variante să coste mult sub 2n³/3; descrierea arată și cât numără GPP pe aceeași matrice.',
+      en: 'The book (theorem 2.10): with partial pivoting, U is banded with at most q + r diagonals above the main one, and the multipliers stay in the first r positions below it; after the permutations, however, L is no longer banded. Complete pivoting would destroy the band and the book does not recommend it here. The book (pages 107-108) notes that it is enough for r or q to be much smaller than n for both variants to cost far below 2n³/3; the description also shows how many GPP counts on the same matrix.',
     },
     iesiri: ['A', 'p'],
     numpy: [

@@ -427,6 +427,12 @@ describe('aplicația montată', () => {
     expect(gazda.querySelectorAll('.geometrie svg .punct').length).toBeGreaterThan(3)
     expect(gazda.querySelector('.geometrie svg')?.getAttribute('aria-label')).toContain('aproximarea curentă este (')
     await scrieIn(gazda.querySelector('header select')!, 'MP')
+    // exemplul din curs este 4 x 4, fara desen; pe o matrice 2 x 2 apare cercul unitate
+    expect(gazda.querySelector('.geometrie')).toBeNull()
+    const intrare = (nume: string) => [...gazda.querySelectorAll<HTMLElement>('.intrare')].find((x) => x.querySelector<HTMLInputElement>('.nume')?.value === nume)!
+    await scrieIn(intrare('A').querySelector('textarea')!, '2 1\n1 2')
+    await scrieIn(intrare('y').querySelector('textarea')!, '1 0')
+    await apasa(gazda, 'Rulează')
     expect(gazda.querySelector('.geometrie .cerc')).not.toBeNull()
     // o matrice 3 x 3 nu se poate desena in plan
     await scrieIn(gazda.querySelector('header select')!, 'G')

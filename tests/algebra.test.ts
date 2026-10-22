@@ -440,6 +440,51 @@ describe('metoda puterii', () => {
   })
 })
 
+describe('metoda puterii inverse', () => {
+  it('ajunge la un vector propriu: Ay = μy cu μ = yᵀAy una dintre valorile proprii, ‖y‖ = 1', () => {
+    pentruFiecare(
+      (n, rnd, unde) => {
+        const spectru = [5, 2, ...Array.from({ length: n - 2 }, (_, k) => 1 / (k + 1))]
+        const A = cuSpectru(spectru, rnd)
+        const rez = ruleaza('MPI', { A, y: vector(n, rnd), tol: 1e-13, maxiter: 500 })
+        expect(rez.final, unde).toBe('gata')
+        const y = vec(rez, 'y')
+        const Ay = peVector(A, y)
+        const mu = y.reduce((s, v, i) => s + v * Ay[i], 0)
+        expect(norma(Ay.map((v, i) => v - mu * y[i])), unde).toBeLessThan(1e-5)
+        expect(Math.abs(norma(y) - 1), unde).toBeLessThan(TOL)
+        expect(Math.min(...spectru.map((l) => Math.abs(l - mu))), unde).toBeLessThan(1e-6)
+      },
+      [2, 3, 5, 8],
+    )
+  })
+
+  it('pe exemplul din curs reproduce tabelul 4.1 din carte: 5 iterații la MPI, 23 la MP, cu aceleași valori μ și λ', () => {
+    const A = [
+      [2, 3, 2, -6],
+      [1, 0, 0, 0],
+      [0, 1, 0, 0],
+      [0, 0, 1, 0],
+    ]
+    const rez = ruleaza('MPI', { A, y: [1, 0, 0, 0], tol: 1e-15, maxiter: 50 })
+    expect(rez.scalari.i).toBe(5)
+    const mu = rez.pasi.filter((p) => p.linie === 6).map((p) => p.scalari['μ'])
+    expect(mu.map((m) => Number(m.toFixed(13)))).toEqual([2, 2.9411764705882, 3.0045159755566, 3.0000169808688, 3.0000000001717])
+    const mp = ruleaza('MP', { A, y: [1, 0, 0, 0], tol: 1e-15, maxiter: 50 })
+    expect(mp.scalari.i).toBe(23)
+    const y = vec(mp, 'y')
+    const Ay = peVector(A, y)
+    expect(y.reduce((s, v, i) => s + v * Ay[i], 0)).toBeCloseTo(3.0000000351815, 12)
+  })
+
+  it('un μ care este exact valoare proprie face sistemul singular, iar algoritmul se oprește spunând asta', () => {
+    // valorile proprii 6 si -2; y = (-1, 1) da μ = -2 din prima
+    const rez = urma(parseaza(algoritm('MPI')!.sursa), { A: [[14, -8], [16, -10]], y: [-1, 1], tol: 1e-10, maxiter: 50 })
+    expect(rez.final).toBe('stop')
+    expect(rez.pasi.at(-1)?.mesaj).toContain('singulară')
+  })
+})
+
 describe('matrice bandă', () => {
   const LATIMI: [number, number][] = [
     [1, 1],

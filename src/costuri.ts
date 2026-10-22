@@ -8,8 +8,8 @@ import { rndDeterminist } from './natura'
 
 export const DIMENSIUNI = [2, 3, 4, 5, 6, 7, 8]
 
-// metodele iterative si metoda puterii au un cost care depinde de numarul de iteratii, nu doar de n
-export const areCostPeN = (a: Algoritm): boolean => a.grup !== 'iterative' && a.id !== 'MP'
+// metodele iterative si cele pentru valori proprii au un cost care depinde de numarul de iteratii, nu doar de n
+export const areCostPeN = (a: Algoritm): boolean => a.grup !== 'iterative' && a.grup !== 'proprii'
 
 // matricea are o linie in plus: QR si SQR lucreaza cu m > n
 export const cuLiniaInPlus = (a: Algoritm): boolean => a.id === 'QR' || a.id === 'SQR'

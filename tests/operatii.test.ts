@@ -200,7 +200,8 @@ describe('roluri și indici în formulă', () => {
     const alg = algoritm('GPP')!
     const rez = urma(parseaza(alg.sursa), intrariExemplu(alg))
     const cauta = rez.pasi.find((p) => p.linie === 4)!
-    expect(cauta.celule.filter((c) => c.rol === 'pivot')).toEqual([{ nume: 'A', i: 2, j: 1, rol: 'pivot' }])
+    // pe exemplul de pe slide, pivotul pasului 1 este 2, din linia 3
+    expect(cauta.celule.filter((c) => c.rol === 'pivot')).toEqual([{ nume: 'A', i: 3, j: 1, rol: 'pivot' }])
     expect(cauta.celule.filter((c) => c.rol === 'citit')).toHaveLength(2)
   })
 

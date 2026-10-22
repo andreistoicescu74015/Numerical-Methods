@@ -91,7 +91,7 @@ export function areGeometrie(id: string, intrari: Intrari): boolean {
   const A = intrari.A
   const mat = Array.isArray(A) && Array.isArray(A[0]) ? (A as number[][]) : null
   if (id === 'JACOBI' || id === 'GS' || id === 'KACZMARZ') return !!mat && mat[0].length === 2
-  if (id === 'MP') return !!mat && mat.length === 2 && mat[0].length === 2
+  if (id === 'MP' || id === 'MPI') return !!mat && mat.length === 2 && mat[0].length === 2
   if (id === 'RFG') return Array.isArray(intrari.x) && (intrari.x as number[]).length === 2 && intrari.k === 1
   return false
 }
@@ -101,6 +101,8 @@ const fmt = (x: number) => String(Number(x.toPrecision(3)))
 export function Geometrie({ id, rez, intrari, k, ascuns }: Props) {
   const { t } = usePreferinte()
   const vizibil = (pas: number) => pas < k || (pas === k && !ascuns)
+  // metoda puterii si metoda puterii inverse: y pe cercul unitate, cu directiile proprii
+  const putere = id === 'MP' || id === 'MPI'
 
   let puncte: Punct[] = []
   let drepte: { a: Punct; b: number; eticheta: string }[] = []
@@ -110,7 +112,7 @@ export function Geometrie({ id, rez, intrari, k, ascuns }: Props) {
   let oglinda: Punct | null = null
   let text: CheieText = 'geometrieJacobi'
 
-  if (id === 'MP') {
+  if (putere) {
     const A = intrari.A as number[][]
     puncte = drum(rez, 'y', intrari.y as number[])
       .filter((x) => vizibil(x.pas))
@@ -120,7 +122,7 @@ export function Geometrie({ id, rez, intrari, k, ascuns }: Props) {
       })
     directii = proprii(A)
     // fara o valoare proprie dominanta reala, ipoteza metodei puterii nu e indeplinita
-    text = directii.length > 0 ? 'geometrieMP' : 'geometrieMPFara'
+    text = id === 'MPI' ? 'geometrieMPI' : directii.length > 0 ? 'geometrieMP' : 'geometrieMPFara'
   } else if (id === 'RFG') {
     const x = intrari.x as number[]
     const sigma = (x[0] >= 0 ? 1 : -1) * Math.hypot(x[0], x[1])
@@ -152,12 +154,12 @@ export function Geometrie({ id, rez, intrari, k, ascuns }: Props) {
   const inCadru = puncte.filter((p) => departe(p) <= 4 * reper)
   // aceeasi scara pe ambele axe, ca unghiurile drepte sa ramana drepte (proiectiile Kaczmarz)
   const toate: Punct[] = [...inCadru, ...(sol ? [sol] : []), ...sageti.map((s) => s.spre), [0, 0]]
-  if (id === 'MP') toate.push([-1, -1], [1, 1])
+  if (putere) toate.push([-1, -1], [1, 1])
   const xs = toate.map((p) => p[0])
   const ys = toate.map((p) => p[1])
   const cx = (Math.min(...xs) + Math.max(...xs)) / 2
   const cy = (Math.min(...ys) + Math.max(...ys)) / 2
-  const raza = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys), 1e-9) * 0.6 + (id === 'MP' ? 0.15 : 0)
+  const raza = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys), 1e-9) * 0.6 + (putere ? 0.15 : 0)
   const scara = Math.min(L, H) / (2 * raza)
   const [x0, x1, y0, y1] = [cx - L / (2 * scara), cx + L / (2 * scara), cy - H / (2 * scara), cy + H / (2 * scara)]
   const X = (x: number) => (x - x0) * scara
@@ -173,7 +175,7 @@ export function Geometrie({ id, rez, intrari, k, ascuns }: Props) {
     const f = Math.min((x1 - cx) / Math.abs(d[0] || 1e-300), (y1 - cy) / Math.abs(d[1] || 1e-300)) * 0.97
     return [cx + d[0] * f, cy + d[1] * f]
   }
-  const curentAfara = id !== 'MP' && !!curent && iese(curent)
+  const curentAfara = !putere && !!curent && iese(curent)
 
   return (
     <>
@@ -188,7 +190,7 @@ export function Geometrie({ id, rez, intrari, k, ascuns }: Props) {
         <text className="gradatie" x={Math.min(Math.max(X(0) + 6, 4), L - 20)} y={12}>
           x₂
         </text>
-        {id === 'MP' && <circle className="cerc" cx={X(0)} cy={Y(0)} r={scara} />}
+        {putere && <circle className="cerc" cx={X(0)} cy={Y(0)} r={scara} />}
         {directii.map((d, i) => (
           <line key={i} className={i === 0 ? 'propriu' : 'propriu al-doilea'} x1={X(-1.3 * d[0])} y1={Y(-1.3 * d[1])} x2={X(1.3 * d[0])} y2={Y(1.3 * d[1])} />
         ))}
@@ -227,11 +229,11 @@ export function Geometrie({ id, rez, intrari, k, ascuns }: Props) {
             </text>
           </g>
         ))}
-        {id === 'MP'
+        {putere
           ? puncte.map((p, i) => <line key={i} className={i === puncte.length - 1 ? 'sageata curent' : 'sageata veche'} x1={X(0)} y1={Y(0)} x2={X(p[0])} y2={Y(p[1])} />)
           : puncte.length > 1 && <polyline className="drum" points={puncte.map((p) => peMargine(p)).map((p) => `${X(p[0])},${Y(p[1])}`).join(' ')} />}
         {sol && <circle className="solutie" cx={X(sol[0])} cy={Y(sol[1])} r={7} />}
-        {id !== 'MP' &&
+        {!putere &&
           puncte.map((p, i) => {
             const q = peMargine(p)
             const ultim = i === puncte.length - 1
@@ -249,7 +251,7 @@ export function Geometrie({ id, rez, intrari, k, ascuns }: Props) {
         </p>
       )}
       <ul className="legenda-geometrie">
-        {id === 'MP' ? (
+        {putere ? (
           <>
             {directii.length > 0 && (
               <li>

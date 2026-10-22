@@ -50,7 +50,7 @@ describe('verificările numerice', () => {
     const rand = (inceput: string) => v.find((x) => x.text.ro.startsWith(inceput))!
     expect(rand('λ = yᵀAy').fel).toBe('valoare')
     expect(rand('λ = yᵀAy').valoare).toBeCloseTo(3, 4)
-    expect(rand('e = ').prag).toBe(1e-6)
+    expect(rand('e = ').prag).toBe(1e-15)
     expect(rand('|λ| față de').valoare).toBeLessThan(rand('|λ| față de').prag!)
   })
 

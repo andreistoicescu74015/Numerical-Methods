@@ -65,10 +65,10 @@ describe('felul pașilor și rolurile', () => {
   it('MP: formula numerică scrie vectorii coloană și matricea întreagă', () => {
     const alg = algoritm('MP')!
     const rez = urma(parseaza(alg.sursa), intrariExemplu(alg))
-    const y = '\\begin{bmatrix} 1 \\\\ 0 \\end{bmatrix}'
+    const y = '\\begin{bmatrix} 1 \\\\ 0 \\\\ 0 \\\\ 0 \\end{bmatrix}'
     expect(rez.pasi[0].formula).toBe(`y \\leftarrow y / \\left\\|y\\right\\| = ${y} / \\left\\|${y}\\right\\| = ${y}`)
     const matvec = rez.pasi.find((p) => p.linie === 4)!
-    expect(matvec.formula).toBe(`z \\leftarrow A\\,y = \\begin{bmatrix} 2 & 1 \\\\ 1 & 2 \\end{bmatrix} \\cdot ${y} = \\begin{bmatrix} 2 \\\\ 1 \\end{bmatrix}`)
+    expect(matvec.formula).toBe(`z \\leftarrow A\\,y = \\begin{bmatrix} 2 & 3 & 2 & -6 \\\\ 1 & 0 & 0 & 0 \\\\ 0 & 1 & 0 & 0 \\\\ 0 & 0 & 1 & 0 \\end{bmatrix} \\cdot ${y} = \\begin{bmatrix} 2 \\\\ 1 \\\\ 0 \\\\ 0 \\end{bmatrix}`)
   })
 })
 

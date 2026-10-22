@@ -246,6 +246,25 @@ def rfg(x, k, m):
     return x, beta
 
 
+def mpi(A, y, tol, maxiter):
+    """Metoda puterii inverse cu deplasare Rayleigh, pe tablouri cu indici de la 0: sistemul
+    (mu I - A) z = y se rezolva cu s_gpp, ca in pseudocodul desfasurat. Intoarce (y, i) sau (None, i)."""
+    n = len(y)
+    y = y / norma(y)
+    i, e = 0, 1.0
+    while e > tol:
+        if i > maxiter:
+            return None, i
+        mu = y @ (A @ y)
+        B = mu * np.eye(n) - A
+        z = s_gpp(pad(B), pad(y), n)[0][1:]
+        z = z / norma(z)
+        e = abs(1 - abs(z @ y))
+        y = z
+        i = i + 1
+    return y, i
+
+
 def mp(A, y, tol, maxiter):
     """Metoda puterii pe tablouri cu indici de la 0. Intoarce (y, i) sau (None, i)."""
     y = y / norma(y)

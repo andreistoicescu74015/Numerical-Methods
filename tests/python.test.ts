@@ -423,7 +423,7 @@ describe('codul Python emis din pseudocod', () => {
         expect(asteptat[n], `${modul}: ${n} lipsește din starea interpretorului`).toBeDefined()
       }
       // diferenta fata de NumPy: la rotunjiri pentru metodele directe, de ordinul tolerantei pentru cele iterative
-      const pragNumpy = ['JACOBI', 'GS', 'KACZMARZ', 'MP'].includes(functie) ? 1 : 1e-8
+      const pragNumpy = ['JACOBI', 'GS', 'KACZMARZ', 'MP', 'MPI'].includes(functie) ? 1 : 1e-8
       cazuri.push({ modul, functie, descriere, intrari, iesiri: r.iesiri, rezultateExemplu: r.rezultateExemplu, indici: r.indici, asteptat, stop: asteptatDat ? asteptatDat.final === 'stop' : rez.final === 'stop', pragNumpy, cuNumpy: !!algoritm(functie)?.numpy })
     }
     for (const alg of BIBLIOTECA) adauga(alg.id, alg.id, 'exemplul din bibliotecă, față de interpretor', alg.sursa, Object.fromEntries(alg.intrari.map((i) => [i.nume, i.exemplu])), alg.iesiri)

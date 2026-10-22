@@ -132,6 +132,18 @@ const VERIFICATORI: Record<string, Verificator> = {
       { text: { ro: '‖Ay - λy‖∞ / max(1, ‖Ay‖∞), cât de bine e y vector propriu', en: '‖Ay - λy‖∞ / max(1, ‖Ay‖∞), how well y is an eigenvector' }, fel: 'valoare', valoare: normaMax(diferenta(Ay, vectorDin(y.d.map((v) => lambda * v)))) / scara(Ay.d) },
     ]
   },
+  MPI: (d) => {
+    const A = matrice(d, 'A', 'intrari')
+    const y = vector(d, 'y', 'stare')
+    const Ay = matvec(A, y)
+    const mu = y.d.reduce((s, v, k) => s + v * Ay.d[k], 0)
+    const tol = typeof d.intrari.tol === 'number' ? d.intrari.tol : PRAG
+    return [
+      { text: { ro: 'μ = yᵀAy, câtul Rayleigh al lui y la oprire', en: 'μ = yᵀAy, the Rayleigh quotient of y at the stop' }, fel: 'valoare', valoare: mu },
+      { text: { ro: 'e = |1 - |zᵀy|| la oprire, față de tol', en: 'e = |1 - |zᵀy|| at the stop, against tol' }, fel: 'reziduu', valoare: d.scalari.e ?? Number.NaN, prag: tol },
+      { text: { ro: '‖Ay - μy‖∞ / max(1, ‖Ay‖∞), cât de bine e y vector propriu', en: '‖Ay - μy‖∞ / max(1, ‖Ay‖∞), how well y is an eigenvector' }, fel: 'valoare', valoare: normaMax(diferenta(Ay, vectorDin(y.d.map((v) => mu * v)))) / scara(Ay.d) },
+    ]
+  },
   JACOBI: (d) => iterativ(d),
   GS: (d) => iterativ(d),
   KACZMARZ: (d) => iterativ(d),

@@ -7,7 +7,8 @@ import { parseaza } from './motor/parser'
 
 // perechile pe care le compara cursul: pivotare sau nu (slide-urile de pivotare), Cholesky fata de
 // eliminare (de doua ori mai putine operatii), QR fata de eliminare in cazul patrat (cost dublu),
-// metodele iterative intre ele si fata de GPP (aplicatia de pe slide-ul cu Gauss-Seidel)
+// metodele iterative intre ele si fata de GPP (aplicatia de pe slide-ul cu Gauss-Seidel), metoda
+// puterii fata de metoda puterii inverse (slide-ul "Exemple numerice MP/MPI")
 const PERECHI: Record<string, string[]> = {
   G: ['GPP', 'LU', 'CHOL', 'QR'],
   GPP: ['G', 'LU'],
@@ -19,6 +20,8 @@ const PERECHI: Record<string, string[]> = {
   JACOBI: ['GS', 'KACZMARZ', 'S_GPP'],
   GS: ['JACOBI', 'KACZMARZ', 'S_GPP'],
   KACZMARZ: ['GS', 'JACOBI', 'S_GPP'],
+  MP: ['MPI'],
+  MPI: ['MP'],
   Gb: ['G', 'GPP'],
   GPPb: ['GPP', 'Gb'],
   UTRISb: ['UTRIS'],

@@ -126,6 +126,12 @@ def cazuri(n):
     dominanta = w[np.argmax(np.abs(w))]
     yield f"MP ({it} iter.)", "numpy.linalg.eigvalsh, λ dominantă", abs(lam - dominanta), it * 2 * n * n, t, t_np
 
+    # MPI ajunge la valoarea proprie cea mai apropiata de catul Rayleigh al pornirii, nu neaparat la cea dominanta
+    (yi, iti), t = cronometru(lambda: alg.mpi(Sy, y0, 1e-10, 10000))
+    mu = float(yi @ Sy @ yi) if yi is not None else float("nan")
+    flopi_mpi = iti * (n * (n - 1) * (4 * n + 1) // 6 + 4 * n * n + 6 * n - 2) + 3 * n - 1
+    yield f"MPI ({iti} iter.)", "numpy.linalg.eigvalsh, λ cea mai apropiată", float(np.min(np.abs(w - mu))), flopi_mpi, t, t_np
+
     # metodele iterative, pe o matrice strict diagonal dominanta; x porneste de la zero
     Ad = rng.standard_normal((n, n)) + 2 * n * np.eye(n)
     bd = rng.standard_normal(n)

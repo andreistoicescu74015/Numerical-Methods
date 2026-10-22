@@ -23,6 +23,9 @@ export type Natura =
   | 'compatibil'
   // vectorul de pornire al metodei puterii: nenul, cu o componenta pe vectorul propriu dominant al lui `cu`
   | 'pornire'
+  // vectorul de pornire al metodei puterii inverse: nenul; "aleator" il alege cu catul Rayleigh
+  // yᵀAy/yᵀy neintreg, ca μ sa nu nimereasca din prima o valoare proprie intreaga a lui `cu`
+  | 'pornireInversa'
   // matrice banda de latime inferioara r si superioara q (`latimi`), cu A[k] nesingulare, respectiv nesingulara
   | 'bandaLider'
   | 'bandaNesingulara'
@@ -219,7 +222,7 @@ export function incalca(natura: Natura, v: Valoare, cu?: Valoare, latimi?: [numb
     return null
   }
   if (esteVector(v)) {
-    if (natura !== 'nenul' && natura !== 'compatibil' && natura !== 'pornire') return null
+    if (natura !== 'nenul' && natura !== 'compatibil' && natura !== 'pornire' && natura !== 'pornireInversa') return null
     if (v.every((x) => x === 0)) return a('naturaNenul')
     // un termen liber de alta lungime decat numarul de linii e semnalat de interpretor
     if (natura === 'compatibil' && esteMatrice(cu) && cu.length === v.length && rang(cu.map((l, i) => [...l, v[i]])) !== rang(cu)) return a('naturaCompatibil')
@@ -382,6 +385,20 @@ export function genereaza(c: Cerere, rnd: Rnd = Math.random): Valoare {
       return pana(
         () => nenul(A.length),
         (y) => !w || Math.abs(w.reduce((s, x, i) => s + x * y[i], 0)) >= 0.2 * Math.sqrt(y.reduce((s, x) => s + x * x, 0)),
+        () => nenul(A.length),
+      )
+    }
+    if (c.natura === 'pornireInversa' && esteMatrice(c.cu) && c.cu.length === c.cu[0].length) {
+      // matricele generate pentru metoda puterii inverse au valori proprii intregi: un cat Rayleigh
+      // neintreg tine primul sistem (μI − A) z = y departe de singularitate
+      const A = c.cu
+      const rayleigh = (y: number[]) => {
+        const Ay = A.map((l) => l.reduce((s, e, j) => s + e * y[j], 0))
+        return y.reduce((s, e, i) => s + e * Ay[i], 0) / y.reduce((s, e) => s + e * e, 0)
+      }
+      return pana(
+        () => nenul(A.length),
+        (y) => Math.abs(rayleigh(y) - Math.round(rayleigh(y))) > 1e-9,
         () => nenul(A.length),
       )
     }

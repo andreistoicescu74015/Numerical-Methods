@@ -348,6 +348,10 @@ Compararea linie cu linie a pseudocodului din bibliotecă cu slide-urile și cu 
   (83-85), G (113), GPP (121-122), Crout (137), S_GPP (140), CHOL (160), RFG (197), Algoritmul QR
   (211), Algoritmul SQR (224), MP (314); din carte, Gaxpy (Algoritmul 1.5, pagina 31), Gb și GPPb
   (algoritmii 2.14 și 2.15, paginile 106-108).
+- GPP rulează pe exemplul lucrat pe slide-urile 118-120 (A = [0.01 1 1; 1 2 0; 2 0 1]): pivotul
+  2 din linia 3, multiplicatorii 0.5 și 0.005, p = (3, 2) și U = [2 0 1; 0 2 −0.5; 0 0 1.245],
+  recalculate. G, LU și S_GPP rămân pe matricea de pe slide-urile 111-112, care nu cere
+  interschimbări.
 - Algoritmul QR păstrează vectorul Householder scalat (u_kk = 1 + a_kk/σ = β_k) în A. Linia
   `a_kk ← u_kk = β_k` este în plus față de slide, ca sumele pe i = k : m să citească vectorul din A,
   cum face SQR. Pe exemplul din curs iese ce tipărește slide-ul 212: u_1 = (5/3, -1/3, 2/3),
@@ -356,6 +360,15 @@ Compararea linie cu linie a pseudocodului din bibliotecă cu slide-urile și cu 
   `r ← ‖b(n+1:m)‖` vine din slide-ul 223. Pe exemplul de pe slide-ul 225 soluția exactă este
   x = (2/3, 0), cu reziduul √10; slide-ul tipărește (0.65, 0.003), pentru că lucrează cu Qᵀ scris
   cu două zecimale.
+- MP rulează pe matricea companion de pe slide-ul 320 (A = [2 3 2 −6; 1 0 0 0; 0 1 0 0; 0 0 1 0],
+  y⁰ = e₁, tol = 10⁻¹⁵): valorile proprii 3, −1 ± i, 1, iar interpretorul ajunge sub toleranță
+  după 23 de iterații, cât arată graficul de pe slide.
+- MPI (slide-ul 318): pașii buclei sunt cei de pe slide, iar "se rezolvă sistemul (μI_n − A)z = y"
+  este scris desfășurat ca S_GPP, pe copia B = μI − A și pe copia z a lui y, cu două linii în
+  plus, marcate cu %, care opresc algoritmul când un pivot iese exact 0 (μ este exact o valoare
+  proprie; slide-ul nu tratează cazul). Pe exemplul de pe slide-ul 320 interpretorul reproduce
+  tabelul 4.1 din carte (pagina 237): μ = 2.9411764705882, 3.0045159755566, 3.0000169808688,
+  3.0000000001717 și oprirea după 5 iterații, iar MP dă λ = 3.0000000351815 după 23.
 - RFG: linia `β ← 0` nu este pe slide; este convenția cărții (pagina 129, punctul 2) pentru cazul
   în care nu este nimic de anulat.
 - S_G (slide-ul 138 descrie pașii fără pseudocod) pornește pe exemplul de pe slide-ul 114 cu 3
@@ -378,8 +391,7 @@ Algoritmi din curs care nu sunt în bibliotecă, în ordinea în care ar merita 
    mult două transformări Householder.
 3. Rotațiile Givens (ROTG, ROT) și GQR.
 4. GPC și S_GPC (maximul pe doi indici se scrie cu două bucle), LINV, INV_GPP, DET_GPP, LDLᵀ.
-5. MPI, care are nevoie de o rezolvare de sistem în interiorul buclei.
-6. HQr, iterațiile QR și DVS completă, construite pe apeluri între algoritmi.
+5. HQr, iterațiile QR și DVS completă, construite pe apeluri între algoritmi.
 
 ## 10. Culori și accesibilitate
 
@@ -422,9 +434,11 @@ Enunțurile din aplicație au una dintre aceste surse:
 - slide-urile cursului;
 - cartea cursului, numită în text: factorul de creștere și "practic stabil" (pagina 103), testul
   reziduului (pagina 99), definiția stabilității numerice (definiția 0.4, pagina 13), stabilitatea
-  lui CHOL (pagina 116) și a triangularizării ortogonale (pagina 148), sgn(0) = 1 și convenția
-  β = 0 (pagina 129), dubla precizie cu 16 cifre (pagina 7), matricele bandă (pagina 40 și
-  secțiunea 2.9);
+  lui CHOL (pagina 116) și a triangularizării ortogonale (pagina 148), sgn(0) = 1, semnul lui σ
+  și convenția β = 0 (pagina 129), dubla precizie cu 16 cifre (pagina 7), matricele bandă
+  (pagina 40 și secțiunea 2.9, cu "r ≪ n sau q ≪ n" de la paginile 107-108), memorarea unei
+  tridiagonale în trei vectori (pagina 41), stabilitatea substituției și instabilitatea lui G
+  (paginile 102-103);
 - calcule elementare din definițiile cursului (de exemplu, o matrice triunghiulară este
   nesingulară exact când diagonala nu are zerouri);
 - documentația NumPy și SciPy, pentru ce fac funcțiile cu care se compară rezultatul.
@@ -447,7 +461,11 @@ Greșeli din surse, unde aplicația urmează varianta corectă:
 - slide-ul 314 și Algoritmul 4.1 din carte (pagina 234): "tol > 1"; cu e = 1 la pornire bucla nu
   s-ar executa, iar Algoritmul 4.2 din carte (pagina 236) scrie tol < 1;
 - slide-ul 168 dă marginea Kaczmarz fără să spună pentru ce ordine a liniilor ține; pe ordinea
-  ciclică ea nu ține pas cu pas (secțiunea 7).
+  ciclică ea nu ține pas cu pas (secțiunea 7);
+- slide-ul 85 numește "prima ecuație" pe x_n = b_n/u_nn, care este ultima;
+- slide-ul 172 tipărește p₄ = 0.52 pentru componenta a noua a soluției;
+- cartea, pagina 99: ‖T⁻¹‖∞ = 1 + 2 + ... + 2ⁿ⁻² = 2ⁿ⁻¹ − 1 omite 1-ul de pe diagonala inversei;
+  concluzia κ∞(T) = n 2ⁿ⁻¹ cere ‖T⁻¹‖∞ = 2ⁿ⁻¹, valoarea pe care o folosește aplicația.
 
 ## 12. Recenzia UI/UX și așezarea
 

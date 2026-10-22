@@ -7,12 +7,13 @@ pivot and the finished ones are marked, the step formula shows the substituted v
 matrices written out, and a counter keeps the flops. Each computation first appears with a `?`
 in place of its result, so that you can work it out, type it and check it before it is shown.
 
-The library has 20 algorithms: matrix products, the two substitutions, Gaussian elimination
+The library has 21 algorithms: matrix products, the two substitutions, Gaussian elimination
 with and without pivoting (G, GPP, S_GPP, and S_G for the course example where the lack of
 pivoting gives a false solution), LU (Crout), Cholesky, the variants of G, GPP and UTRIS for
 banded matrices, the iterative solvers of the course (Jacobi, Gauss-Seidel, Kaczmarz), the
 Householder reflector for a vector, orthogonal triangularization (algorithm QR), least squares
-(algorithm SQR) and the power method. The theory comes only from the course: the slides and the
+(algorithm SQR), the power method and the inverse power method with the Rayleigh shift. The
+theory comes only from the course: the slides and the
 book of the course (Dumitrescu, Popeea, Jora). For each algorithm the
 application says which course and slide (or which section of the book) it comes from and what
 differs from the source. It also shows what the
@@ -93,7 +94,7 @@ the one from the image.
 - "Counterexamples from the course", under the inputs, loads inputs that break a hypothesis of
   the algorithm or reach an edge case and runs them: a zero diagonal entry for LTRIS, UTRIS and
   UTRISb, a zero pivot for G, S_G and LU, the matrix that stops G for GPP, a singular matrix for
-  GPP and S_GPP, a symmetric matrix that is not positive definite for Cholesky, Jacobi and
+  GPP, S_GPP and S_G, a symmetric matrix that is not positive definite for Cholesky, Jacobi and
   Gauss-Seidel with ρ > 1, Jacobi converging on a matrix that is not diagonally dominant, a
   positive definite matrix where only Gauss-Seidel converges, Kaczmarz on a system without a
   solution and with steps that do not reduce the error, the power method without a dominant
@@ -176,8 +177,8 @@ the one from the image.
 - "Geometric view" appears for two unknowns: for Jacobi, Gauss-Seidel and Kaczmarz the equations
   are lines and the approximations are points moving towards their intersection (Gauss-Seidel
   moves one coordinate at a time, Kaczmarz projects perpendicularly onto one line per step); for
-  the power method with a 2 x 2 matrix, y turns on the unit circle towards the dominant
-  eigenvector; for RFG with a vector of length 2, x is mirrored onto the first axis.
+  the power method and the inverse power method with a 2 x 2 matrix, y turns on the unit circle
+  towards an eigenvector; for RFG with a vector of length 2, x is mirrored onto the first axis.
 - Cells: red with a double outline for the divisor (the pivot in elimination), orange with a
   thick outline for what is written, blue with a dashed outline for what is read, green with a
   marked corner for what is final (also an entry the algorithm uses but never writes in an array it

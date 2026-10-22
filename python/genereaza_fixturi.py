@@ -159,6 +159,12 @@ xh, bh = alg.rfg(alg.pad(xr), 2, 5)
 assert bh != 0
 cazuri.append({"algoritm": "RFG", "descriere": "vector de 5, indice 2", "intrari": {"x": lista(xr), "k": 2}, "iesiri": {"x": lista(xh[1:]), "β": bh}})
 
+# exemplul din curs (slide-ul 320, tabelul 4.1 din carte): 5 iteratii, fata de 23 la MP
+Ac = np.array([[2.0, 3.0, 2.0, -6.0], [1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0]])
+yc, ic = alg.mpi(Ac, np.array([1.0, 0.0, 0.0, 0.0]), 1e-15, 50)
+assert yc is not None and ic == 5
+cazuri.append({"algoritm": "MPI", "descriere": f"matricea companion din curs, {ic} iteratii", "intrari": {"A": lista(Ac), "y": [1.0, 0.0, 0.0, 0.0], "tol": 1e-15, "maxiter": 50}, "iesiri": {"y": lista(yc), "i": ic}})
+
 iesire = pathlib.Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "algoritmi.json"
 iesire.parent.mkdir(parents=True, exist_ok=True)
 iesire.write_text(json.dumps({"sursa": "python/genereaza_fixturi.py, samanta 7", "cazuri": cazuri}, indent=1, ensure_ascii=False), encoding="utf-8")
