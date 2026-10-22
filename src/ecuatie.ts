@@ -15,23 +15,26 @@ export interface Ecuatie {
 }
 
 // Linia marcata la pasul curent (de la 1): valoarea variabilei de linie a algoritmului, cand linia
-// de pseudocod a pasului o foloseste; altfel nicio linie.
+// de pseudocod a pasului o foloseste si pasul a ajuns la liniile unde sistemul se poate scrie;
+// altfel nicio linie.
 export function linieEcuatie(alg: Algoritm, pas: Pas | undefined, variabile: string[]): number | null {
   const e = alg.ecuatie
-  if (!e || !pas || pas.linie <= 0 || !variabile.includes(e.linie)) return null
+  if (!e?.linie || !pas || pas.linie <= 0 || !variabile.includes(e.linie)) return null
+  if (e.deLaLinia !== undefined && pas.linie < e.deLaLinia) return null
   const v = pas.scalari[e.linie]
   return Number.isInteger(v) && v >= 1 ? v : null
 }
 
 // Ecuatia i: termenii cu coeficient nenul, in ordinea coloanelor, cu semnul in fata si fara
-// coeficientul 1; o linie nula se scrie "0".
-export function ecuatia(A: Matrice, b: Vector, x: Vector | null, numeX: string, i: number): Ecuatie {
+// coeficientul 1; o linie nula se scrie "0". Cu `triunghi` superior, coeficientii de sub
+// diagonala nu sunt ai sistemului (acolo stau multiplicatorii) si se sar.
+export function ecuatia(A: Matrice, b: Vector, x: Vector | null, numeX: string, i: number, triunghi?: 'superior'): Ecuatie {
   const termeni: string[] = []
   const numeric: string[] = []
   let suma = 0
   for (let j = 0; j < A.n; j++) {
     const c = A.d[(i - 1) * A.n + j]
-    if (c === 0) continue
+    if (c === 0 || (triunghi === 'superior' && j < i - 1)) continue
     const primul = termeni.length === 0
     const semn = primul ? (c < 0 ? '-' : '') : c < 0 ? ' - ' : ' + '
     const modul = Math.abs(c)

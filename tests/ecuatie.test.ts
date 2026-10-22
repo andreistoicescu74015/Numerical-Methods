@@ -68,11 +68,39 @@ describe('ecuația i a sistemului', () => {
       expect(rez.stare[e.A]?.tip, a.id).toBe('matrice')
       expect(rez.stare[e.x]?.tip, a.id).toBe('vector')
       expect(rez.stare[e.b]?.tip, a.id).toBe('vector')
-      expect([...variabilePeLinie(program).values()].some((v) => v.includes(e.linie)), a.id).toBe(true)
+      if (!e.linie) continue
+      expect([...variabilePeLinie(program).values()].some((v) => v.includes(e.linie!)), a.id).toBe(true)
       expect(rez.pasi.some((p) => linieEcuatie(a, p, variabilePeLinie(program).get(p.linie) ?? []) !== null), a.id).toBe(true)
     }
-    // MPI: sistemul (μI − A) z = y pe copia B, cu linia l
-    expect(algoritm('MPI')!.ecuatie).toEqual({ A: 'B', x: 'z', b: 'y', linie: 'l', tex: '(\\mu I - A)\\, z = y' })
+    // MPI: doar asezarea (μI − A) z = y pe copia B; z este pe rand copia lui y, membrul drept
+    // transformat si solutia, deci ecuatia l nu se poate scrie cu numerele curente
+    expect(algoritm('MPI')!.ecuatie).toEqual({ A: 'B', x: 'z', b: 'y', tex: '(\\mu I - A)\\, z = y' })
+  })
+
+  it('S_G și S_GPP marchează ecuația doar din substituție, cu sistemul U x = d din triunghiul superior', () => {
+    for (const [id, deLa] of [
+      ['S_G', 11],
+      ['S_GPP', 17],
+    ] as const) {
+      const a = algoritm(id)!
+      expect(a.ecuatie).toMatchObject({ deLaLinia: deLa, triunghi: 'superior' })
+      const program = parseaza(a.sursa)
+      const rez = urma(program, { A: [[2, 1], [1, 3]], b: [3, 4] })
+      const variabile = variabilePeLinie(program)
+      const marcate = rez.pasi.filter((p) => linieEcuatie(a, p, variabile.get(p.linie) ?? []) !== null)
+      expect(marcate.length, id).toBeGreaterThan(0)
+      // in faza de eliminare (A transformata, b nu inca) si in cea de aplicare pe b nu se marcheaza nimic
+      expect(marcate.every((p) => p.linie >= deLa), id).toBe(true)
+    }
+    // dupa eliminare A = [[2, 1], [0.5, 2.5]] (μ_21 = 0.5 sub diagonala) si d = (3, 2.5): ecuatia 2 este 2.5 x_2 = 2.5
+    const U = matriceDin([
+      [2, 1],
+      [0.5, 2.5],
+    ])
+    const d = vectorDin([3, 2.5])
+    expect(ecuatia(U, d, null, 'x', 2, 'superior').tex).toBe('2.5\\,x_{2} = 2.5')
+    expect(ecuatia(U, d, null, 'x', 2).tex).toBe('0.5\\,x_{1} + 2.5\\,x_{2} = 2.5')
+    expect(ecuatia(U, d, vectorDin([1, 1]), 'x', 1, 'superior').verificare).toBe('2 \\cdot 1 + 1 \\cdot 1 = 3')
   })
 
   it('fazele SQR acoperă toate liniile pseudocodului, în ordine', () => {

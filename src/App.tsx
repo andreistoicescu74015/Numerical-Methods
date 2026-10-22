@@ -635,7 +635,7 @@ function Continut() {
     const l = linieEcuatie(alg!, pas, variabile.get(pas?.linie ?? 0) ?? [])
     return l !== null && l <= matriceEc.m && l <= bEc.n ? l : null
   })() : null
-  const ecuatieCurenta = cuEcuatie && linieEc !== null ? ecuatia(matriceEc as Matrice, bEc as Vector, xEc?.tip === 'vector' ? xEc : null, sistem!.x, linieEc) : null
+  const ecuatieCurenta = cuEcuatie && linieEc !== null ? ecuatia(matriceEc as Matrice, bEc as Vector, xEc?.tip === 'vector' ? xEc : null, sistem!.x, linieEc, sistem!.triunghi) : null
   const inSistem = (nume: string) => !!sistem && (nume === sistem.A || nume === sistem.x || nume === sistem.b)
   const esteIntrare = (nume: string) => definitii.some((d) => d.nume.trim() === nume)
   // faza algoritmului (SQR pune QR, d = Qᵀb si substitutia unul dupa altul)

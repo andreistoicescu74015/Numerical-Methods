@@ -243,10 +243,15 @@ condiției extrase de `evaluari` din `src/motor/analiza.ts`).
 Scena așază grilele sistemului ca ecuație A · x = b (câmpul `ecuatie` din bibliotecă: LTRIS,
 UTRIS, UTRISb, S_G, S_GPP, Jacobi, Gauss-Seidel, Kaczmarz și MPI, cu (μI − A) z = y pe copia B),
 cu locul lui x gol până când algoritmul îl creează. Când linia de pseudocod folosește variabila
-de linie (i, la MPI l), linia i a lui A, x_i și b_i sunt încadrate, iar cardul scrie ecuația i cu
+de linie i, linia i a lui A, x_i și b_i sunt încadrate, iar cardul scrie ecuația i cu
 numerele curente și, dedesubt, cu valorile curente ale lui x și dacă este satisfăcută
 (`src/ecuatie.ts`); partea a doua rămâne ascunsă cât timp rezultatul pasului este ascuns, iar
-pasul final, fără linie de cod, nu marchează nimic, ca editorul și lista etapelor. La SQR
+pasul final, fără linie de cod, nu marchează nimic, ca editorul și lista etapelor. La S_G și
+S_GPP ecuația se scrie doar de la `x ← b` încolo, când sistemul este U x = d cu U în triunghiul
+superior al lui A (sub diagonală stau multiplicatorii, pe care ecuația îi sare); în timpul
+eliminării A e deja transformată, dar b nu, deci nu se marchează nimic. La MPI rămâne doar
+așezarea: z este pe rând copia lui y, membrul drept transformat de eliminare și soluția, iar y
+rămâne cel inițial, deci ecuația l nu se poate scrie cu numerele curente. La SQR
 titlul fazei (QᵀA = R, d = Qᵀb, R′x = d′, câmpul `faze`) stă deasupra grilelor, iar vederea
 geometrică pentru n = 2 desenează dreptele ecuațiilor, care nu trec prin același punct (slide-ul
 "Rezolvarea de sisteme liniare: m ≠ n"), soluția CMMP calculată separat și x-ul algoritmului după

@@ -196,10 +196,16 @@ the one from the image.
   Kaczmarz, and the inverse power method with its system (μI − A) z = y) the grids of the system
   stand in the scene as the equation A · x = b, the other inputs before them and the arrays the
   algorithm creates after them; until the algorithm creates x, its place is drawn empty. When the
-  current line uses the row variable of the pseudocode (i, or l for the inverse power method),
+  current line uses the row variable i of the pseudocode,
   that row of A, x_i and b_i are framed, and the step card writes equation i with the current
   numbers, then with the current values of x and whether it holds; the second part stays hidden
   while a result is hidden in exercise mode. The final step has no line, so it marks nothing.
+  For S_G and S_GPP this happens only from `x ← b` on, when the system is U x = d with U in the
+  upper triangle of A (below the diagonal A holds the multipliers, which the equation skips);
+  during the elimination A is already transformed while b is not yet, so nothing is marked. The
+  inverse power method shows only the layout: z is in turn the copy of y, the right-hand side
+  transformed by the elimination and the solution, so no equation can be written with the
+  current numbers.
 - For SQR a title above the grids names the phase of the current line, QᵀA = R, d = Qᵀb or
   R′x = d′, with what it does.
 - Cells: red with a double outline for the divisor (the pivot in elimination), orange with a

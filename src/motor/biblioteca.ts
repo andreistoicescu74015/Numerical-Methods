@@ -91,9 +91,13 @@ export interface Algoritm {
   // precizia exemplului, in cifre semnificative, cand exemplul din curs o cere
   cifre?: number
   // sistemul liniar pe care il rezolva sau il aproximeaza, pentru grilele asezate ca ecuatie
-  // A · x = b: numele matricei, al necunoscutei, al termenului liber si variabila de linie a
-  // pseudocodului (ecuatia i); `tex` scrie sistemul cand numele grilelor nu il spun singure
-  ecuatie?: { A: string; x: string; b: string; linie: string; tex?: string }
+  // A · x = b: numele matricei, al necunoscutei si al termenului liber. `linie` este variabila
+  // de linie a pseudocodului (ecuatia i se marcheaza si se scrie in card); fara ea ramane doar
+  // asezarea. `deLaLinia`: ecuatia se marcheaza doar de la acea linie, cand matricea si termenul
+  // liber sunt transformate impreuna (la S_G si S_GPP, substitutia). `triunghi`: coeficientii
+  // ecuatiei se iau doar din triunghiul superior, pentru ca sub diagonala stau multiplicatorii.
+  // `tex` scrie sistemul cand numele grilelor nu il spun singure.
+  ecuatie?: { A: string; x: string; b: string; linie?: string; deLaLinia?: number; triunghi?: 'superior'; tex?: string }
   // fazele algoritmului, cu titlul in forma matriceala, cand pseudocodul pune mai multi algoritmi
   // ai cursului unul dupa altul
   faze?: { linii: [number, number]; tex: string; text: Text }[]
@@ -523,7 +527,8 @@ ${SURSA_GPP}`,
     },
     iesiri: ['x'],
     numpy: fataDeSolve('A', '{x}'),
-    ecuatie: { A: 'A', x: 'x', b: 'b', linie: 'i' },
+    // dupa x ← b (linia 17) sistemul este U x = d, cu U in triunghiul superior al lui A
+    ecuatie: { A: 'A', x: 'x', b: 'b', linie: 'i', deLaLinia: 17, triunghi: 'superior' },
     sursa: `μ, U peste A
 fie p[n-1]
 ${SURSA_GPP}
@@ -1093,7 +1098,9 @@ cât timp e > tol
       '# fata de valoarea proprie cea mai apropiata de mu',
       dif('mu', 'val[np.argmin(np.abs(val - mu))]'),
     ],
-    ecuatie: { A: 'B', x: 'z', b: 'y', linie: 'l', tex: '(\\mu I - A)\\, z = y' },
+    // doar asezarea: z este pe rand copia lui y, membrul drept transformat de eliminare si
+    // solutia, iar y ramane cel initial, deci nicio ecuatie l nu se poate scrie cu numerele curente
+    ecuatie: { A: 'B', x: 'z', b: 'y', tex: '(\\mu I - A)\\, z = y' },
     sursa: `y ← y / ‖y‖; i ← 0; e ← 1
 fie B[n,n]
 cât timp e > tol
@@ -1189,7 +1196,8 @@ cât timp e > tol
     },
     iesiri: ['x'],
     numpy: fataDeSolve('A', '{x}'),
-    ecuatie: { A: 'A', x: 'x', b: 'b', linie: 'i' },
+    // dupa x ← b (linia 11) sistemul este U x = d, cu U in triunghiul superior al lui A
+    ecuatie: { A: 'A', x: 'x', b: 'b', linie: 'i', deLaLinia: 11, triunghi: 'superior' },
     cifre: 3,
     sursa: `μ, U peste A
 pentru k = 1 : n-1
