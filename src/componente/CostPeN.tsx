@@ -75,8 +75,9 @@ export function CostPeN({ alg, intrari, deschis }: Props) {
             n
           </text>
           {ales && <line className="rigla tinta" x1={x(ales.n)} x2={x(ales.n)} y1={M.sus} y2={H - M.jos} />}
-          <polyline className="formula" points={puncte.map((p) => `${x(p.n)},${y(p.formula)}`).join(' ')} />
           <polyline className="serie" points={puncte.map((p) => `${x(p.n)},${y(p.flopi)}`).join(' ')} />
+          {/* formula deasupra seriei: cand e exacta, linia intrerupta se vede peste cea plina */}
+          <polyline className="formula" points={puncte.map((p) => `${x(p.n)},${y(p.formula)}`).join(' ')} />
           {puncte.map((p) => (
             <circle key={p.n} className="punct" cx={x(p.n)} cy={y(p.flopi)} r={ales?.n === p.n ? 6 : 4} />
           ))}

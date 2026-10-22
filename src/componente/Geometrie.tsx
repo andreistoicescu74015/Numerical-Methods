@@ -55,15 +55,15 @@ function solutie(A: number[][], b: number[]): Punct | null {
   return [(d * e - c * f) / det, (a * f - c * e) / det]
 }
 
-// directiile vectorilor proprii reali ai unei matrice 2 x 2, cea dominanta prima; [] daca nu exista
-// o valoare proprie dominanta reala (|λ₁| > |λ₂|)
-function proprii(A: number[][]): Punct[] {
+// directiile vectorilor proprii reali ai unei matrice 2 x 2, cea dominanta prima; [] daca valorile
+// proprii nu sunt reale si, fara `toate`, daca nu exista o valoare proprie dominanta (|λ₁| > |λ₂|)
+function proprii(A: number[][], toate = false): Punct[] {
   const [[p, q], [r, s]] = A
   const urma = p + s
   const disc = urma * urma - 4 * (p * s - q * r)
   if (disc < 0) return []
   const lambdas = [(urma + Math.sqrt(disc)) / 2, (urma - Math.sqrt(disc)) / 2].sort((x, y) => Math.abs(y) - Math.abs(x))
-  if (Math.abs(lambdas[0]) - Math.abs(lambdas[1]) <= 1e-9 * Math.max(1, Math.abs(lambdas[0]))) return []
+  if (!toate && Math.abs(lambdas[0]) - Math.abs(lambdas[1]) <= 1e-9 * Math.max(1, Math.abs(lambdas[0]))) return []
   return lambdas.map((l) => {
     const v: Punct = Math.abs(q) > 1e-12 ? [q, l - p] : Math.abs(r) > 1e-12 ? [l - s, r] : Math.abs(l - p) < 1e-12 ? [1, 0] : [0, 1]
     const n = Math.hypot(v[0], v[1])
@@ -120,9 +120,10 @@ export function Geometrie({ id, rez, intrari, k, ascuns }: Props) {
         const n = Math.hypot(x.v[0], x.v[1]) || 1
         return [x.v[0] / n, x.v[1] / n] as Punct
       })
-    directii = proprii(A)
-    // fara o valoare proprie dominanta reala, ipoteza metodei puterii nu e indeplinita
-    text = id === 'MPI' ? 'geometrieMPI' : directii.length > 0 ? 'geometrieMP' : 'geometrieMPFara'
+    // la MP, fara o valoare proprie dominanta reala ipoteza metodei nu e indeplinita; la MPI
+    // conteaza doar ca valorile proprii sa fie reale
+    directii = proprii(A, id === 'MPI')
+    text = id === 'MPI' ? (directii.length > 0 ? 'geometrieMPI' : 'geometrieMPIComplex') : directii.length > 0 ? 'geometrieMP' : 'geometrieMPFara'
   } else if (id === 'RFG') {
     const x = intrari.x as number[]
     const sigma = (x[0] >= 0 ? 1 : -1) * Math.hypot(x[0], x[1])
@@ -131,6 +132,8 @@ export function Geometrie({ id, rez, intrari, k, ascuns }: Props) {
     const calculat = rez.pasi.findIndex((p) => p.scalari['β'] !== undefined && p.scalari['β'] !== 0)
     if (calculat >= 0 && vizibil(calculat) && sigma !== 0) {
       sageti.push({ spre: [-sigma, 0], clasa: 'imagine', eticheta: 'U₁x' })
+      // vectorul Householder u = x + σ e₁, perpendicular pe oglinda
+      sageti.push({ spre: [x[0] + sigma, x[1]], clasa: 'householder', eticheta: 'u' })
       // dreapta fata de care se face reflexia este perpendiculara pe u = x + σ e₁
       oglinda = [x[0] + sigma, x[1]]
     }

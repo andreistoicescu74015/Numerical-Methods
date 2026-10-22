@@ -30,8 +30,8 @@ const FEL: Record<string, Fel> = {
 
 export const areInvariant = (id: string): boolean => id in FEL
 
-// produsul primilor c factori, de la ultimul la primul: "M_3 ⋯ M_1", "M_1", nimic pentru c = 0
-const produs = (factor: (j: number) => string, c: number): string => (c === 0 ? '' : c === 1 ? `${factor(1)}\\, ` : `${factor(c)} \\cdots ${factor(1)}\\, `)
+// produsul primilor c factori, de la ultimul la primul: "M_3 ⋯ M_1", "M_2 M_1", "M_1", nimic pentru c = 0
+const produs = (factor: (j: number) => string, c: number): string => (c === 0 ? '' : c === 1 ? `${factor(1)}\\, ` : c === 2 ? `${factor(2)} ${factor(1)}\\, ` : `${factor(c)} \\cdots ${factor(1)}\\, `)
 
 // Enuntul, ca formula si ca text; {0} este numarul de pasi completi, {1} cel urmator
 // `unu`: textul dupa un singur pas, la singular ("prima coloana", nu "primele 1 coloane")

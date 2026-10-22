@@ -54,16 +54,18 @@ export function Comparatie({ alg, rez, intrari, cifre, definitii, onTreci }: Pro
     const s = r.rez.scalari[nume]
     return s === undefined ? '' : `${nume} = ${fmtValoare(s)}`
   }
-  // o matrice rezultat de cel mult 4 x 4 se arata intreaga, ca cele doua rezultate sa se compare
+  // o matrice rezultat de cel mult 5 x 5 se arata intreaga, ca cele doua rezultate sa se compare
   const matrice = (r: Rulat): string | null => {
     if (r.rez.final !== 'gata') return null
     const nume = r.alg.iesiri[0]
     const v = r.rez.stare[nume]
-    if (v?.tip !== 'matrice' || v.m > 4 || v.n > 4) return null
+    if (v?.tip !== 'matrice' || v.m > 5 || v.n > 5) return null
     const randuri = Array.from({ length: v.m }, (_, i) => v.d.slice(i * v.n, i * v.n + v.n).map(fmtNumar).join(' & '))
     return `${nume} = \\begin{bmatrix} ${randuri.join(' \\\\ ')} \\end{bmatrix}`
   }
   const iterative = curent.iteratii > 0 || (alt?.iteratii ?? 0) > 0
+  // o metoda directa nu are iteratii de numarat
+  const areIteratii = (r: Rulat) => r.iteratii > 0 || r.alg.grup === 'iterative' || r.alg.grup === 'proprii'
   const dif = alt ? diferenta(curent, alt) : null
 
   return (
@@ -103,8 +105,8 @@ export function Comparatie({ alg, rez, intrari, cifre, definitii, onTreci }: Pro
               {iterative && (
                 <tr>
                   <td>{t('comparatieIteratii')}</td>
-                  <td className="numar">{curent.iteratii}</td>
-                  <td className="numar">{alt.iteratii}</td>
+                  <td className="numar">{areIteratii(curent) ? curent.iteratii : '–'}</td>
+                  <td className="numar">{areIteratii(alt) ? alt.iteratii : '–'}</td>
                 </tr>
               )}
               {!(matrice(curent) && matrice(alt)) && (

@@ -55,7 +55,7 @@ describe('urma de execuție', () => {
     expect(primul.formula).toBe('a_{21} \\leftarrow \\mu_{21} = a_{21} / a_{11} = 2 / 1 = 2')
     expect(primul.celule).toHaveLength(2)
     expect(primul.celule).toContainEqual({ nume: 'A', i: 1, j: 1, rol: 'pivot' })
-    expect(primul.celule).toContainEqual({ nume: 'A', i: 2, j: 1, rol: 'scris', mult: true })
+    expect(primul.celule).toContainEqual({ nume: 'A', i: 2, j: 1, rol: 'scris', mult: true, litera: 'μ' })
     expect(scrieri.length).toBe(2 + 4 + 1 + 1)
     expect(rez.flopi).toBe(2 + 8 + 1 + 2)
   })

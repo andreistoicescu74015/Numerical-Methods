@@ -28,8 +28,9 @@ describe('condiționarea unui sistem', () => {
     }
     for (const ex of exempleCarte())
       for (const id of ex.pentru) {
-        const nume = id === 'LTRIS' ? 'L' : id === 'UTRIS' ? 'U' : 'A'
-        const e = experiment(algoritm(id)!, { [nume]: ex.A, b: ex.b }, 1e-6)!
+        const nume = id === 'LTRIS' ? 'L' : id === 'UTRIS' || id === 'UTRISb' ? 'U' : 'A'
+        // UTRISb citeste doar banda: matricea diagonala D este banda cu q = 0
+        const e = experiment(algoritm(id)!, { [nume]: ex.A, b: ex.b, ...(id === 'UTRISb' ? { q: 0 } : {}) }, 1e-6)!
         expect(e.schimbare, `${ex.id}, ${id}`).toBeLessThanOrEqual(e.margine * (1 + 1e-6))
       }
   })

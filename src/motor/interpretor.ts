@@ -31,8 +31,10 @@ export interface Celula {
   i: number
   j?: number
   rol: Rol
-  // scriere etichetata cu μ: un multiplicator, pastrat pentru mai tarziu
+  // scriere etichetata cu μ (un multiplicator) sau cu u (o componenta a vectorului Householder):
+  // o valoare pastrata pentru mai tarziu; `litera` spune care dintre ele
   mult?: boolean
+  litera?: string
 }
 
 export interface Scriere {
@@ -537,7 +539,12 @@ class Interpretor implements InfoLatex {
     const rezultat = valoareLatex(v, s.tinta.nume)
     // eticheta (μ_ik) nu se evalueaza, dar indicii ei trebuie stiuti ca sa apara ca μ_21
     if (s.eticheta?.tip === 'elem') for (const x of s.eticheta.idx) this.indice(x)
-    if (s.eticheta && norm(s.eticheta.nume) === 'μ') for (const c of scrise) c.mult = true
+    if (s.eticheta && (norm(s.eticheta.nume) === 'μ' || norm(s.eticheta.nume) === 'u')) {
+      for (const c of scrise) {
+        c.mult = true
+        c.litera = norm(s.eticheta.nume)
+      }
+    }
     const eticheta = s.eticheta ? `${this.tintaLatex(s.eticheta)} = ` : ''
     let f = `${this.tintaLatex(s.tinta)} \\leftarrow ${eticheta}${simbolic}`
     if (numeric !== simbolic) f += ` = ${numeric}`

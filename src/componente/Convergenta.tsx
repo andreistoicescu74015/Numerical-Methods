@@ -122,7 +122,7 @@ export function Convergenta({ puncte, vazute, onPas, nota }: Props) {
         {t(logaritmic ? 'convergentaLog' : 'convergentaLiniar')}
       </p>
       <div className="grafic" ref={ref}>
-        <svg viewBox={`0 0 ${L} ${H}`} role="img" aria-label={t('convergentaDescriere', vizibile.length, ultim ? fmtNumar(ultim.stanga) : '', fmtNumar(prag))} onPointerLeave={() => setPeste(null)}>
+        <svg viewBox={`0 0 ${L} ${H}`} role="img" aria-label={t('convergentaDescriere', Math.max(vizibile.length - 1, 0), ultim ? fmtNumar(ultim.stanga) : '', fmtNumar(prag))} onPointerLeave={() => setPeste(null)}>
           {gradY.map((g, k) => (
             <g key={k}>
               <line className="rigla" x1={M.stanga} x2={L - M.dreapta} y1={g.poz} y2={g.poz} />

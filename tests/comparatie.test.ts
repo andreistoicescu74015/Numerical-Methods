@@ -53,6 +53,7 @@ describe('comparația cu alt algoritm', () => {
     const sgpp = ruleazaPe(algoritm('S_GPP')!, { A, b }, 0)
     expect(sg.rez.final).toBe('eroare')
     expect(diferenta(sg, sgpp)).toBeNull()
-    expect(diferenta(ruleazaPe(algoritm('G')!, { A: [[2, 1], [1, 3]] }, 0), ruleazaPe(algoritm('GPP')!, { A: [[2, 1], [1, 3]] }, 0))).toBeNull()
+    // doua matrice rezultat de aceeasi forma se compara element cu element: fara interschimbari, G si GPP dau acelasi A
+    expect(diferenta(ruleazaPe(algoritm('G')!, { A: [[2, 1], [1, 3]] }, 0), ruleazaPe(algoritm('GPP')!, { A: [[2, 1], [1, 3]] }, 0))).toEqual({ nume: 'A', valoare: 0 })
   })
 })

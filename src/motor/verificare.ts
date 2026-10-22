@@ -13,6 +13,8 @@ export interface Verificare {
   fel: 'reziduu' | 'valoare'
   valoare: number
   prag?: number
+  // o valoare de aratat cu toate cifrele (λ, μ), ca sa se poata compara cu tabelele din carte
+  precis?: boolean
 }
 
 export const PRAG = 1e-9
@@ -44,8 +46,8 @@ function reziduu(text: Record<Limba, string>, obtinut: Matrice | Vector, astepta
 }
 
 // reziduul relativ, ca eroarea lui x sa fie cel mult κ(A) ori el (teorema de conditionare din curs)
-const sistem = (A: Matrice, x: Vector, b: Vector): Verificare => ({
-  text: { ro: '‖b - Ax‖∞ / ‖b‖∞', en: '‖b - Ax‖∞ / ‖b‖∞' },
+const sistem = (A: Matrice, x: Vector, b: Vector, nume = 'A'): Verificare => ({
+  text: { ro: `‖b - ${nume}x‖∞ / ‖b‖∞`, en: `‖b - ${nume}x‖∞ / ‖b‖∞` },
   fel: 'reziduu',
   valoare: normaMax(diferenta(b, matvec(A, x))) / (normaMax(b.d) || 1),
 })
@@ -53,8 +55,8 @@ const sistem = (A: Matrice, x: Vector, b: Vector): Verificare => ({
 const VERIFICATORI: Record<string, Verificator> = {
   matvec: (d) => [reziduu({ ro: 'y față de Ax, recalculat', en: 'y against Ax, recomputed' }, vector(d, 'y', 'stare'), matvec(matrice(d, 'A', 'intrari'), vector(d, 'x', 'intrari')))],
   matmul: (d) => [reziduu({ ro: 'C față de AB, recalculat', en: 'C against AB, recomputed' }, matrice(d, 'C', 'stare'), produs(matrice(d, 'A', 'intrari'), matrice(d, 'B', 'intrari')))],
-  LTRIS: (d) => [sistem(matrice(d, 'L', 'intrari'), vector(d, 'x', 'stare'), vector(d, 'b', 'intrari'))],
-  UTRIS: (d) => [sistem(matrice(d, 'U', 'intrari'), vector(d, 'x', 'stare'), vector(d, 'b', 'intrari'))],
+  LTRIS: (d) => [sistem(matrice(d, 'L', 'intrari'), vector(d, 'x', 'stare'), vector(d, 'b', 'intrari'), 'L')],
+  UTRIS: (d) => [sistem(matrice(d, 'U', 'intrari'), vector(d, 'x', 'stare'), vector(d, 'b', 'intrari'), 'U')],
   G: (d) => {
     const F = matrice(d, 'A', 'stare')
     return [reziduu({ ro: 'LU față de A, cu L unitate din multiplicatori', en: 'LU against A, with unit L from the multipliers' }, produs(inferior(F, false, true), superior(F, true)), matrice(d, 'A', 'intrari'))]
@@ -81,7 +83,7 @@ const VERIFICATORI: Record<string, Verificator> = {
   // pe o matrice banda, elementele din afara benzii sunt zero, deci verificarile sunt cele de la G si GPP
   Gb: (d) => VERIFICATORI.G(d),
   GPPb: (d) => VERIFICATORI.GPP(d),
-  UTRISb: (d) => [sistem(matrice(d, 'U', 'intrari'), vector(d, 'x', 'stare'), vector(d, 'b', 'intrari'))],
+  UTRISb: (d) => [sistem(matrice(d, 'U', 'intrari'), vector(d, 'x', 'stare'), vector(d, 'b', 'intrari'), 'U')],
   LU: (d) => {
     const F = matrice(d, 'A', 'stare')
     return [reziduu({ ro: 'LU față de A, cu U unitate', en: 'LU against A, with unit U' }, produs(inferior(F, true), superior(F, false, true)), matrice(d, 'A', 'intrari'))]
@@ -118,8 +120,8 @@ const VERIFICATORI: Record<string, Verificator> = {
         : [
             {
               text: {
-                ro: '|λ| față de cea mai mare valoare proprie în modul, aflată din alt vector de pornire',
-                en: '|λ| against the largest eigenvalue in absolute value, found from another starting vector',
+                ro: '|λ| față de cea mai mare valoare proprie în modul, aflată separat cu metoda puterii și iterația inversă cu deplasare Rayleigh',
+                en: '|λ| against the largest eigenvalue in absolute value, found separately with the power method and inverse iteration with the Rayleigh shift',
               },
               fel: 'reziduu' as const,
               valoare: Math.abs(Math.abs(lambda) - Math.abs(dominanta)) / Math.abs(dominanta),
@@ -127,7 +129,7 @@ const VERIFICATORI: Record<string, Verificator> = {
               prag: Math.max(1e-6, 10 * Math.sqrt(tol)),
             },
           ]),
-      { text: { ro: 'λ = yᵀAy, câtul Rayleigh al lui y', en: 'λ = yᵀAy, the Rayleigh quotient of y' }, fel: 'valoare', valoare: lambda },
+      { text: { ro: 'λ = yᵀAy, câtul Rayleigh al lui y', en: 'λ = yᵀAy, the Rayleigh quotient of y' }, fel: 'valoare', valoare: lambda, precis: true },
       { text: { ro: 'e = |1 - |zᵀy|| la oprire, față de tol', en: 'e = |1 - |zᵀy|| at the stop, against tol' }, fel: 'reziduu', valoare: d.scalari.e ?? Number.NaN, prag: tol },
       { text: { ro: '‖Ay - λy‖∞ / max(1, ‖Ay‖∞), cât de bine e y vector propriu', en: '‖Ay - λy‖∞ / max(1, ‖Ay‖∞), how well y is an eigenvector' }, fel: 'valoare', valoare: normaMax(diferenta(Ay, vectorDin(y.d.map((v) => lambda * v)))) / scara(Ay.d) },
     ]
@@ -139,7 +141,7 @@ const VERIFICATORI: Record<string, Verificator> = {
     const mu = y.d.reduce((s, v, k) => s + v * Ay.d[k], 0)
     const tol = typeof d.intrari.tol === 'number' ? d.intrari.tol : PRAG
     return [
-      { text: { ro: 'μ = yᵀAy, câtul Rayleigh al lui y la oprire', en: 'μ = yᵀAy, the Rayleigh quotient of y at the stop' }, fel: 'valoare', valoare: mu },
+      { text: { ro: 'μ = yᵀAy, câtul Rayleigh al lui y la oprire', en: 'μ = yᵀAy, the Rayleigh quotient of y at the stop' }, fel: 'valoare', valoare: mu, precis: true },
       { text: { ro: 'e = |1 - |zᵀy|| la oprire, față de tol', en: 'e = |1 - |zᵀy|| at the stop, against tol' }, fel: 'reziduu', valoare: d.scalari.e ?? Number.NaN, prag: tol },
       { text: { ro: '‖Ay - μy‖∞ / max(1, ‖Ay‖∞), cât de bine e y vector propriu', en: '‖Ay - μy‖∞ / max(1, ‖Ay‖∞), how well y is an eigenvector' }, fel: 'valoare', valoare: normaMax(diferenta(Ay, vectorDin(y.d.map((v) => mu * v)))) / scara(Ay.d) },
     ]
@@ -167,7 +169,12 @@ const VERIFICATORI: Record<string, Verificator> = {
 // legatura cu cel al utilizatorului; null cand sirul nu se stabilizeaza (fara valoare dominanta).
 function valoareDominanta(A: Matrice): number | null {
   const n = A.n
+  const rayleigh = (y: Vector) => {
+    const Ay = matvec(A, y)
+    return y.d.reduce((s, x, i) => s + x * Ay.d[i], 0)
+  }
   let y = vectorDin(Array.from({ length: n }, (_, i) => 1 + (i + 1) / (n + 2)))
+  let lambda: number | null = null
   for (let k = 0; k < 5000; k++) {
     const z = matvec(A, y)
     const nz = norma2(z.d)
@@ -176,11 +183,29 @@ function valoareDominanta(A: Matrice): number | null {
     const cos = Math.abs(nou.d.reduce((s, x, i) => s + x * y.d[i], 0))
     y = nou
     if (k > 20 && 1 - cos <= 1e-15) {
-      const Ay = matvec(A, y)
-      return y.d.reduce((s, x, i) => s + x * Ay.d[i], 0)
+      lambda = rayleigh(y)
+      break
     }
   }
-  return null
+  if (lambda === null) return null
+  // metoda puterii lasa in λ o eroare de ordinul lui √tol; cateva iteratii inverse cu deplasarea
+  // Rayleigh (algoritmul MPI) o aduc la precizia masinii, ca referinta sa fie mai buna decat λ-ul
+  // verificat
+  for (let k = 0; k < 8; k++) {
+    const mu = lambda
+    const B = matriceDin(Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => (i === j ? mu : 0) - A.d[i * n + j])))
+    const z = rezolva(B, y)
+    if (!z) break
+    const nz = norma2(z.d)
+    if (!Number.isFinite(nz) || nz === 0) break
+    y = vectorDin(z.d.map((x) => x / nz))
+    const nou = rayleigh(y)
+    if (!Number.isFinite(nou)) break
+    const gata = Math.abs(nou - lambda) <= 1e-15 * Math.max(1, Math.abs(nou))
+    lambda = nou
+    if (gata) break
+  }
+  return lambda
 }
 
 // Metodele iterative promit doar testul de oprire. Langa el se arata numarul de iteratii si, pentru

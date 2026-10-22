@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { exempleCarte, experiment, type ExempluCarte } from '../conditionare'
+import { exempleCarte, experiment, matriceaSistemului, type ExempluCarte } from '../conditionare'
 import type { CheieText } from '../i18n'
 import type { Algoritm } from '../motor/biblioteca'
 import type { Intrari } from '../motor/interpretor'
@@ -27,9 +27,11 @@ export function Conditionare({ alg, intrari, onExemplu, deschis }: Props) {
   // cu b = 0, x = 0: schimbarea relativa a lui x nu se poate calcula
   const faraX = !!e && !Number.isFinite(e.schimbare)
   const exemple = exempleCarte().filter((x) => x.pentru.includes(alg.id))
+  // numele matricei sistemului: A la rezolvari, L sau U la substitutii
+  const numeMatrice = matriceaSistemului(alg.id) ?? 'A'
   const rand = (cheie: CheieText, v: number) => (
     <tr>
-      <td>{t(cheie)}</td>
+      <td>{t(cheie, numeMatrice)}</td>
       <td className="numar">{fmtValoare(v)}</td>
     </tr>
   )

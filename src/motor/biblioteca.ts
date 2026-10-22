@@ -147,7 +147,10 @@ const ETAPE_GPP: Etapa[] = [
   {
     linii: [6, 7],
     tex: 'A \\leftarrow P_k A',
-    text: { ro: 'liniile k și i_k se interschimbă (P_k este matricea care face această interschimbare)', en: 'rows k and i_k are swapped (P_k is the matrix that performs this swap)' },
+    text: {
+      ro: 'liniile k și i_k se interschimbă de la coloana k încolo (P_k este matricea care face această interschimbare); multiplicatorii din coloanele dinainte rămân pe loc, de aceea în PA = LU coloana k a lui L este m_k permutată de interschimbările următoare (slide-ul "Factorizari LU rezultate din eliminarea gaussiana")',
+      en: 'rows k and i_k are swapped from column k onwards (P_k is the matrix that performs this swap); the multipliers of the earlier columns stay in place, which is why in PA = LU column k of L is m_k permuted by the later swaps (slide "Factorizari LU rezultate din eliminarea gaussiana")',
+    },
   },
   {
     linii: [8, 9],
@@ -277,7 +280,7 @@ pentru i = 1 : m
     forma: 'C = A B',
     etape: [
       {
-        linii: [3, 6],
+        linii: [3, 3],
         tex: 'C(:, j) = A\\, B(:, j)',
         text: { ro: 'coloana j a lui C este A înmulțită cu coloana j a lui B', en: 'column j of C is A times column j of B' },
       },
@@ -456,7 +459,7 @@ pentru k = 1 : n-1
       ro: 'Curs III, slide-ul "Algoritmul GPP - Eliminare gaussiana cu pivotare partiala", rând cu rând; la egalitate se alege cel mai mic indice, ca pe slide. Exemplul este cel lucrat pe slide-urile "Eliminarea Gaussiana cu Pivotare Partiala - exemplu": la pasul 1 pivotul este 2, din linia 3, cu multiplicatorii 0.5 și 0.005; la pasul 2 pivotul rămâne pe loc, iar U iese [2 0 1; 0 2 −0.5; 0 0 1.245], cu p = (3, 2).',
       en: 'Course III, slide "Algoritmul GPP - Eliminare gaussiana cu pivotare partiala", line by line; on ties the smallest index is chosen, as on the slide. The example is the one worked on the slides "Eliminarea Gaussiana cu Pivotare Partiala - exemplu": at step 1 the pivot is 2, from row 3, with multipliers 0.5 and 0.005; at step 2 the pivot stays in place, and U comes out [2 0 1; 0 2 −0.5; 0 0 1.245], with p = (3, 2).',
     },
-    cost: { ro: '≈ 2n³/3 flopi și ≈ n²/2 comparații', en: '≈ 2n³/3 flops and ≈ n²/2 comparisons' },
+    cost: { ro: '≈ 2n³/3 flopi plus ≈ n²/2 comparații nenumărate ca flopi', en: '≈ 2n³/3 flops plus ≈ n²/2 comparisons not counted as flops' },
     estimare: eliminare('A'),
     forma: 'M_{n-1} P_{n-1} \\cdots M_1 P_1 A = U',
     etape: ETAPE_GPP,
@@ -650,8 +653,8 @@ pentru k = 1 : n
       { linii: [8, 8], tex: 'r = A x - b, \\qquad e = \\|r\\| / \\|b\\|', text: TEST_OPRIRE },
     ],
     practic: {
-      ro: 'Are nevoie de toate elementele diagonale nenule. Cursul dă două condiții de convergență: raza spectrală a matricei D⁻¹N să fie sub 1, sau A să fie strict diagonal dominantă (pe fiecare linie, |a_ii| mai mare decât suma modulelor celorlalte elemente); butonul "aleator" generează astfel de matrice. Cursul recomandă metodele directe pentru n < 500 și pe cele iterative pentru sisteme foarte mari. Un reziduu mic spune că Ax este aproape de b; cât de aproape este x de soluție depinde și de condiționarea lui A.',
-      en: 'It needs all diagonal entries to be nonzero. The course gives two convergence conditions: the spectral radius of the matrix D⁻¹N is below 1, or A is strictly diagonally dominant (in every row, |a_ii| exceeds the sum of the absolute values of the other entries); the "random" button generates such matrices. The course recommends direct methods for n < 500 and iterative ones for very large systems. A small residual says that Ax is close to b; how close x is to the solution also depends on the conditioning of A.',
+      ro: 'Are nevoie de toate elementele diagonale nenule. Cursul dă două condiții de convergență: raza spectrală a matricei D⁻¹N să fie sub 1, sau A să fie strict diagonal dominantă (pe fiecare linie, |a_ii| mai mare decât suma modulelor celorlalte elemente); butonul "aleator" generează astfel de matrice. Reziduul nu scade neapărat la fiecare trecere: pe exemplul din curs, D⁻¹N = [0 −1/2; −5/7 0] are valorile proprii ±√(5/14) ≈ ±0.6, deci eroarea se înmulțește cu 5/14 abia din două în două treceri, iar graficul convergenței urcă și coboară. Cursul recomandă metodele directe pentru n < 500 și pe cele iterative pentru sisteme foarte mari. Un reziduu mic spune că Ax este aproape de b; cât de aproape este x de soluție depinde și de condiționarea lui A.',
+      en: 'It needs all diagonal entries to be nonzero. The course gives two convergence conditions: the spectral radius of the matrix D⁻¹N is below 1, or A is strictly diagonally dominant (in every row, |a_ii| exceeds the sum of the absolute values of the other entries); the "random" button generates such matrices. The residual does not necessarily shrink at every sweep: on the course example, D⁻¹N = [0 −1/2; −5/7 0] has the eigenvalues ±√(5/14) ≈ ±0.6, so the error is multiplied by 5/14 only every two sweeps, and the convergence chart goes up and down. The course recommends direct methods for n < 500 and iterative ones for very large systems. A small residual says that Ax is close to b; how close x is to the solution also depends on the conditioning of A.',
     },
     iesiri: ['x', 'k'],
     numpy: fataDeSolve('A', '{x}'),
@@ -791,10 +794,10 @@ cât timp e > tol    % bucla nu este pe slide
       en: 'Builds the Householder reflector U_k that annihilates components k+1, ..., m of a vector x: U_k x has −σ in position k and zeros below it, where |σ| is the norm of x(k : m). The Householder vector u is scaled as in the course (u_i = x_i/σ, u_k = 1 + x_k/σ); its part below position k overwrites x, in place of the zeros, and β = u_k is kept separately.',
     },
     curs: {
-      ro: 'Curs IV, slide-ul "Transformari ortogonale - reflectori", algoritmul RFG. Linia β ← 0 nu este pe slide; este convenția cărții cursului pentru cazul în care nu este nimic de anulat (reflectorul este atunci I, semnalat prin β = 0). Exemplul este prima coloană a matricei din exemplul de triangularizare ortogonală și dă valorile de acolo: σ = 3, u = (5/3, −1/3, 2/3), β = 5/3.',
-      en: 'Course IV, slide "Transformari ortogonale - reflectori", algorithm RFG. The line β ← 0 is not on the slide; it is the convention of the book of the course for the case when there is nothing to annihilate (the reflector is then I, signalled by β = 0). The example is the first column of the matrix in the orthogonal triangularization example and gives the values found there: σ = 3, u = (5/3, −1/3, 2/3), β = 5/3.',
+      ro: 'Curs IV, slide-ul "Transformari ortogonale - reflectori", algoritmul RFG. Linia β ← 0 nu este pe slide; este convenția cărții cursului pentru cazul în care nu este nimic de anulat (reflectorul este atunci I, semnalat prin β = 0). Exemplul este prima coloană a matricei din exemplul de triangularizare ortogonală și dă valorile de acolo: σ = 3, u = (5/3, −1/3, 2/3), β = 5/3. Vederea geometrică apare pentru un vector de lungime 2 cu k = 1; exemplul are lungimea 3.',
+      en: 'Course IV, slide "Transformari ortogonale - reflectori", algorithm RFG. The line β ← 0 is not on the slide; it is the convention of the book of the course for the case when there is nothing to annihilate (the reflector is then I, signalled by β = 0). The example is the first column of the matrix in the orthogonal triangularization example and gives the values found there: σ = 3, u = (5/3, −1/3, 2/3), β = 5/3. The geometric view appears for a vector of length 2 with k = 1; the example has length 3.',
     },
-    cost: { ro: '≈ 3(m − k + 1) flopi și un radical', en: '≈ 3(m − k + 1) flops and one square root' },
+    cost: { ro: '≈ 3(m − k + 1) flopi și un radical, numărați pe pseudocod', en: '≈ 3(m − k + 1) flops and one square root, counted on the pseudocode' },
     estimare: (x) => 3 * (x.forme.x[0] - x.scalari.k + 1),
     forma: 'U_k = I_m - \\dfrac{u u^T}{\\beta}, \\qquad U_k x = (x_1, \\dots, x_{k-1}, -\\sigma, 0, \\dots, 0)^T',
     etape: [
@@ -856,8 +859,8 @@ dacă k < m atunci
     forma: 'U_s \\cdots U_2 U_1 A = R, \\qquad U_k = I_m - \\dfrac{u_k u_k^T}{\\beta_k}, \\qquad s = \\min(m-1, n)',
     etape: ETAPE_QR,
     practic: {
-      ro: 'Reflectorii sunt matrice ortogonale, deci păstrează norma coloanelor (cursul: ‖Ux‖ = ‖x‖); nu este nevoie de pivotare, iar cartea cursului arată că algoritmul este numeric stabil. Pentru o matrice pătrată costul este ≈ 4n³/3, dublu față de eliminarea gaussiană, de aceea cursul preferă eliminarea gaussiană în cazul pătrat și folosește QR pentru problema celor mai mici pătrate. Matricea Q nu se formează: se păstrează vectorii u_k și scalarii β_k, iar Qᵀb se calculează aplicând reflectorii pe rând. numpy.linalg.qr dă aceeași factorizare, cu liniile lui R eventual de semn opus.',
-      en: 'Reflectors are orthogonal matrices, so they preserve the norm of the columns (the course: ‖Ux‖ = ‖x‖); no pivoting is needed, and the book of the course shows that the algorithm is numerically stable. For a square matrix the cost is ≈ 4n³/3, twice that of Gaussian elimination, which is why the course prefers Gaussian elimination in the square case and uses QR for the least squares problem. The matrix Q is not formed: the vectors u_k and the scalars β_k are kept, and Qᵀb is computed by applying the reflectors in turn. numpy.linalg.qr gives the same factorization, with the rows of R possibly of opposite sign.',
+      ro: 'Reflectorii sunt matrice ortogonale, deci păstrează norma coloanelor (cursul: ‖Ux‖ = ‖x‖); nu este nevoie de pivotare, iar cartea cursului arată că algoritmul este numeric stabil. Pentru o matrice pătrată costul este ≈ 4n³/3, dublu față de eliminarea gaussiană, de aceea cursul preferă eliminarea gaussiană în cazul pătrat; pentru problema celor mai mici pătrate cursul pornește de la ieșirea lui QR (Algoritmul SQR). Matricea Q nu se formează: se păstrează vectorii u_k și scalarii β_k, iar Qᵀb se calculează aplicând reflectorii pe rând. numpy.linalg.qr dă aceeași factorizare, cu liniile lui R eventual de semn opus.',
+      en: 'Reflectors are orthogonal matrices, so they preserve the norm of the columns (the course: ‖Ux‖ = ‖x‖); no pivoting is needed, and the book of the course shows that the algorithm is numerically stable. For a square matrix the cost is ≈ 4n³/3, twice that of Gaussian elimination, which is why the course prefers Gaussian elimination in the square case; for the least squares problem the course starts from the output of QR (Algorithm SQR). The matrix Q is not formed: the vectors u_k and the scalars β_k are kept, and Qᵀb is computed by applying the reflectors in turn. numpy.linalg.qr gives the same factorization, with the rows of R possibly of opposite sign.',
     },
     iesiri: ['A', 'β'],
     numpy: [
@@ -879,10 +882,10 @@ dacă k < m atunci
       en: 'For a system with more equations than unknowns (m > n), finds the x that makes the residual ‖b − Ax‖ as small as possible. It first triangularizes A with Algorithm QR, then applies the same reflectors to b (d = Qᵀb) and solves the upper triangular system formed by the first n rows. The norm of the remaining part of d, r = ‖d(n+1 : m)‖, is the minimal residual.',
     },
     curs: {
-      ro: 'Curs IV, slide-ul "Calculul solutiei CMMP: m > n", Algoritmul SQR, care pornește de la ieșirea Algoritmului QR; aici cele două sunt scrise unul după altul. Pe slide prima linie din buclă apare ca "t = a_kk = 0"; aici este t ← a_kk, valoarea pe care ultima linie o pune la loc. Linia cu r nu este în algoritm: vine din slide-ul de dinainte, unde reziduul minim este ‖d"‖. Exemplul este cel din slide: aici iese x = (2/3, 0) până la rotunjiri, iar slide-ul obține (0.65, 0.003) pentru că lucrează cu Qᵀ scris cu două zecimale. Slide-ul pornește de la ieșirea lui QR cu m ≥ n; aici se cere m > n, pentru că la m = n Algoritmul QR calculează doar s = n − 1 reflectori, iar bucla lui SQR ar citi β_n, care nu există.',
-      en: 'Course IV, slide "Calculul solutiei CMMP: m > n", Algorithm SQR, which starts from the output of Algorithm QR; here the two are written one after the other. On the slide the first line of the loop appears as "t = a_kk = 0"; here it is t ← a_kk, the value the last line puts back. The line with r is not in the algorithm: it comes from the preceding slide, where the minimal residual is ‖d"‖. The example is the one on the slide: here x = (2/3, 0) up to rounding, and the slide gets (0.65, 0.003) because it works with Qᵀ written with two decimals. The slide starts from the output of QR with m ≥ n; here m > n is required, because for m = n Algorithm QR computes only s = n − 1 reflectors, and the loop of SQR would read β_n, which does not exist.',
+      ro: 'Curs IV, slide-ul "Calculul solutiei CMMP: m > n", Algoritmul SQR, care pornește de la ieșirea Algoritmului QR; aici cele două sunt scrise unul după altul. Pe slide prima linie din buclă apare ca "t = a_kk = 0"; aici este t ← a_kk, valoarea pe care ultima linie o pune la loc. Linia cu r nu este în algoritm: vine din slide-ul de dinainte, unde reziduul minim este ‖d"‖. Exemplul este cel din slide: aici iese x = (2/3, 0) până la rotunjiri, iar slide-ul obține (0.65, 0.003) pentru că lucrează cu Qᵀ scris cu două zecimale. Slide-ul pornește de la ieșirea lui QR cu m ≥ n; aici se cere m > n, pentru că la m = n Algoritmul QR calculează doar s = n − 1 reflectori, iar bucla lui SQR ar citi β_n, care nu există. Panoul "Ce rămâne adevărat" urmărește doar prima buclă, triangularizarea.',
+      en: 'Course IV, slide "Calculul solutiei CMMP: m > n", Algorithm SQR, which starts from the output of Algorithm QR; here the two are written one after the other. On the slide the first line of the loop appears as "t = a_kk = 0"; here it is t ← a_kk, the value the last line puts back. The line with r is not in the algorithm: it comes from the preceding slide, where the minimal residual is ‖d"‖. The example is the one on the slide: here x = (2/3, 0) up to rounding, and the slide gets (0.65, 0.003) because it works with Qᵀ written with two decimals. The slide starts from the output of QR with m ≥ n; here m > n is required, because for m = n Algorithm QR computes only s = n − 1 reflectors, and the loop of SQR would read β_n, which does not exist. The panel "What stays true" follows only the first loop, the triangularization.',
     },
-    cost: { ro: '≈ 2(mn² − n³/3) flopi pentru triangularizare, plus ≈ 4mn − n² pentru b și substituție', en: '≈ 2(mn² − n³/3) flops for the triangularization, plus ≈ 4mn − n² for b and the substitution' },
+    cost: { ro: '≈ 2(mn² − n³/3) flopi pentru triangularizare, plus ≈ 4mn − n² pentru b și substituție, numărați pe pseudocod', en: '≈ 2(mn² − n³/3) flops for the triangularization, plus ≈ 4mn − n² for b and the substitution, counted on the pseudocode' },
     // n reflectori aplicati pe b, cate ≈ 4(m − k + 1) flopi, si substitutia inapoi, n²
     estimare: (x) => triangularizare(x) + 4 * x.forme.A[0] * x.forme.A[1] - x.forme.A[1] ** 2,
     forma: '\\min_x \\|b - Ax\\|: \\qquad Q^T A = \\begin{bmatrix} R\' \\\\ 0 \\end{bmatrix}, \\qquad Q^T b = \\begin{bmatrix} d\' \\\\ d\'\' \\end{bmatrix}, \\qquad R\' x = d\'',
@@ -1141,7 +1144,7 @@ cât timp e > tol
       {
         linii: [8, 10],
         tex: 'd = M_{n-1} \\cdots M_1\\, b',
-        text: { ro: 'aceiași multiplicatori se aplică termenului liber', en: 'the same multipliers are applied to the right-hand side' },
+        text: { ro: 'aceiași multiplicatori se aplică termenului liber; d se scrie peste b, ca în pseudocod', en: 'the same multipliers are applied to the right-hand side; d is written over b, as in the pseudocode' },
       },
       {
         linii: [11, 15],
@@ -1203,7 +1206,7 @@ pentru i = n : -1 : 1
       },
       {
         linii: [5, 7],
-        tex: 'A(i,\\; k+1\\!:\\!k+q) \\leftarrow A(i,\\; k+1\\!:\\!k+q) - \\mu_{ik}\\, A(k,\\; k+1\\!:\\!k+q), \\quad i = k+1 : k+r',
+        tex: 'A(i,\\; k+1\\!:\\!q_k) \\leftarrow A(i,\\; k+1\\!:\\!q_k) - \\mu_{ik}\\, A(k,\\; k+1\\!:\\!q_k), \\quad i = k+1 : \\min(k+r,\\, n),\\ q_k = \\min(k+q,\\, n)',
         text: { ro: 'se modifică doar blocul de r x q de sub și din dreapta pivotului; restul matricei nu se atinge', en: 'only the r x q block below and to the right of the pivot changes; the rest of the matrix is not touched' },
       },
     ],
@@ -1251,8 +1254,8 @@ pentru k = 1 : n-1
       en: 'GPP adapted to a banded matrix: the pivot is searched only from the diagonal down to r positions below it, the only ones that can be nonzero in column k. After the swap, the pivot row can have nonzero entries up to column k + q + r, so the update goes that far: the band above the diagonal widens from q to at most q + r.',
     },
     curs: {
-      ro: 'Algoritmul 2.15 (GPPb) din cartea cursului, secțiunea 2.9 "Sisteme bandă". Cartea notează cu r1 = min(k + r, n) și q1 = min(k + q + r, n) ultima linie și ultima coloană atinse la pasul k; aici aceste limite sunt scrise direct în bucle, pentru că o atribuire separată ar fi numărată ca flopi. Exemplul este ales ca pivotarea să mute linii și să lărgească banda.',
-      en: 'Algorithm 2.15 (GPPb) in the book of the course, section 2.9 "Sisteme bandă". The book writes r1 = min(k + r, n) and q1 = min(k + q + r, n) for the last row and the last column touched at step k; here these bounds are written straight into the loops, because a separate assignment would be counted as flops. The example is chosen so that pivoting moves rows and widens the band.',
+      ro: 'Algoritmul 2.15 (GPPb) din cartea cursului, secțiunea 2.9 "Sisteme bandă". Cartea notează cu r1 = min(k + r, n) și q1 = min(k + q + r, n) ultima linie și ultima coloană atinse la pasul k; aici aceste limite sunt scrise direct în bucle, ca fiecare capăt să se vadă în bucla lui. Exemplul este ales ca pivotarea să mute linii și să lărgească banda.',
+      en: 'Algorithm 2.15 (GPPb) in the book of the course, section 2.9 "Sisteme bandă". The book writes r1 = min(k + r, n) and q1 = min(k + q + r, n) for the last row and the last column touched at step k; here these bounds are written straight into the loops, so that each bound is seen in its own loop. The example is chosen so that pivoting moves rows and widens the band.',
     },
     cost: {
       ro: 'Σ r_k(2q_k + 1) flopi, cu r_k = min(r, n − k) și q_k = min(q + r, n − k), plus comparațiile pentru pivot; ≈ n(2r(q + r) + r) când r și q sunt mult mai mici decât n',

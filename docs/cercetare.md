@@ -465,7 +465,10 @@ Greșeli din surse, unde aplicația urmează varianta corectă:
 - slide-ul 85 numește "prima ecuație" pe x_n = b_n/u_nn, care este ultima;
 - slide-ul 172 tipărește p₄ = 0.52 pentru componenta a noua a soluției;
 - cartea, pagina 99: ‖T⁻¹‖∞ = 1 + 2 + ... + 2ⁿ⁻² = 2ⁿ⁻¹ − 1 omite 1-ul de pe diagonala inversei;
-  concluzia κ∞(T) = n 2ⁿ⁻¹ cere ‖T⁻¹‖∞ = 2ⁿ⁻¹, valoarea pe care o folosește aplicația.
+  concluzia κ∞(T) = n 2ⁿ⁻¹ cere ‖T⁻¹‖∞ = 2ⁿ⁻¹, valoarea pe care o folosește aplicația;
+- cartea, tabelul 4.1 (pagina 237): la MP e₈ este tipărit 0.0000014882055, recalculat
+  0.0000014282055; la MPI e₂ este tipărit 0.2003991735561, recalculat 0.0200399173556; restul
+  tabelului coincide cu rulările aplicației cifră cu cifră.
 
 ## 12. Recenzia UI/UX și așezarea
 

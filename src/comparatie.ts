@@ -31,7 +31,10 @@ const PERECHI: Record<string, string[]> = {
 // Algoritmii care pot rula pe definitiile date: fiecare intrare a lor exista, cu acelasi nume si
 // tip, si are forma ceruta (patrata, cu dimensiunile potrivite). Perechile din curs vin primele.
 export function compatibili(curent: string, definitii: Definitie[]): Algoritm[] {
-  const potrivit = (a: Algoritm) => a.id !== curent && a.intrari.every((i) => definitii.some((d) => d.nume.trim() === i.nume && d.tip === i.tip)) && !blocaj(definitii, a.intrari)
+  // un algoritm din biblioteca se compara doar cu unul care calculeaza macar un rezultat cu acelasi nume
+  const al = algoritm(curent)
+  const comun = (a: Algoritm) => !al || a.iesiri.some((n) => al.iesiri.includes(n))
+  const potrivit = (a: Algoritm) => a.id !== curent && comun(a) && a.intrari.every((i) => definitii.some((d) => d.nume.trim() === i.nume && d.tip === i.tip)) && !blocaj(definitii, a.intrari)
   const perechi = (PERECHI[curent] ?? []).map((id) => algoritm(id)!).filter(potrivit)
   return [...perechi, ...BIBLIOTECA.filter((a) => potrivit(a) && !perechi.includes(a))]
 }
@@ -56,15 +59,16 @@ export function ruleazaPe(a: Algoritm, intrari: Intrari, cifre: number): Rulat {
   return { alg: a, rez, iteratii: nrIteratii(rez) }
 }
 
-// Vectorul rezultat comun celor doua rulari (x, y), daca amandoua l-au calculat cu aceeasi lungime:
-// cea mai mare diferenta dintre ele, pe componente.
+// Tabloul rezultat comun celor doua rulari (x, y, A), daca amandoua l-au calculat cu aceeasi forma:
+// cea mai mare diferenta dintre ele, pe elemente.
 export function diferenta(a: Rulat, b: Rulat): { nume: string; valoare: number } | null {
   if (a.rez.final !== 'gata' || b.rez.final !== 'gata') return null
   for (const nume of a.alg.iesiri) {
     if (!b.alg.iesiri.includes(nume)) continue
     const u = a.rez.stare[nume]
     const v = b.rez.stare[nume]
-    if (!u || !v || u.tip !== 'vector' || v.tip !== 'vector' || u.n !== v.n) continue
+    if (!u || !v || u.tip !== v.tip || u.d.length !== v.d.length) continue
+    if (u.tip === 'matrice' && v.tip === 'matrice' && (u.m !== v.m || u.n !== v.n)) continue
     return { nume, valoare: Math.max(...u.d.map((x, i) => Math.abs(x - v.d[i]))) }
   }
   return null

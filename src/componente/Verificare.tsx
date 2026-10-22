@@ -21,7 +21,7 @@ export function RanduriVerificare({ randuri, clasa }: { randuri: Rand[]; clasa?:
           return (
             <tr key={k} className={ok ? 'ok' : 'rau'}>
               <td>{r.text[limba]}</td>
-              <td className="numar">{fmtValoare(r.valoare)}</td>
+              <td className="numar">{r.precis && Number.isFinite(r.valoare) ? String(Number(r.valoare.toPrecision(14))) : fmtValoare(r.valoare)}</td>
               <td className="stare">{r.fel === 'valoare' ? '' : ok ? t('verificareOk') : t('verificareRau')}</td>
             </tr>
           )

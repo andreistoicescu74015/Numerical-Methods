@@ -120,7 +120,7 @@ export function exempleCarte(): ExempluCarte[] {
   const T = Array.from({ length: 5 }, (_, i) => Array.from({ length: 5 }, (_, j) => (i === j ? 1 : j > i ? -1 : 0)))
   const H3 = Array.from({ length: 3 }, (_, i) => Array.from({ length: 3 }, (_, j) => 1 / (i + j + 1)))
   return [
-    { id: 'D', A: D, b: termenLiber(D), pentru: ['LTRIS', 'UTRIS', 'S_GPP', 'S_G'] },
+    { id: 'D', A: D, b: termenLiber(D), pentru: ['LTRIS', 'UTRIS', 'UTRISb', 'S_GPP', 'S_G'] },
     { id: 'T', A: T, b: termenLiber(T), pentru: ['UTRIS', 'S_GPP', 'S_G'] },
     { id: 'H3', A: H3, b: termenLiber(H3), pentru: ['S_GPP', 'S_G'] },
   ]

@@ -26,8 +26,10 @@ interface Props {
   celule: Celula[]
   // celulele „i:j” scrise la pasi dinainte si nemodificate pana la sfarsit
   gata?: Set<string>
-  // dintre ele, multiplicatorii (scrieri etichetate cu μ)
+  // dintre ele, valorile pastrate (scrieri etichetate cu μ sau u)
   mult?: Set<string>
+  // dintre cele pastrate, componentele vectorilor Householder (litera u in colt, in loc de μ)
+  householder?: Set<string>
   // pozitiile care sunt zero stiut dinainte (in afara benzii); algoritmul nu le atinge
   zerouri?: Set<string>
   // cate caractere are cel mai lung text din fiecare coloana, pe toata urma: latimea coloanei
@@ -43,7 +45,7 @@ interface Props {
   animat: boolean
 }
 
-export function Grila({ nume, tablou, celule, gata, mult, zerouri, latimi, pasIdx, fel, intrebare, durata, animat }: Props) {
+export function Grila({ nume, tablou, celule, gata, mult, householder, zerouri, latimi, pasIdx, fel, intrebare, durata, animat }: Props) {
   const { tema, t } = usePreferinte()
   const paleta = PALETA[tema]
   const roluri = new Map<string, Rol>()
@@ -86,7 +88,7 @@ export function Grila({ nume, tablou, celule, gata, mult, zerouri, latimi, pasId
       const cheieRol = TEXT_ROL[rol]
       const zero = rol === 'neatins' && !!zerouri?.has(cheie)
       const eticheta = `${pozitie} = ${text}${cheieRol ? `, ${t(cheieRol)}` : ''}${zero ? `, ${t('zeroStiut')}` : ''}`
-      const clasa = `celula rol-${rol}${zero ? ' zero-stiut' : ''}`
+      const clasa = `celula rol-${rol}${zero ? ' zero-stiut' : ''}${rol === 'mult' && householder?.has(cheie) ? ' householder' : ''}`
       const titlu = ascuns ? pozitie : `${pozitie} = ${v}`
       if (!animat) {
         rand.push(
