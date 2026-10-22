@@ -1372,9 +1372,83 @@ button.mic {
   font-size: 0.75rem;
 }
 
-/* randurile exista doar pentru cititoarele de ecran; grila ramane plata */
+/* un rand este un subgrid: coloanele raman ale grilei, iar randul ecuatiei curente poate avea contur */
 .rand {
-  display: contents;
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+}
+
+/* linia ecuatiei la care lucreaza pasul: incadrata, cu indicele ei evidentiat */
+.rand.ec {
+  outline: 2px solid var(--c-info);
+  border-radius: 3px;
+}
+
+.indice.ec {
+  color: var(--c-info);
+  font-weight: 700;
+}
+
+/* grilele sistemului, asezate ca ecuatie A · x = b; operatorii stau la mijlocul grilelor, sub titlurile lor */
+.ecuatie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.ecuatie .titlu-ecuatie {
+  flex-basis: 100%;
+  font-size: 0.9rem;
+  color: var(--text-sters);
+}
+
+.ecuatie .op {
+  font-size: 1.3rem;
+  color: var(--text-sters);
+  margin-top: 1.7rem;
+}
+
+/* necunoscuta care nu exista inca: locul ei, cu celule goale */
+.grila.fantoma .celula {
+  border: 1px dashed var(--contur-control);
+  background: transparent;
+}
+
+/* ecuatia i scrisa in card cu numerele curente, apoi cu valorile curente ale necunoscutei */
+.ecuatie-card,
+.faza {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.ecuatie-card .nr {
+  color: var(--c-info);
+  font-weight: 600;
+}
+
+.ecuatie-card .cu-valori {
+  color: var(--text-sters);
+  font-size: 0.8rem;
+}
+
+.ecuatie-card .cu-valori.satisfacuta {
+  color: var(--c-gata);
+}
+
+/* titlul fazei algoritmului (la SQR: QᵀA = R, d = Qᵀb, R′x = d′), deasupra grilelor */
+.faza .nr {
+  color: var(--titlu);
+  font-weight: 600;
+}
+
+.faza .text {
+  color: var(--text-sters);
 }
 
 .indice {

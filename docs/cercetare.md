@@ -235,6 +235,18 @@ comun și, la alegere, cu flopii numărați până la fiecare evaluare pe axa or
 vadă și cât costă o iterație a fiecăruia (`src/componente/CurbeComparate.tsx`, cu evaluările
 condiției extrase de `evaluari` din `src/motor/analiza.ts`).
 
+Scena așază grilele sistemului ca ecuație A · x = b (câmpul `ecuatie` din bibliotecă: LTRIS,
+UTRIS, UTRISb, S_G, S_GPP, Jacobi, Gauss-Seidel, Kaczmarz și MPI, cu (μI − A) z = y pe copia B),
+cu locul lui x gol până când algoritmul îl creează. Când linia de pseudocod folosește variabila
+de linie (i, la MPI l), linia i a lui A, x_i și b_i sunt încadrate, iar cardul scrie ecuația i cu
+numerele curente și, dedesubt, cu valorile curente ale lui x și dacă este satisfăcută
+(`src/ecuatie.ts`); partea a doua rămâne ascunsă cât timp rezultatul pasului este ascuns. La SQR
+titlul fazei (QᵀA = R, d = Qᵀb, R′x = d′, câmpul `faze`) stă deasupra grilelor, iar vederea
+geometrică pentru n = 2 desenează dreptele ecuațiilor, care nu trec prin același punct (slide-ul
+"Rezolvarea de sisteme liniare: m ≠ n"), soluția CMMP calculată separat și x-ul algoritmului după
+ce a fost calculat; interpretarea din Rᵐ (proiecția lui b pe Im A, slide-ul "Problema CMMP -
+interpretarea geometrica") este citată în text, nu desenată.
+
 Patru funcții leagă algoritmul de teoria din curs:
 
 - "Ce rămâne adevărat" (`src/invarianti.ts`) verifică, la începutul fiecărui pas al buclei

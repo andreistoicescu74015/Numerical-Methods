@@ -868,4 +868,61 @@ describe('aplicația montată', () => {
     expect(gazda.querySelectorAll('.panou.cost-n .grafic svg rect.punct.a-doua')).toHaveLength(0)
     expect(gazda.querySelectorAll('.panou.cost-n thead th')).toHaveLength(4)
   })
+
+  it('sistemul Ax = b stă în scenă ca ecuație: grilele L · x = b, linia i încadrată și ecuația i scrisă în card', async () => {
+    const gazda = await monteaza()
+    expect(gazda.querySelector('.ecuatie')).toBeNull()
+    await scrieIn(gazda.querySelector('header select')!, 'LTRIS')
+    const ecuatie = gazda.querySelector('.ecuatie')!
+    expect([...ecuatie.querySelectorAll('.grila figcaption')].map((f) => f.firstChild?.textContent?.trim())).toEqual(['L', 'x', 'b'])
+    expect([...ecuatie.querySelectorAll('.op')].map((o) => o.textContent)).toEqual(['·', '='])
+    // x ← b nu lucreaza pe o ecuatie anume
+    expect(gazda.querySelector('.rand.ec')).toBeNull()
+    expect(gazda.querySelector('.ecuatie-card')).toBeNull()
+    await faraIntrebari(gazda)
+    await comanda(gazda, 'pasInainte')
+    // antetul "pentru i = 1 : n": ecuatia 1 in cele trei grile si in card
+    expect(gazda.querySelectorAll('.ecuatie .rand.ec')).toHaveLength(3)
+    expect(gazda.querySelector('.grila .indice.ec')?.textContent).toBe('1')
+    expect(gazda.querySelector('.ecuatie-card .nr')?.textContent).toBe('ec. 1')
+    expect(gazda.querySelector('.ecuatie-card annotation')?.textContent).toBe('2\\,x_{1} = 2')
+    await comanda(gazda, 'laSfarsit')
+    // pasul final nu are linie de cod: scena pastreaza ultima, x_3 ← x_3 / l_33, cu ecuatia 3 satisfacuta de x
+    expect(gazda.querySelector('.ecuatie-card .nr')?.textContent).toBe('ec. 3')
+    expect(gazda.querySelector('.ecuatie-card .cu-valori.satisfacuta')).not.toBeNull()
+    expect(gazda.querySelector('.ecuatie-card .cu-valori')?.textContent).toContain('cu x curent:')
+    // MPI: titlul (μI − A) z = y peste grilele B, z, y, de cand exista B (fie B[n,n], linia 2)
+    await scrieIn(gazda.querySelector('header select')!, 'MPI')
+    expect(gazda.querySelector('.ecuatie')).toBeNull()
+    await comanda(gazda, 'laSfarsit')
+    expect(gazda.querySelector('.ecuatie .titlu-ecuatie annotation')?.textContent).toBe('(\\mu I - A)\\, z = y')
+    expect([...gazda.querySelectorAll('.ecuatie .grila figcaption')].map((f) => f.firstChild?.textContent?.trim())).toEqual(['B', 'z', 'y'])
+    // S_G: x nu exista pana la x ← b, deci locul lui este gol; la sfarsit grila e acolo
+    await scrieIn(gazda.querySelector('header select')!, 'S_G')
+    expect(gazda.querySelector('.ecuatie .grila.fantoma')).not.toBeNull()
+    expect(gazda.querySelectorAll('.ecuatie .grila')).toHaveLength(3)
+    await comanda(gazda, 'laSfarsit')
+    expect(gazda.querySelector('.ecuatie .grila.fantoma')).toBeNull()
+    expect(gazda.querySelectorAll('.ecuatie .grila')).toHaveLength(3)
+  })
+
+  it('SQR: titlul fazei deasupra grilelor și vederea geometrică pentru două necunoscute', async () => {
+    const gazda = await monteaza()
+    await scrieIn(gazda.querySelector('header select')!, 'SQR')
+    expect(gazda.querySelector('.faza .nr')?.textContent).toBe('faza 1 din 3')
+    expect(gazda.querySelector('.faza annotation')?.textContent).toBe('Q^T A = R')
+    // trei ecuatii ca drepte, solutia CMMP, fara x pana nu e calculat
+    expect(gazda.querySelectorAll('.geometrie svg .dreapta')).toHaveLength(3)
+    expect(gazda.querySelector('.geometrie svg .solutie')).not.toBeNull()
+    expect(gazda.querySelector('.geometrie svg .punct.curent')).toBeNull()
+    expect(gazda.querySelector('.geometrie')?.textContent).toContain('soluția CMMP x*, (0.667, 0)')
+    await comanda(gazda, 'laSfarsit')
+    expect(gazda.querySelector('.faza .nr')?.textContent).toBe('faza 3 din 3')
+    expect(gazda.querySelector('.faza annotation')?.textContent).toBe("R' x = d'")
+    expect(gazda.querySelectorAll('.geometrie svg .punct.curent')).toHaveLength(1)
+    expect(gazda.querySelector('.geometrie svg')?.getAttribute('aria-label')).toContain('x calculat de algoritm: (0.667,')
+    // QR singur nu are faze
+    await scrieIn(gazda.querySelector('header select')!, 'QR')
+    expect(gazda.querySelector('.faza')).toBeNull()
+  })
 })

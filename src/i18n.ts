@@ -81,6 +81,17 @@ export const TEXTE = {
   legendaPropriuDominant: { ro: 'direcția vectorului propriu dominant', en: 'the direction of the dominant eigenvector' },
   legendaYCurent: { ro: 'y la pasul curent; săgețile mai deschise sunt cele de dinainte', en: 'y at the current step; the lighter arrows are the earlier ones' },
   legendaOglinda: { ro: 'dreapta față de care oglindește reflectorul', en: 'the line the reflector mirrors across' },
+  geometrieSQR: {
+    ro: 'Fiecare ecuație a_i1 x₁ + a_i2 x₂ = b_i este o dreaptă. Cu m > n dreptele nu trec, de regulă, prin același punct, deci sistemul nu are soluție (slide-ul "Rezolvarea de sisteme liniare: m ≠ n"); soluția CMMP x* este punctul care face ‖b − Ax‖ cât mai mic. Pe slide-ul "Problema CMMP - interpretarea geometrica", în Rᵐ, Ax* este proiecția ortogonală a lui b pe Im A. Punctul mare apare când algoritmul a calculat x.',
+    en: 'Each equation a_i1 x₁ + a_i2 x₂ = b_i is a line. With m > n the lines do not, as a rule, pass through one point, so the system has no solution (slide "Rezolvarea de sisteme liniare: m ≠ n"); the least squares solution x* is the point that makes ‖b − Ax‖ as small as possible. On the slide "Problema CMMP - interpretarea geometrica", in Rᵐ, Ax* is the orthogonal projection of b onto Im A. The large dot appears when the algorithm has computed x.',
+  },
+  geometrieXSQR: { ro: 'x calculat de algoritm: ({0}, {1})', en: 'x computed by the algorithm: ({0}, {1})' },
+  legendaXSQR: { ro: 'x calculat de algoritm (cercul mare)', en: 'x computed by the algorithm (large dot)' },
+  legendaSolutieSQR: { ro: 'soluția CMMP x*, ({0}, {1}), calculată separat', en: 'the least squares solution x*, ({0}, {1}), computed separately' },
+  faza: { ro: 'faza {0} din {1}', en: 'phase {0} of {1}' },
+  ecuatiaCuValori: { ro: 'cu {0} curent:', en: 'with the current {0}:' },
+  ecuatieGrup: { ro: 'sistemul {0}, grilele așezate ca ecuație', en: 'the system {0}, the grids laid out as an equation' },
+  ecuatieFantoma: { ro: '{0} nu există încă', en: '{0} does not exist yet' },
   costEstimat: {
     ro: 'Pentru aceste intrări formula dă ≈ {0}, iar rularea numără {1}; formula lasă deoparte termenii cu puteri mai mici ale lui n, deci cele două se apropie abia când matricea crește.',
     en: 'For these inputs the formula gives ≈ {0}, and this run counts {1}; the formula leaves out the terms with lower powers of n, so the two get close only as the matrix grows.',

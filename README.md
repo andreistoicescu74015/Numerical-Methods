@@ -186,8 +186,21 @@ the one from the image.
 - "Geometric view" appears for two unknowns: for Jacobi, Gauss-Seidel and Kaczmarz the equations
   are lines and the approximations are points moving towards their intersection (Gauss-Seidel
   moves one coordinate at a time, Kaczmarz projects perpendicularly onto one line per step); for
+  SQR the m equations are lines that, as a rule, do not pass through one point, with the least
+  squares solution x* computed separately and the x of the algorithm once it has been computed;
+  for
   the power method and the inverse power method with a 2 x 2 matrix, y turns on the unit circle
   towards an eigenvector; for RFG with a vector of length 2, x is mirrored onto the first axis.
+- For the solvers of a linear system (LTRIS, UTRIS, UTRISb, S_G, S_GPP, Jacobi, Gauss-Seidel,
+  Kaczmarz, and the inverse power method with its system (μI − A) z = y) the grids of the system
+  stand in the scene as the equation A · x = b, the other inputs before them and the arrays the
+  algorithm creates after them; until the algorithm creates x, its place is drawn empty. When the
+  current line uses the row variable of the pseudocode (i, or l for the inverse power method),
+  that row of A, x_i and b_i are framed, and the step card writes equation i with the current
+  numbers, then with the current values of x and whether it holds; the second part stays hidden
+  while a result is hidden in exercise mode. At the final step the scene keeps the last line.
+- For SQR a title above the grids names the phase of the current line, QᵀA = R, d = Qᵀb or
+  R′x = d′, with what it does.
 - Cells: red with a double outline for the divisor (the pivot in elimination), orange with a
   thick outline for what is written, blue with a dashed outline for what is read, green with a
   marked corner for what is final (also an entry the algorithm uses but never writes in an array it

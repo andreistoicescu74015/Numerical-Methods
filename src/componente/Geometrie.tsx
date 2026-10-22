@@ -91,6 +91,8 @@ export function areGeometrie(id: string, intrari: Intrari): boolean {
   const A = intrari.A
   const mat = Array.isArray(A) && Array.isArray(A[0]) ? (A as number[][]) : null
   if (id === 'JACOBI' || id === 'GS' || id === 'KACZMARZ') return !!mat && mat[0].length === 2
+  // CMMP cu doua necunoscute si mai multe ecuatii: dreptele nu trec prin acelasi punct
+  if (id === 'SQR') return !!mat && mat[0].length === 2 && mat.length > 2
   if (id === 'MP' || id === 'MPI') return !!mat && mat.length === 2 && mat[0].length === 2
   if (id === 'RFG') return Array.isArray(intrari.x) && (intrari.x as number[]).length === 2 && intrari.k === 1
   return false
@@ -110,6 +112,8 @@ export function Geometrie({ id, rez, intrari, k, ascuns }: Props) {
   let directii: Punct[] = []
   let sageti: { spre: Punct; clasa: string; eticheta: string }[] = []
   let oglinda: Punct | null = null
+  // puncte nedesenate pe care cadrul le cuprinde totusi
+  const repere: Punct[] = []
   let text: CheieText = 'geometrieJacobi'
 
   if (putere) {
@@ -138,6 +142,25 @@ export function Geometrie({ id, rez, intrari, k, ascuns }: Props) {
       oglinda = [x[0] + sigma, x[1]]
     }
     text = 'geometrieRFG'
+  } else if (id === 'SQR') {
+    const A = intrari.A as number[][]
+    const b = intrari.b as number[]
+    drepte = A.map((l, i) => ({ a: [l[0], l[1]] as Punct, b: b[i], eticheta: `${i + 1}` }))
+    sol = solutie(A, b)
+    // x apare cand algoritmul i-a calculat ambele componente: dupa ultima scriere in x
+    const scrieri = rez.pasi.flatMap((p, idx) => p.scrieri.filter((w) => w.nume === 'x').map(() => idx))
+    const ultima = scrieri.at(-1)
+    if (ultima !== undefined && scrieri.length >= 2 && vizibil(ultima)) {
+      const x = drum(rez, 'x', []).at(-1)!.v
+      puncte = [[x[0], x[1]]]
+    }
+    // cadrul cuprinde si punctele in care se taie dreptele doua cate doua: se vede ca nu trec prin acelasi punct
+    for (let i = 0; i < A.length; i++)
+      for (let j = i + 1; j < A.length; j++) {
+        const det = A[i][0] * A[j][1] - A[i][1] * A[j][0]
+        if (Math.abs(det) > 1e-12) repere.push([(b[i] * A[j][1] - A[i][1] * b[j]) / det, (A[i][0] * b[j] - b[i] * A[j][0]) / det])
+      }
+    text = 'geometrieSQR'
   } else {
     const A = intrari.A as number[][]
     const b = intrari.b as number[]
@@ -154,7 +177,7 @@ export function Geometrie({ id, rez, intrari, k, ascuns }: Props) {
   const centru: Punct = sol ?? puncte[0] ?? [0, 0]
   const departe = (p: Punct) => Math.hypot(p[0] - centru[0], p[1] - centru[1])
   const reper = Math.max(1, puncte.length > 0 ? departe(puncte[0]) : 1)
-  const inCadru = puncte.filter((p) => departe(p) <= 4 * reper)
+  const inCadru = [...puncte, ...repere].filter((p) => departe(p) <= 4 * reper)
   // aceeasi scara pe ambele axe, ca unghiurile drepte sa ramana drepte (proiectiile Kaczmarz)
   const toate: Punct[] = [...inCadru, ...(sol ? [sol] : []), ...sageti.map((s) => s.spre), [0, 0]]
   if (putere) toate.push([-1, -1], [1, 1])
@@ -169,7 +192,7 @@ export function Geometrie({ id, rez, intrari, k, ascuns }: Props) {
   const Y = (y: number) => H - (y - y0) * scara
 
   const curent = puncte.at(-1)
-  const descriere = curent ? t('geometrieDescriere', fmt(curent[0]), fmt(curent[1])) : t(text)
+  const descriere = curent ? t(id === 'SQR' ? 'geometrieXSQR' : 'geometrieDescriere', fmt(curent[0]), fmt(curent[1])) : t(text)
   const iese = (p: Punct) => p[0] < x0 || p[0] > x1 || p[1] < y0 || p[1] > y1
   // un punct din afara cadrului se deseneaza pe margine, in directia lui
   const peMargine = (p: Punct): Punct => {
@@ -275,11 +298,11 @@ export function Geometrie({ id, rez, intrari, k, ascuns }: Props) {
               <span className="mostra dreapta" aria-hidden="true" /> {t('legendaDreapta')}
             </li>
             <li>
-              <span className="mostra curent" aria-hidden="true" /> {t('legendaXCurent')}
+              <span className="mostra curent" aria-hidden="true" /> {t(id === 'SQR' ? 'legendaXSQR' : 'legendaXCurent')}
             </li>
             {sol && (
               <li>
-                <span className="mostra solutie" aria-hidden="true" /> {t('legendaSolutie', fmt(sol[0]), fmt(sol[1]))}
+                <span className="mostra solutie" aria-hidden="true" /> {t(id === 'SQR' ? 'legendaSolutieSQR' : 'legendaSolutie', fmt(sol[0]), fmt(sol[1]))}
               </li>
             )}
           </>

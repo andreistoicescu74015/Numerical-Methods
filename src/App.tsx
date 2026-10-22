@@ -24,6 +24,7 @@ import { areInvariant, invariant } from './invarianti'
 import { vederi } from './vederi'
 import { areCostPeN } from './costuri'
 import { areConditionare, matriceaSistemului, type ExempluCarte } from './conditionare'
+import { ecuatia, linieEcuatie } from './ecuatie'
 import { asteptat } from './exercitiu'
 import { nrFlopi, nrPasi, text, type CheieText } from './i18n'
 import { blocaj, definitiiDin, intrariDinDefinitii, textDinValoare, type Definitie } from './intrari'
@@ -35,7 +36,7 @@ import type { Limba } from './motor/mesaje'
 import { parseaza } from './motor/parser'
 import { inEngleza } from './motor/traducere'
 import { areVerificare, verifica } from './motor/verificare'
-import type { Tablou } from './motor/valori'
+import type { Matrice, Tablou, Vector } from './motor/valori'
 import { estePatrata } from './natura'
 import { notiune } from './notiuni'
 import { OPERATII } from './operatii'
@@ -613,6 +614,25 @@ function Continut() {
           .join(', ')
       : ''
 
+  // sistemul A x = b al algoritmului din biblioteca: grilele lui stau asezate ca ecuatie, iar
+  // linia la care lucreaza pasul (variabila de linie a pseudocodului) este incadrata si scrisa in card
+  const sistem = alg?.ecuatie && dinBiblioteca ? alg.ecuatie : null
+  const matriceEc = sistem ? stare[sistem.A] : undefined
+  const xEc = sistem ? stare[sistem.x] : undefined
+  const bEc = sistem ? stare[sistem.b] : undefined
+  const cuEcuatie = !!sistem && matriceEc?.tip === 'matrice' && bEc?.tip === 'vector'
+  // pasul final nu are linie de cod: scena pastreaza linia ultimului pas executat
+  const linieScena = pas && pas.linie > 0 ? pas.linie : pas?.final === 'gata' && k > 0 && rez ? rez.pasi[k - 1].linie : 0
+  const linieEc = cuEcuatie && matriceEc && bEc && pas ? (() => {
+    const l = linieEcuatie(alg!, { ...pas, linie: linieScena }, variabile.get(linieScena) ?? [])
+    return l !== null && l <= matriceEc.m && l <= bEc.n ? l : null
+  })() : null
+  const ecuatieCurenta = cuEcuatie && linieEc !== null ? ecuatia(matriceEc as Matrice, bEc as Vector, xEc?.tip === 'vector' ? xEc : null, sistem!.x, linieEc) : null
+  const inSistem = (nume: string) => !!sistem && (nume === sistem.A || nume === sistem.x || nume === sistem.b)
+  const esteIntrare = (nume: string) => definitii.some((d) => d.nume.trim() === nume)
+  // faza algoritmului (SQR pune QR, d = Qᵀb si substitutia unul dupa altul)
+  const faza = alg?.faze && dinBiblioteca && linieScena > 0 ? alg.faze.findIndex((f) => linieScena >= f.linii[0] && linieScena <= f.linii[1]) : -1
+
   const intrariScalare = new Set(definitii.filter((d) => d.tip === 'scalar').map((d) => d.nume.trim()))
   const scalari = pas
     ? Object.entries(pas.scalari)
@@ -678,6 +698,42 @@ function Continut() {
   const rezumatVerificare = stareVerificare === 'inainte' ? t('verificareRezumatLaFinal') : stareVerificare === 'oprit' ? (verificari.length ? '' : t('verificareRezumatOprit')) : verificari.every(randOk) ? t('verificareOk') : t('verificareRau')
   const rezumatIntrari = [...definitii.map(rezumatDefinitie), cifre > 0 ? t('cifreScurt', cifre) : t('dublaScurt')].join(' · ')
   const numeFisier = alg ? alg.id : 'program'
+
+  const grila = ([nume, tablou]: readonly [string, Tablou]) => (
+    <Grila
+      key={nume}
+      nume={nume}
+      tablou={tablou}
+      celule={pas?.celule ?? []}
+      gata={finale.gata.get(nume)}
+      mult={finale.mult.get(nume)}
+      householder={finale.householder.get(nume)}
+      zerouri={zerouri?.tablou === nume ? zerouri.set : undefined}
+      latimi={latimi.get(nume)}
+      ecuatie={inSistem(nume) && linieEc !== null ? linieEc : undefined}
+      pasIdx={k}
+      fel={pas?.fel}
+      intrebare={ascuns}
+      durata={durata}
+      animat={animat}
+    />
+  )
+  // necunoscuta nu exista inca (S_G o creeaza cu x ← b): locul ei in ecuatie, gol
+  const fantoma = (nume: string, n: number) => (
+    <figure key={nume} className="grila fantoma" aria-label={t('ecuatieFantoma', nume)}>
+      <figcaption>
+        {nume} <span>{n}</span>
+      </figcaption>
+      <div className="celule" style={{ gridTemplateColumns: 'var(--indice) var(--cel-min)' }}>
+        {Array.from({ length: n }, (_, i) => (
+          <div key={i} className="rand">
+            <div className="indice">{i + 1}</div>
+            <div className="celula" />
+          </div>
+        ))}
+      </div>
+    </figure>
+  )
 
   return (
     <div className="aplicatie">
@@ -883,6 +939,17 @@ function Continut() {
               {scalari.length > 0 && <span className="valori">{scalari.join(', ')}</span>}
             </p>
           )}
+          {ecuatieCurenta && linieEc !== null && (
+            <p className="ecuatie-card">
+              <span className="nr">{t('ecuatia', linieEc)}</span>
+              <Formula tex={ecuatieCurenta.tex} inline />
+              {!ascuns && ecuatieCurenta.verificare && (
+                <span className={`cu-valori${ecuatieCurenta.satisfacuta ? ' satisfacuta' : ''}`}>
+                  {t('ecuatiaCuValori', sistem!.x)} <Formula tex={ecuatieCurenta.verificare} inline />
+                </span>
+              )}
+            </p>
+          )}
           <Formula tex={ascuns ? pas?.intrebare : pas?.formula} />
           {ascuns && (
             <div className="actiuni-pas">
@@ -932,25 +999,38 @@ function Continut() {
           <OperatiiPas operatii={pas?.operatii} />
         </div>
         {!animat && <p className="ajutor matrice-mare">{t('matriceMare', CELULE_ANIMATE)}</p>}
+        {faza >= 0 && (
+          <p className="faza">
+            <span className="nr">{t('faza', faza + 1, alg!.faze!.length)}</span>
+            <Formula tex={alg!.faze![faza].tex} inline />
+            <span className="text">{alg!.faze![faza].text[limba]}</span>
+          </p>
+        )}
         <div className={`grile${compact ? ' compact' : ''}`}>
-          {tablouri.map(([nume, tablou]) => (
-            <Grila
-              key={nume}
-              nume={nume}
-              tablou={tablou}
-              celule={pas?.celule ?? []}
-              gata={finale.gata.get(nume)}
-              mult={finale.mult.get(nume)}
-              householder={finale.householder.get(nume)}
-              zerouri={zerouri?.tablou === nume ? zerouri.set : undefined}
-              latimi={latimi.get(nume)}
-              pasIdx={k}
-              fel={pas?.fel}
-              intrebare={ascuns}
-              durata={durata}
-              animat={animat}
-            />
-          ))}
+          {cuEcuatie ? (
+            <>
+              {tablouri.filter(([nume]) => !inSistem(nume) && esteIntrare(nume)).map(grila)}
+              <div className="ecuatie" role="group" aria-label={t('ecuatieGrup', `${sistem!.A} ${sistem!.x} = ${sistem!.b}`)}>
+                {sistem!.tex && (
+                  <div className="titlu-ecuatie">
+                    <Formula tex={sistem!.tex} inline />
+                  </div>
+                )}
+                {grila([sistem!.A, matriceEc as Tablou])}
+                <span className="op" aria-hidden="true">
+                  ·
+                </span>
+                {xEc ? grila([sistem!.x, xEc]) : fantoma(sistem!.x, (bEc as Vector).n)}
+                <span className="op" aria-hidden="true">
+                  =
+                </span>
+                {grila([sistem!.b, bEc as Tablou])}
+              </div>
+              {tablouri.filter(([nume]) => !inSistem(nume) && !esteIntrare(nume)).map(grila)}
+            </>
+          ) : (
+            tablouri.map(grila)
+          )}
         </div>
         {listaVederi.length > 0 && (
           <div className="vederi">

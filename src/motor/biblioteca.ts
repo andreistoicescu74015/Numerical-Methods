@@ -90,6 +90,13 @@ export interface Algoritm {
   zerouri?: { tablou: string; zero: (i: number, j: number, s: Record<string, number>) => boolean }
   // precizia exemplului, in cifre semnificative, cand exemplul din curs o cere
   cifre?: number
+  // sistemul liniar pe care il rezolva sau il aproximeaza, pentru grilele asezate ca ecuatie
+  // A · x = b: numele matricei, al necunoscutei, al termenului liber si variabila de linie a
+  // pseudocodului (ecuatia i); `tex` scrie sistemul cand numele grilelor nu il spun singure
+  ecuatie?: { A: string; x: string; b: string; linie: string; tex?: string }
+  // fazele algoritmului, cu titlul in forma matriceala, cand pseudocodul pune mai multi algoritmi
+  // ai cursului unul dupa altul
+  faze?: { linii: [number, number]; tex: string; text: Text }[]
 }
 
 export const GRUPURI_ALGORITMI: { id: string; titlu: Text }[] = [
@@ -341,6 +348,7 @@ pentru j = 1 : n
     },
     iesiri: ['x'],
     numpy: fataDeSolve('L', '{x}'),
+    ecuatie: { A: 'L', x: 'x', b: 'b', linie: 'i' },
     sursa: `x ← b
 pentru i = 1 : n
     pentru j = 1 : i-1
@@ -385,6 +393,7 @@ pentru i = 1 : n
     },
     iesiri: ['x'],
     numpy: fataDeSolve('U', '{x}'),
+    ecuatie: { A: 'U', x: 'x', b: 'b', linie: 'i' },
     sursa: `x ← b
 pentru i = n : -1 : 1
     pentru j = i+1 : n
@@ -514,6 +523,7 @@ ${SURSA_GPP}`,
     },
     iesiri: ['x'],
     numpy: fataDeSolve('A', '{x}'),
+    ecuatie: { A: 'A', x: 'x', b: 'b', linie: 'i' },
     sursa: `μ, U peste A
 fie p[n-1]
 ${SURSA_GPP}
@@ -659,6 +669,7 @@ pentru k = 1 : n
     iesiri: ['x', 'k'],
     numpy: fataDeSolve('A', '{x}'),
     direct: GPP_DIRECT,
+    ecuatie: { A: 'A', x: 'x', b: 'b', linie: 'i' },
     sursa: `fie y[n]
 r ← A x - b; e ← ‖r‖ / ‖b‖; k ← 0
 cât timp e > tol    % bucla nu este pe slide
@@ -711,6 +722,7 @@ cât timp e > tol    % bucla nu este pe slide
     iesiri: ['x', 'k'],
     numpy: fataDeSolve('A', '{x}'),
     direct: GPP_DIRECT,
+    ecuatie: { A: 'A', x: 'x', b: 'b', linie: 'i' },
     sursa: `r ← A x - b; e ← ‖r‖ / ‖b‖; k ← 0
 cât timp e > tol    % bucla nu este pe slide
     dacă k ≥ maxiter atunci stop 'nu a convers în maxiter iterații'
@@ -769,6 +781,7 @@ cât timp e > tol    % bucla nu este pe slide
       'if A.shape[0] == A.shape[1]:',
       ...fataDeSolve('A', '{x}').map((l) => `    ${l}`),
     ],
+    ecuatie: { A: 'A', x: 'x', b: 'b', linie: 'i' },
     sursa: `r ← A x - b; e ← ‖r‖ / ‖b‖; k ← 0
 cât timp e > tol    % bucla nu este pe slide
     dacă k ≥ maxiter atunci stop 'nu a convers în maxiter treceri'
@@ -921,6 +934,23 @@ dacă k < m atunci
       dif('{x}', 'x_np'),
       'print("np.linalg.norm(b - A @ x_np) =", np.linalg.norm(b - A @ x_np))',
     ],
+    faze: [
+      {
+        linii: [1, 14],
+        tex: 'Q^T A = R',
+        text: { ro: 'triangularizarea ortogonală: reflectorii U_1, …, U_n aduc A la forma superior triunghiulară (Algoritmul QR)', en: 'the orthogonal triangularization: the reflectors U_1, …, U_n bring A to upper triangular form (Algorithm QR)' },
+      },
+      {
+        linii: [15, 20],
+        tex: 'd = Q^T b',
+        text: { ro: 'aceiași reflectori, aplicați în aceeași ordine termenului liber b', en: 'the same reflectors, applied in the same order to the right-hand side b' },
+      },
+      {
+        linii: [21, 24],
+        tex: "R' x = d'",
+        text: { ro: 'sistemul superior triunghiular din primele n linii, prin substituție înapoi; norma restului lui d este reziduul minim', en: 'the upper triangular system of the first n rows, by back substitution; the norm of the rest of d is the minimal residual' },
+      },
+    ],
     sursa: `${SURSA_QR}
 pentru k = 1 : n
     t ← a_kk    % pe slide: "t = a_kk = 0"
@@ -1063,6 +1093,7 @@ cât timp e > tol
       '# fata de valoarea proprie cea mai apropiata de mu',
       dif('mu', 'val[np.argmin(np.abs(val - mu))]'),
     ],
+    ecuatie: { A: 'B', x: 'z', b: 'y', linie: 'l', tex: '(\\mu I - A)\\, z = y' },
     sursa: `y ← y / ‖y‖; i ← 0; e ← 1
 fie B[n,n]
 cât timp e > tol
@@ -1158,6 +1189,7 @@ cât timp e > tol
     },
     iesiri: ['x'],
     numpy: fataDeSolve('A', '{x}'),
+    ecuatie: { A: 'A', x: 'x', b: 'b', linie: 'i' },
     cifre: 3,
     sursa: `μ, U peste A
 pentru k = 1 : n-1
@@ -1357,6 +1389,7 @@ pentru k = 1 : n-1
     },
     iesiri: ['x'],
     numpy: fataDeSolve('U', '{x}'),
+    ecuatie: { A: 'U', x: 'x', b: 'b', linie: 'i' },
     plin: 'UTRIS',
     zerouri: { tablou: 'U', zero: (i, j, s) => i > j || j - i > s.q },
     sursa: `x ← b

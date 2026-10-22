@@ -35,6 +35,8 @@ interface Props {
   // cate caractere are cel mai lung text din fiecare coloana, pe toata urma: latimea coloanei
   // nu se schimba de la un pas la altul
   latimi?: number[]
+  // linia (de la 1) a ecuatiei la care lucreaza pasul curent, incadrata
+  ecuatie?: number
   pasIdx: number
   fel?: FelPas
   // rezultatul pasului e inca ascuns: celulele care se scriu arata "?"
@@ -45,7 +47,7 @@ interface Props {
   animat: boolean
 }
 
-export function Grila({ nume, tablou, celule, gata, mult, householder, zerouri, latimi, pasIdx, fel, intrebare, durata, animat }: Props) {
+export function Grila({ nume, tablou, celule, gata, mult, householder, zerouri, latimi, ecuatie, pasIdx, fel, intrebare, durata, animat }: Props) {
   const { tema, t } = usePreferinte()
   const paleta = PALETA[tema]
   const roluri = new Map<string, Rol>()
@@ -71,8 +73,9 @@ export function Grila({ nume, tablou, celule, gata, mult, householder, zerouri, 
     </div>,
   ]
   for (let i = 1; i <= m; i++) {
+    const marcat = ecuatie === i
     const rand: React.ReactNode[] = [
-      <div key={`r${i}`} className="indice" role="rowheader">
+      <div key={`r${i}`} className={`indice${marcat ? ' ec' : ''}`} role="rowheader">
         {i}
       </div>,
     ]
@@ -128,7 +131,7 @@ export function Grila({ nume, tablou, celule, gata, mult, householder, zerouri, 
       )
     }
     randuri.push(
-      <div key={`rand${i}`} className="rand" role="row">
+      <div key={`rand${i}`} className={`rand${marcat ? ' ec' : ''}`} role="row">
         {rand}
       </div>,
     )
