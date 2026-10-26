@@ -74,8 +74,14 @@ export function pragComun(a: Rulat, b: Rulat): number | undefined {
   return prag !== undefined && toate.every((p) => p.dreapta === prag) ? prag : undefined
 }
 
-// Tabloul rezultat comun celor doua rulari (x, y, A), daca amandoua l-au calculat cu aceeasi forma:
-// cea mai mare diferenta dintre ele, pe elemente.
+// Algoritmii a caror matrice rezultat tine acelasi lucru (U peste A, cu multiplicatorii sub
+// diagonala): doar intre ei diferenta dintre matrice are sens. L de la Cholesky, R de la QR sau
+// factorii Crout, scrisi tot peste A, nu se compara cu U.
+const ACEEASI_MATRICE: string[][] = [['G', 'GPP', 'Gb', 'GPPb']]
+const aceeasiMatrice = (a: string, b: string): boolean => ACEEASI_MATRICE.some((f) => f.includes(a) && f.includes(b))
+
+// Tabloul rezultat comun celor doua rulari (x, y, A), daca amandoua l-au calculat cu aceeasi forma
+// si inseamna acelasi lucru: cea mai mare diferenta dintre ele, pe elemente.
 export function diferenta(a: Rulat, b: Rulat): { nume: string; valoare: number } | null {
   if (a.rez.final !== 'gata' || b.rez.final !== 'gata') return null
   for (const nume of a.alg.iesiri) {
@@ -83,7 +89,7 @@ export function diferenta(a: Rulat, b: Rulat): { nume: string; valoare: number }
     const u = a.rez.stare[nume]
     const v = b.rez.stare[nume]
     if (!u || !v || u.tip !== v.tip || u.d.length !== v.d.length) continue
-    if (u.tip === 'matrice' && v.tip === 'matrice' && (u.m !== v.m || u.n !== v.n)) continue
+    if (u.tip === 'matrice' && v.tip === 'matrice' && (u.m !== v.m || u.n !== v.n || !aceeasiMatrice(a.alg.id, b.alg.id))) continue
     return { nume, valoare: Math.max(...u.d.map((x, i) => Math.abs(x - v.d[i]))) }
   }
   return null

@@ -55,6 +55,12 @@ describe('comparația cu alt algoritm', () => {
     expect(diferenta(sg, sgpp)).toBeNull()
     // doua matrice rezultat de aceeasi forma se compara element cu element: fara interschimbari, G si GPP dau acelasi A
     expect(diferenta(ruleazaPe(algoritm('G')!, { A: [[2, 1], [1, 3]] }, 0), ruleazaPe(algoritm('GPP')!, { A: [[2, 1], [1, 3]] }, 0))).toEqual({ nume: 'A', valoare: 0 })
+    // varianta banda da exact ce da algoritmul plin
+    const T = [[2, 1, 0], [1, 3, 1], [0, 1, 4]]
+    expect(diferenta(ruleazaPe(algoritm('Gb')!, { A: T, r: 1, q: 1 }, 0), ruleazaPe(algoritm('G')!, { A: T }, 0))).toEqual({ nume: 'A', valoare: 0 })
+    // L de la Cholesky si U cu multiplicatori de la G sunt scrise amandoua peste A, dar nu sunt acelasi lucru: fara diferenta
+    expect(diferenta(ruleazaPe(algoritm('CHOL')!, { A: [[4, 2], [2, 3]] }, 0), ruleazaPe(algoritm('G')!, { A: [[4, 2], [2, 3]] }, 0))).toBeNull()
+    expect(diferenta(ruleazaPe(algoritm('QR')!, { A: [[4, 2], [2, 3]] }, 0), ruleazaPe(algoritm('G')!, { A: [[4, 2], [2, 3]] }, 0))).toBeNull()
   })
 })
 

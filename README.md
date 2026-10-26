@@ -116,7 +116,8 @@ the one from the image.
   GPP as on the slide "Comparatie GPP - GS - K", the power method and the inverse power method;
   Jacobi is offered next to them) and shows side by
   side how each run finishes, the counted flops, the iterations, the result (a result matrix of at
-  most 5 x 5 in full) and the largest difference between the two solution vectors. When both runs
+  most 5 x 5 in full) and the largest difference between the two result vectors (between the
+  result matrices only when both hold U with the multipliers: G, GPP, Gb, GPPb). When both runs
   have a stopping condition, their curves are drawn on the same axes, as the slide "Exemple
   numerice MP/MPI" draws the power method next to the inverse power method: the quantity of the
   condition at every iteration, on a logarithmic scale when the values span several orders of
