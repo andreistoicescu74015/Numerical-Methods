@@ -32,7 +32,8 @@ Slide-ul "Tema - colocviu" din cursul VI (468) dă șase puncte de evaluare:
 6. comentarea rezultatelor: grafice, tabele, număr de iterații, număr de operații, timp de calcul.
 
 Slide-ul "Teme colocviu - cerința" din cursul IV (256) cere cel puțin un algoritm și dă ca
-exemplu, pentru CMMP, operația A\b din Matlab.
+exemplu, pentru CMMP, operatorul din Matlab, scris pe slide "A/b" (operatorul Matlab care
+rezolvă CMMP este A\b).
 
 Vizualizatorul acoperă direct punctul 3: algoritmii se rulează în notația cursului, pe matrice
 alese de student. Pentru punctele 4-6 are emițătorul de cod Python, comparația cu NumPy de la
@@ -510,7 +511,11 @@ Greșeli din surse, unde aplicația urmează varianta corectă:
   concluzia κ∞(T) = n 2ⁿ⁻¹ cere ‖T⁻¹‖∞ = 2ⁿ⁻¹, valoarea pe care o folosește aplicația;
 - cartea, tabelul 4.1 (pagina 237): la MP e₈ este tipărit 0.0000014882055, recalculat
   0.0000014282055; la MPI e₂ este tipărit 0.2003991735561, recalculat 0.0200399173556; restul
-  tabelului coincide cu rulările aplicației cifră cu cifră.
+  tabelului coincide cu rulările aplicației cifră cu cifră, cu excepția ultimei zecimale la e₆
+  (MP: tipărit ...856, calculat 0.0000549638855) și la e₃ (MPI: tipărit ...785, calculat
+  0.0000155353784);
+- slide-ul 256 scrie, pentru CMMP, "in Matlab A/b"; operatorul Matlab care rezolvă CMMP este
+  A\b;
 - slide-ul 317 dă costul rezolvării sistemului dintr-o iterație MPI ca ≈ n³/3 "operații";
   cartea (pagina 236) numără aceeași cantitate ca ≈ n³/3 operații de tipul α ← α + βγ, adică
   perechi înmulțire-adunare. În flopi, unitatea slide-ului 140 pentru S_GPP (≈ 2n³/3), aplicația
