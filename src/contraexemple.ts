@@ -72,8 +72,8 @@ export const CONTRAEXEMPLE: Record<string, Contraexemplu[]> = {
     {
       titlu: { ro: 'matricea care oprește G', en: 'the matrix that stops G' },
       explicatie: {
-        ro: 'Aceeași matrice pe care G nu o poate triangulariza (pivotul de la pasul 1 este 0). GPP aduce în locul lui cel mai mare element din coloană și merge până la capăt, cum spune teorema de pe slide-ul GPP: dacă A este nesingulară, GPP se execută complet.',
-        en: 'The same matrix that G cannot triangularize (the pivot of step 1 is 0). GPP brings the largest entry of the column in its place and runs to the end, as the theorem on the GPP slide says: if A is nonsingular, GPP runs to completion.',
+        ro: 'Aceeași matrice pe care G nu o poate triangulariza (pivotul de la pasul 1 este 0). GPP aduce în locul lui cel mai mare element din coloană și merge până la capăt, cum spune teorema de pe slide-ul "Eliminare gaussiana cu pivotare partiala", de după algoritm: dacă A este nesingulară, GPP se execută complet.',
+        en: 'The same matrix that G cannot triangularize (the pivot of step 1 is 0). GPP brings the largest entry of the column in its place and runs to the end, as the theorem on the slide "Eliminare gaussiana cu pivotare partiala", after the algorithm, says: if A is nonsingular, GPP runs to completion.',
       },
       valori: { A: PIVOT_NUL },
       final: 'gata',
@@ -224,8 +224,8 @@ export const CONTRAEXEMPLE: Record<string, Contraexemplu[]> = {
     {
       titlu: { ro: 'coloane dependente', en: 'dependent columns' },
       explicatie: {
-        ro: 'A doua coloană este zero, deci coloanele nu sunt liniar independente și soluția CMMP nu este unică (teorema de pe slide-ul "Rezolvarea problemei CMMP: m > n": soluție unică exact când A este monică). R iese cu r_22 = 0, iar substituția înapoi nu poate împărți la el.',
-        en: 'The second column is zero, so the columns are not linearly independent and the least squares solution is not unique (the theorem on the slide "Rezolvarea problemei CMMP: m > n": a unique solution exactly when A has independent columns). R comes out with r_22 = 0, and back substitution cannot divide by it.',
+        ro: 'A doua coloană este zero, deci coloanele nu sunt liniar independente și soluția CMMP nu este unică (teorema de pe slide-ul "Rezolvarea problemei CMMP: m > n": soluție unică exact când A este monică). La pasul 2 nu mai este nimic de anulat (σ = 0): reflectorul U_2 nu se construiește, β_2 rămâne 0, iar aplicarea lui pe b împarte la β_2 = 0 și rularea se oprește acolo; R are oricum r_22 = 0, deci nici substituția înapoi nu ar putea împărți la el.',
+        en: 'The second column is zero, so the columns are not linearly independent and the least squares solution is not unique (the theorem on the slide "Rezolvarea problemei CMMP: m > n": a unique solution exactly when A has independent columns). At step 2 there is nothing left to annihilate (σ = 0): the reflector U_2 is not built, β_2 stays 0, and applying it to b divides by β_2 = 0, so the run stops there; R has r_22 = 0 anyway, so back substitution could not divide by it either.',
       },
       valori: { A: [[1, 0], [2, 0], [2, 0]], b: [1, 2, 3] },
       final: 'eroare',
