@@ -520,6 +520,15 @@ function Continut() {
     return m
   }, [rez])
 
+  // latimea coloanelor unei grile din formula: cel mai lung text din fiecare coloana la pasul curent
+  // (valorile ei se recalculeaza la fiecare pas, deci nu au o urma din care sa se ia latimea)
+  const latimiVedere = (t: Tablou): number[] => {
+    const n = t.tip === 'vector' ? 1 : t.n
+    const l: number[] = Array.from({ length: n }, () => 1)
+    t.d.forEach((v, idx) => (l[idx % n] = Math.max(l[idx % n], fmtCelula(v).length)))
+    return l
+  }
+
   // ultimul pas care scrie fiecare celula: inainte de el celula e „scris”, dupa el „gata” sau „mult”
   const ultimaScriere = useMemo(() => {
     const m = new Map<string, { idx: number; mult: boolean; litera?: string }>()
@@ -1058,7 +1067,7 @@ function Continut() {
               <div className={`grile vederi-grile${compact ? ' compact' : ''}`}>
                 {listaVederi.map((v) => (
                   <div key={v.nume} className="vedere">
-                    <Grila nume={v.nume} tablou={v.tablou} celule={[]} pasIdx={k} intrebare={false} durata={0} animat={false} />
+                    <Grila nume={v.nume} tablou={v.tablou} celule={[]} latimi={latimiVedere(v.tablou)} pasIdx={k} intrebare={false} durata={0} animat={false} />
                     <p className="explicatie">{v.text[limba]}</p>
                   </div>
                 ))}

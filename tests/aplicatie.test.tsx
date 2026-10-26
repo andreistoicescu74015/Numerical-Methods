@@ -950,4 +950,17 @@ describe('aplicația montată', () => {
     expect(gazda.querySelector<HTMLTextAreaElement>('.intrare.matrice textarea')!.value).toBe('4 1 0\n1 3 1\n0 1 2')
     expect(gazda.querySelector('.stare')?.textContent).toContain('pasul 1 din')
   })
+
+  it('grilele din formulă primesc lățimea coloanelor după valorile lor, ca textul să nu fie tăiat', async () => {
+    const gazda = await monteaza()
+    await scrieIn(gazda.querySelector('header select')!, 'QR')
+    await comanda(gazda, 'laSfarsit')
+    const vedere = (nume: string) => [...gazda.querySelectorAll<HTMLElement>('.vederi-grile .grila .celule')].find((g) => g.getAttribute('aria-label')?.startsWith(`${nume},`))!
+    // Q are elemente ca -0.6667, de 7 caractere: fiecare coloana a ei cere macar atat
+    const Q = vedere('Q')
+    expect([...Q.querySelectorAll('.celula')].some((c) => c.textContent?.length === 7)).toBe(true)
+    expect(Q.style.gridTemplateColumns).toBe('var(--indice) max(var(--cel-min), 7ch + 1.1rem) max(var(--cel-min), 7ch + 1.1rem) max(var(--cel-min), 7ch + 1.1rem)')
+    // R are -3 si -1 pe prima linie si -3.162 pe a doua: coloanele au latimi diferite
+    expect(vedere('R').style.gridTemplateColumns).toBe('var(--indice) max(var(--cel-min), 2ch + 1.1rem) max(var(--cel-min), 6ch + 1.1rem)')
+  })
 })
