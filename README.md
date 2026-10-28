@@ -1,5 +1,7 @@
 # Algorithm visualizer for Numerical Methods
 
+[![XERJ Corpus Hub contributor](https://hub.xerj.org/contributors/andreistoicescu74015/badge.svg)](https://hub.xerj.org/contributors/andreistoicescu74015)
+
 A web application in which you write pseudocode in the notation of the Numerical Methods
 course, your own or from a library of algorithms, and watch step by step what it does on
 matrices and vectors. The current line of code is highlighted, the cells read, written, the
